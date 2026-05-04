@@ -1,0 +1,81 @@
+ui/src/pages/CompanyExport.tsx
+  b20a0920352ccc3a 785
+cli/src/commands/auth-bootstrap-ceo.ts
+  b20a0920352ccc3a 27
+.rebrand-manifests/final-mile-cleanup.md
+  b20a0920352ccc3a 1-218
+cli/src/commands/worktree-lib.ts
+  b20a0920352ccc3a 234
+cli/src/__tests__/company-import-export-e2e.test.ts
+  b20a0920352ccc3a 88,109,274,276,284,286-287,304-305,341-342,348,437-438,467-468,521-522,554-555,607-608
+packages/adapters/hermes-local/README.md
+  b20a0920352ccc3a 3,12-13,50,52,76,78,96,100,140,148,157,170,193,204,208,226,228
+AGENTS.md
+  b20a0920352ccc3a 179,181,183,185,187-189,191,193,195-197,199,201,207,209,211-213
+cli/src/commands/client/company.ts
+  b20a0920352ccc3a 76,1250
+cli/src/commands/db-backup.ts
+  b20a0920352ccc3a 32,51,63
+.rebrand-manifests/hermes-dist-patch.md
+  b20a0920352ccc3a 1-135
+cli/src/__tests__/routines.test.ts
+  b20a0920352ccc3a 70
+docker/ecs-task-definition.json
+  b20a0920352ccc3a 2,7-8,11-12,25-31,37,41,45,49,53,58,82
+server/src/__tests__/company-portability-routes.test.ts
+  b20a0920352ccc3a 158,212
+packages/shared/src/types/company-portability.ts
+  b20a0920352ccc3a 176,197
+cli/src/commands/worktree.ts
+  b20a0920352ccc3a 1302,2465
+CLAUDE.md
+  b20a0920352ccc3a 108,110-113
+cli/src/commands/configure.ts
+  b20a0920352ccc3a 80
+cli/src/__tests__/onboard.test.ts
+  b20a0920352ccc3a 56
+cli/src/commands/env.ts
+  b20a0920352ccc3a 40,169
+.rebrand-manifests/rebrand-markdown.ps1
+  b20a0920352ccc3a 1-97
+.dockerignore
+  b20a0920352ccc3a 3
+cli/src/__tests__/doctor.test.ts
+  b20a0920352ccc3a 58
+cli/src/__tests__/allowed-hostname.test.ts
+  b20a0920352ccc3a 54
+cli/src/commands/doctor.ts
+  b20a0920352ccc3a 32
+doc/HISTORY.md
+  b20a0920352ccc3a 1-49
+scripts/dev-runner.mjs
+  b20a0920352ccc3a 82,86-87,91-93,97-99,101,103,300,311,329,362,390,400
+cli/src/prompts/storage.ts
+  b20a0920352ccc3a 16,76-77,116
+cli/src/__tests__/telemetry.test.ts
+  b20a0920352ccc3a 54
+.gitignore
+  b20a0920352ccc3a 14,45
+cli/src/__tests__/worktree.test.ts
+  b20a0920352ccc3a 119,578-579,590,650,981
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "22540f210a5ef263b3bd53fc6f5400a5b95b6b2a",
+  "prompts": {
+    "b20a0920352ccc3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "614338e0-1cb7-476f-bbbc-9faa2f355769",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 800,
+      "total_deletions": 182,
+      "accepted_lines": 15918,
+      "overriden_lines": 20
+    }
+  }
+}
