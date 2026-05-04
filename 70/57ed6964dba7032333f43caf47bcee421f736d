@@ -1,0 +1,25 @@
+tests/release-smoke/playwright.config.ts
+  b20a0920352ccc3a 4
+tests/release-smoke/docker-auth-onboarding.spec.ts
+  b20a0920352ccc3a 4,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "7057ed6964dba7032333f43caf47bcee421f736d",
+  "prompts": {
+    "b20a0920352ccc3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "614338e0-1cb7-476f-bbbc-9faa2f355769",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 2289,
+      "accepted_lines": 105879,
+      "overriden_lines": 0
+    }
+  }
+}
