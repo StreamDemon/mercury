@@ -1,0 +1,29 @@
+cli/src/prompts/server.ts
+  b20a0920352ccc3a 193
+cli/src/__tests__/worktree.test.ts
+  b20a0920352ccc3a 196
+LICENSE
+  b20a0920352ccc3a 3
+ui/src/adapters/openclaw-gateway/config-fields.tsx
+  b20a0920352ccc3a 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "add1f797c73b1955587574e9c8387b7a93275312",
+  "prompts": {
+    "b20a0920352ccc3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "614338e0-1cb7-476f-bbbc-9faa2f355769",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 8,
+      "accepted_lines": 105981,
+      "overriden_lines": 0
+    }
+  }
+}
