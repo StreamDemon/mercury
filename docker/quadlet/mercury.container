@@ -1,0 +1,23 @@
+[Unit]
+Description=Mercury AI Agent Orchestrator
+Requires=mercury-db.service
+After=mercury-db.service
+
+[Container]
+Image=mercury-local
+ContainerName=mercury
+Pod=mercury.pod
+Volume=%h/.local/share/mercury:/mercury:Z
+Environment=HOST=0.0.0.0
+Environment=MERCURY_HOME=/mercury
+Environment=MERCURY_DEPLOYMENT_MODE=authenticated
+Environment=MERCURY_DEPLOYMENT_EXPOSURE=private
+Environment=MERCURY_PUBLIC_URL=http://localhost:3100
+EnvironmentFile=%h/.config/containers/systemd/mercury.env
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,18 @@
+services:
+  mercury:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "${MERCURY_PORT:-3100}:3100"
+    environment:
+      HOST: "0.0.0.0"
+      MERCURY_HOME: "/mercury"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      MERCURY_DEPLOYMENT_MODE: "authenticated"
+      MERCURY_DEPLOYMENT_EXPOSURE: "private"
+      MERCURY_PUBLIC_URL: "${MERCURY_PUBLIC_URL:-http://localhost:3100}"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
+    volumes:
+      - "${MERCURY_DATA_DIR:-../data/docker-mercury}:/mercury"

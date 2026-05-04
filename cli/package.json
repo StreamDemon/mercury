@@ -1,0 +1,62 @@
+{
+  "name": "mercuryai",
+  "version": "0.3.1",
+  "description": "Mercury CLI — orchestrate AI agent teams to run a business",
+  "type": "module",
+  "bin": {
+    "mercuryai": "./dist/index.js"
+  },
+  "keywords": [
+    "mercury",
+    "ai",
+    "agents",
+    "orchestration",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/StreamDemon/mercury",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/StreamDemon/mercury",
+  "bugs": {
+    "url": "https://github.com/StreamDemon/mercury/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "node --input-type=module -e \"import esbuild from 'esbuild'; import config from './esbuild.config.mjs'; await esbuild.build(config);\" && chmod +x dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.0",
+    "@mercuryai/adapter-claude-local": "workspace:*",
+    "@mercuryai/adapter-codex-local": "workspace:*",
+    "@mercuryai/adapter-cursor-local": "workspace:*",
+    "@mercuryai/adapter-gemini-local": "workspace:*",
+    "@mercuryai/adapter-opencode-local": "workspace:*",
+    "@mercuryai/adapter-pi-local": "workspace:*",
+    "@mercuryai/adapter-openclaw-gateway": "workspace:*",
+    "@mercuryai/adapter-utils": "workspace:*",
+    "@mercuryai/db": "workspace:*",
+    "@mercuryai/server": "workspace:*",
+    "@mercuryai/shared": "workspace:*",
+    "drizzle-orm": "0.38.4",
+    "dotenv": "^17.0.1",
+    "commander": "^13.1.0",
+    "embedded-postgres": "^18.1.0-beta.16",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

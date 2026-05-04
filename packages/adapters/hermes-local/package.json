@@ -1,0 +1,33 @@
+{
+  "name": "@mercuryai/adapter-hermes",
+  "version": "0.2.0",
+  "description": "Mercury adapter for Hermes Agent — run Hermes as a managed employee in a Mercury company",
+  "type": "module",
+  "license": "MIT",
+  "author": "Nous Research",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/StreamDemon/mercury"
+  },
+  "keywords": [
+    "mercury",
+    "hermes",
+    "hermes-agent",
+    "ai-agent",
+    "adapter",
+    "orchestration"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server/index.js",
+    "./ui": "./dist/ui/index.js",
+    "./cli": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@mercuryai/adapter-utils": "workspace:*"
+  }
+}

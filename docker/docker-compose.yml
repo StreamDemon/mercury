@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: mercury
+      POSTGRES_PASSWORD: mercury
+      POSTGRES_DB: mercury
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mercury -d mercury"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3100"
+    environment:
+      DATABASE_URL: postgres://mercury:mercury@db:5432/mercury
+      PORT: "3100"
+      SERVE_UI: "true"
+      MERCURY_DEPLOYMENT_MODE: "authenticated"
+      MERCURY_DEPLOYMENT_EXPOSURE: "private"
+      MERCURY_PUBLIC_URL: "${MERCURY_PUBLIC_URL:-http://localhost:3100}"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
+    volumes:
+      - mercury-data:/mercury
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  mercury-data:
