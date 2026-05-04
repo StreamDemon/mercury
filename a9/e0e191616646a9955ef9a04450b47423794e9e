@@ -1,0 +1,191 @@
+server/src/__tests__/codex-local-skill-sync.test.ts
+  b20a0920352ccc3a 15-16
+cli/src/commands/db-backup.ts
+  b20a0920352ccc3a 32
+packages/mcp-server/package.json
+  b20a0920352ccc3a 5,7,11
+packages/shared/package.json
+  b20a0920352ccc3a 5,7,11
+server/src/__tests__/agent-skill-contract.test.ts
+  b20a0920352ccc3a 34,44
+server/src/__tests__/workspace-runtime.test.ts
+  b20a0920352ccc3a 179,895,2299
+releases/v2026.325.0.md
+  b20a0920352ccc3a 7-9,24-27,29-31,35-36,41,50,57
+packages/db/src/backup.ts
+  b20a0920352ccc3a 72
+doc/plans/2026-03-13-agent-evals-framework.md
+  b20a0920352ccc3a 30
+packages/adapters/openclaw-gateway/package.json
+  b20a0920352ccc3a 5,7,11
+ui/package.json
+  b20a0920352ccc3a 6,8,12
+cli/src/prompts/database.ts
+  b20a0920352ccc3a 47
+server/src/__tests__/heartbeat-project-env.test.ts
+  b20a0920352ccc3a 92,98,106,114
+server/src/__tests__/cli-auth-routes.test.ts
+  b20a0920352ccc3a 137,167
+releases/v2026.318.0.md
+  b20a0920352ccc3a 7-11,17-24,31-35,41-42,47-48
+server/src/__tests__/claude-local-execute.test.ts
+  b20a0920352ccc3a 134
+scripts/paperclip-commit-metrics.ts
+  b20a0920352ccc3a 10-11,18-19,571
+scripts/backfill-issue-reference-mentions.ts
+  b20a0920352ccc3a 17
+server/src/__tests__/feedback-service.test.ts
+  b20a0920352ccc3a 147,185
+packages/db/src/test-embedded-postgres.ts
+  b20a0920352ccc3a 149,151
+ui/src/lib/optimistic-issue-comments.test.ts
+  b20a0920352ccc3a 535-536,556
+ui/src/lib/issue-reference.test.ts
+  b20a0920352ccc3a 18-19
+releases/v2026.416.0.md
+  b20a0920352ccc3a 7-9,12,16-27,29-31,37,39,43-45,48-53,60-61,66,68-72,79,81
+packages/adapters/gemini-local/package.json
+  b20a0920352ccc3a 5,7,11
+packages/shared/src/issue-references.test.ts
+  b20a0920352ccc3a 19,22
+ui/storybook/stories/forms-editors.stories.tsx
+  b20a0920352ccc3a 106,240,289,293,295
+cli/src/commands/routines.ts
+  b20a0920352ccc3a 196,198,259,261
+server/src/services/company-skills.ts
+  b20a0920352ccc3a 304,335
+server/src/__tests__/invite-onboarding-text.test.ts
+  b20a0920352ccc3a 44
+server/package.json
+  b20a0920352ccc3a 5,7,11
+cli/package.json
+  b20a0920352ccc3a 19,22,24
+packages/adapters/cursor-local/package.json
+  b20a0920352ccc3a 5,7,11
+packages/adapter-utils/src/server-utils.ts
+  b20a0920352ccc3a 1103
+packages/db/package.json
+  b20a0920352ccc3a 5,7,11
+server/src/__tests__/issues-service.test.ts
+  b20a0920352ccc3a 346
+server/src/__tests__/agent-skills-routes.test.ts
+  b20a0920352ccc3a 245,247,256,264,272,351,371,390,409,434,615,617,647,657,659
+server/src/__tests__/paperclip-skill-utils.test.ts
+  b20a0920352ccc3a 35-36
+server/src/__tests__/pi-local-skill-sync.test.ts
+  b20a0920352ccc3a 15
+releases/v2026.427.0.md
+  b20a0920352ccc3a 7-12,16,20-42,46-58,62
+ui/src/components/SidebarAccountMenu.tsx
+  b20a0920352ccc3a 24
+packages/plugins/sandbox-providers/e2b/package.json
+  b20a0920352ccc3a 6,8,12
+server/src/__tests__/log-redaction.test.ts
+  b20a0920352ccc3a 71
+packages/adapters/opencode-local/package.json
+  b20a0920352ccc3a 5,7,11
+scripts/clean-onboard-git.sh
+  b20a0920352ccc3a 10,14
+packages/adapter-utils/src/server-utils.test.ts
+  b20a0920352ccc3a 438,451
+releases/v2026.414.0.md
+  b20a0920352ccc3a 7-8,10,16-20,25-37,39-40,43,47,49,56-58,60-66,70-71,75,77-81
+doc/plans/2026-03-13-features.md
+  b20a0920352ccc3a 772-780
+docker/ecs-task-definition.json
+  b20a0920352ccc3a 25,59,73
+packages/db/scripts/create-auth-bootstrap-invite.ts
+  b20a0920352ccc3a 40
+server/src/__tests__/claude-local-skill-sync.test.ts
+  b20a0920352ccc3a 22-23
+server/src/__tests__/gemini-local-skill-sync.test.ts
+  b20a0920352ccc3a 15
+releases/v2026.403.0.md
+  b20a0920352ccc3a 7-11,16,18-21,23-26,28,35-36,38-43,53-54
+scripts/discord-daily-digest.sh
+  b20a0920352ccc3a 9,55
+server/src/__tests__/express5-auth-wildcard.test.ts
+  b20a0920352ccc3a 6
+server/src/__tests__/logger-tz.test.ts
+  b20a0920352ccc3a 4
+server/src/services/company-export-readme.ts
+  b20a0920352ccc3a 99,163,168
+server/src/services/company-portability.ts
+  b20a0920352ccc3a 193,1967,1971
+packages/db/src/migration-runtime.ts
+  b20a0920352ccc3a 100,117,128,131,171,175
+packages/plugins/create-mercury-plugin/package.json
+  b20a0920352ccc3a 5,7,11
+ui/src/lib/vite-watch.test.ts
+  b20a0920352ccc3a 20,27
+packages/adapters/claude-local/package.json
+  b20a0920352ccc3a 5,7,11
+releases/v0.3.1.md
+  b20a0920352ccc3a 7-10,14-15,17-19,21,25-34
+server/src/__tests__/cursor-local-skill-sync.test.ts
+  b20a0920352ccc3a 22
+server/src/__tests__/opencode-local-skill-sync.test.ts
+  b20a0920352ccc3a 15
+ui/storybook/stories/dialogs-modals.stories.tsx
+  b20a0920352ccc3a 185,575
+packages/adapters/codex-local/package.json
+  b20a0920352ccc3a 5,7,11
+packages/plugins/sdk/package.json
+  b20a0920352ccc3a 6,8,12
+server/src/services/feedback.ts
+  b20a0920352ccc3a 1528
+server/src/__tests__/company-portability.test.ts
+  b20a0920352ccc3a 124,289,303,439-441,561-563,581,599,695,701,727-728,805-806,879,882,952,976,1050
+cli/src/__tests__/worktree-merge-history.test.ts
+  b20a0920352ccc3a 295
+docs/docs.json
+  b20a0920352ccc3a 19,147
+packages/db/src/runtime-config.test.ts
+  b20a0920352ccc3a 33,39,55,62,74,82
+releases/v0.3.0.md
+  b20a0920352ccc3a 7-9,22-24,26,29-30,35-39,41-47
+server/src/__tests__/cleanup-removal-service.test.ts
+  b20a0920352ccc3a 169
+server/src/__tests__/company-skills.test.ts
+  b20a0920352ccc3a 161-162,182-183
+server/src/__tests__/server-startup-feedback-export.test.ts
+  b20a0920352ccc3a 60
+cli/src/commands/worktree.ts
+  b20a0920352ccc3a 999,1301,1325,1327
+.rebrand-manifests/url-creds-pass.md
+  b20a0920352ccc3a 1-241
+server/src/__tests__/dev-runner-paths.test.ts
+  b20a0920352ccc3a 8
+packages/adapters/pi-local/package.json
+  b20a0920352ccc3a 5,7,11
+cli/src/__tests__/worktree.test.ts
+  b20a0920352ccc3a 533,590,593,971,973,979,989
+packages/adapter-utils/package.json
+  b20a0920352ccc3a 5,7,11
+cli/src/commands/auth-bootstrap-ceo.ts
+  b20a0920352ccc3a 27
+releases/v2026.428.0.md
+  b20a0920352ccc3a 7-9,13-21,25-27
+server/src/__tests__/codex-local-skill-injection.test.ts
+  b20a0920352ccc3a 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a9e0e191616646a9955ef9a04450b47423794e9e",
+  "prompts": {
+    "b20a0920352ccc3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "614338e0-1cb7-476f-bbbc-9faa2f355769",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 11348,
+      "total_deletions": 473,
+      "accepted_lines": 11336,
+      "overriden_lines": 0
+    }
+  }
+}
