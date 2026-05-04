@@ -1,0 +1,373 @@
+server/src/__tests__/ui-branding.test.ts
+  b20a0920352ccc3a 32,37,47,59,63-65,71,75,80
+server/src/services/workspace-runtime.ts
+  b20a0920352ccc3a 396
+ui/storybook/.storybook/styles.css
+  b20a0920352ccc3a 17,26,31,37,46
+server/src/__tests__/costs-service.test.ts
+  b20a0920352ccc3a 345
+server/src/__tests__/documents-service.test.ts
+  b20a0920352ccc3a 33
+server/src/__tests__/agent-cross-tenant-authz-routes.test.ts
+  b20a0920352ccc3a 109
+server/src/__tests__/heartbeat-retry-scheduling.test.ts
+  b20a0920352ccc3a 39
+server/src/__tests__/environment-config.test.ts
+  b20a0920352ccc3a 13,27,47,85,99
+ui/storybook/stories/issue-thread-interactions.stories.tsx
+  b20a0920352ccc3a 44-45,60,63,530-531
+ui/src/lib/issue-properties-panel-key.test.ts
+  b20a0920352ccc3a 70,75
+server/src/__tests__/opencode-local-adapter-environment.test.ts
+  b20a0920352ccc3a 11,32,63-64
+packages/db/src/migrations/0075_rebrand_paperclip_to_mercury.sql
+  b20a0920352ccc3a 1-99
+ui/src/index.css
+  b20a0920352ccc3a 146-147,331-332,364-365,370-371,375-376,380,386,390,394,400,411,415,419,424,428,435,439-440,460-463,470-471,476-477,481,484-485,489-490,499-500,505,509,513,519,523,530,537,544,549,557,562,574,580,586,590,594-595,599,603,607,612,616-617,626-627,633-636,643,650,662,667,691,697,701,705,710,714,718,722,727,732,736-739,748,752,756,760,764,769,776,780,787,792,796,803,808,813,817,822,831,839,845,849,857-860,883-886
+server/src/__tests__/routines-routes.test.ts
+  b20a0920352ccc3a 89,136
+ui/src/lib/project-workspaces-tab.test.ts
+  b20a0920352ccc3a 10,136
+server/src/__tests__/heartbeat-issue-liveness-escalation.test.ts
+  b20a0920352ccc3a 41-43,80
+server/src/__tests__/runtime-api.test.ts
+  b20a0920352ccc3a 8,13
+server/src/__tests__/llms-routes.test.ts
+  b20a0920352ccc3a 69
+server/src/__tests__/codex-local-adapter.test.ts
+  b20a0920352ccc3a 48,53,110,120
+server/src/__tests__/pi-local-adapter-environment.test.ts
+  b20a0920352ccc3a 45,76
+server/src/__tests__/adapter-models.test.ts
+  b20a0920352ccc3a 105
+server/src/__tests__/issue-agent-mutation-ownership-routes.test.ts
+  b20a0920352ccc3a 65,233
+server/src/__tests__/plugin-orchestration-apis.test.ts
+  b20a0920352ccc3a 50,113,127,153,165,170,173,181,189,215,259,356
+server/src/__tests__/dev-server-status.test.ts
+  b20a0920352ccc3a 10
+ui/src/lib/zip.test.ts
+  b20a0920352ccc3a 192,199,207,221,223,227,231,245,249,266,270,279,282
+server/src/__tests__/feedback-service.test.ts
+  b20a0920352ccc3a 38,127,148,642,701,705,709,783,998
+server/src/__tests__/heartbeat-stale-queue-invalidation.test.ts
+  b20a0920352ccc3a 103
+server/src/__tests__/forbidden-tokens.test.ts
+  b20a0920352ccc3a 12,14,18,40,43-44,47,65
+server/src/__tests__/heartbeat-comment-wake-batching.test.ts
+  b20a0920352ccc3a 153
+server/src/__tests__/routines-e2e.test.ts
+  b20a0920352ccc3a 93,122,357,363,373
+server/src/__tests__/heartbeat-workspace-session.test.ts
+  b20a0920352ccc3a 232
+server/src/__tests__/company-skills.test.ts
+  b20a0920352ccc3a 98,102,116,122,151,192,214
+ui/src/lib/issue-chat-messages.test.ts
+  b20a0920352ccc3a 176
+cli/src/__tests__/company-import-zip.test.ts
+  b20a0920352ccc3a 25,39
+server/src/__tests__/cursor-local-skill-sync.test.ts
+  b20a0920352ccc3a 31,42,56,60-61,65,78-80,90,98,108,119,133,142
+server/src/__tests__/issue-comment-reopen-routes.test.ts
+  b20a0920352ccc3a 69
+server/src/__tests__/private-hostname-guard.test.ts
+  b20a0920352ccc3a 49,76
+server/src/__tests__/issue-blocker-attention.test.ts
+  b20a0920352ccc3a 34
+tests/e2e/multi-user-authenticated.spec.ts
+  b20a0920352ccc3a 8,10-11,43,48,68
+server/src/__tests__/issue-closed-workspace-routes.test.ts
+  b20a0920352ccc3a 43,182
+cli/src/__tests__/company-import-export-e2e.test.ts
+  b20a0920352ccc3a 446
+tests/e2e/playwright.config.ts
+  b20a0920352ccc3a 10,35
+server/src/__tests__/codex-local-adapter-environment.test.ts
+  b20a0920352ccc3a 19,44,76,105
+ui/storybook/stories/status-language.stories.tsx
+  b20a0920352ccc3a 34,36,490-493
+ui/storybook/stories/data-viz-misc.stories.tsx
+  b20a0920352ccc3a 60-61,76,78,193,596
+server/src/__tests__/http-log-policy.test.ts
+  b20a0920352ccc3a 58,71
+server/src/__tests__/issue-telemetry-routes.test.ts
+  b20a0920352ccc3a 20,103
+server/src/__tests__/invite-create-route.test.ts
+  b20a0920352ccc3a 125,135
+server/src/__tests__/productivity-review-service.test.ts
+  b20a0920352ccc3a 38
+server/src/__tests__/auth-routes.test.ts
+  b20a0920352ccc3a 77
+server/src/__tests__/mercury-skill-utils.test.ts
+  b20a0920352ccc3a 14,23,28-29,36,39-40,42-43,47,54,56,59,61,67,69,75,79,87,91,95
+server/src/__tests__/gemini-local-execute.test.ts
+  b20a0920352ccc3a 14,44,48-49,83,104,131,173,206,258
+ui/storybook/stories/overview.stories.tsx
+  b20a0920352ccc3a 112-114,117,142,158,160
+server/src/__tests__/setup-supertest.ts
+  b20a0920352ccc3a 17,24,46
+ui/storybook/stories/dialogs-modals.stories.tsx
+  b20a0920352ccc3a 34,172,186,265,267,284-285,361,576
+ui/src/plugins/bridge-init.ts
+  b20a0920352ccc3a 30,41,48,58
+server/src/__tests__/workspace-runtime-routes-authz.test.ts
+  b20a0920352ccc3a 389,412,477,501
+server/src/__tests__/company-skills-routes.test.ts
+  b20a0920352ccc3a 26,78
+server/src/__tests__/cli-auth-routes.test.ts
+  b20a0920352ccc3a 115-116,143,178-179
+server/src/__tests__/company-skills-detail.test.ts
+  b20a0920352ccc3a 41,105,137,162,197,211
+server/src/__tests__/agent-permissions-routes.test.ts
+  b20a0920352ccc3a 104-105,112,264,285,489
+server/src/__tests__/storage-local-provider.test.ts
+  b20a0920352ccc3a 25,46,62
+ui/src/lib/worktree-branding.ts
+  b20a0920352ccc3a 53,55-56,63
+server/src/__tests__/log-redaction.test.ts
+  b20a0920352ccc3a 10,13,15,23,25,30,33,41,46,49-50,61-62,71
+server/src/__tests__/logger-tz.test.ts
+  b20a0920352ccc3a 48
+server/src/__tests__/issue-stale-execution-lock-routes.test.ts
+  b20a0920352ccc3a 39
+server/src/__tests__/dev-watch-ignore.test.ts
+  b20a0920352ccc3a 9
+server/src/__tests__/workspace-runtime.test.ts
+  b20a0920352ccc3a 70,72,180,198-200,208,213,215,222,227,237-238,244,249,251,258,267-269,282,284,291,296,817-819,876,1180,1197,1200,1236,1271,1756,1805,2050,2081,2180,2199,2275,2284,2286,2296-2297,2355,2409,2468,2529,2801,2820-2821,2953,2965,2968,2970,2987,2989,2991,2999,3018
+server/src/__tests__/cleanup-removal-service.test.ts
+  b20a0920352ccc3a 40,170
+server/src/__tests__/sandbox-provider-runtime.test.ts
+  b20a0920352ccc3a 150,156,161,188,195,202
+cli/src/__tests__/company.test.ts
+  b20a0920352ccc3a 107-108,325,331,471
+packages/db/src/migrations/meta/_journal.json
+  b20a0920352ccc3a 529-535
+server/src/__tests__/plugin-routes-authz.test.ts
+  b20a0920352ccc3a 107,129,137,147,153,171,175,229,270,274,302,341,395,404,430,439,451
+server/src/services/company-skills.ts
+  b20a0920352ccc3a 334,1432,1563,1568,2183,2331,2333-2334
+server/src/__tests__/issues-service.test.ts
+  b20a0920352ccc3a 68,1086,1512,1850,2127,2208
+ui/storybook/stories/sub-issues-workflow.stories.tsx
+  b20a0920352ccc3a 188,216-217,220
+server/src/__tests__/health-dev-server-token.test.ts
+  b20a0920352ccc3a 13
+server/src/__tests__/issue-references-service.test.ts
+  b20a0920352ccc3a 59,139
+ui/storybook/stories/navigation-layout.stories.tsx
+  b20a0920352ccc3a 54,56,224,226-227,230
+server/src/__tests__/codex-local-skill-sync.test.ts
+  b20a0920352ccc3a 16,25,36,54,65,74,80,91,105,116-117,124,126
+server/src/__tests__/vite-html-renderer.test.ts
+  b20a0920352ccc3a 36,79
+server/src/__tests__/environment-runtime.test.ts
+  b20a0920352ccc3a 287,327,375,450-451,456,895,1044
+server/src/__tests__/better-auth.test.ts
+  b20a0920352ccc3a 19-20,29,32,40
+server/src/__tests__/cursor-local-skill-injection.test.ts
+  b20a0920352ccc3a 24-25,29-30,41-42,45,47,49-50,54-55,59-60,62,70,74-75
+server/src/__tests__/heartbeat-project-env.test.ts
+  b20a0920352ccc3a 91,104,113
+server/src/__tests__/invite-onboarding-text.test.ts
+  b20a0920352ccc3a 48,53
+ui/src/plugins/slots.tsx
+  b20a0920352ccc3a 204,227,241,251,259,322,357
+ui/storybook/stories/foundations.stories.tsx
+  b20a0920352ccc3a 54,56,69-72
+server/src/__tests__/routine-run-telemetry.test.ts
+  b20a0920352ccc3a 29-31,49
+server/src/services/company-portability.ts
+  b20a0920352ccc3a 192,312-313,623,1963,2003,3468
+server/src/__tests__/plugin-database.test.ts
+  b20a0920352ccc3a 91,96,115,139,231
+ui/storybook/.storybook/preview.tsx
+  b20a0920352ccc3a 32,34,37,64,74
+ui/storybook/stories/budget-finance.stories.tsx
+  b20a0920352ccc3a 42,44,553-555,558
+cli/src/__tests__/feedback.test.ts
+  b20a0920352ccc3a 30
+ui/storybook/stories/chat-comments.stories.tsx
+  b20a0920352ccc3a 53,56,105,243,403,646-649,687-688,697-698,707-708
+server/src/__tests__/heartbeat-active-run-output-watchdog.test.ts
+  b20a0920352ccc3a 42-44,77
+ui/storybook/stories/forms-editors.stories.tsx
+  b20a0920352ccc3a 37,39,81-82,292,294,618,621,718
+ui/storybook/stories/agent-management.stories.tsx
+  b20a0920352ccc3a 56,58,208,642-644,647
+tests/release-smoke/docker-auth-onboarding.spec.ts
+  b20a0920352ccc3a 6,10
+server/src/__tests__/instance-database-backups-routes.test.ts
+  b20a0920352ccc3a 27,63
+server/src/__tests__/issue-attachment-routes.test.ts
+  b20a0920352ccc3a 20,197
+ui/src/lib/company-export-selection.test.ts
+  b20a0920352ccc3a 9,22
+server/src/__tests__/claude-local-adapter-environment.test.ts
+  b20a0920352ccc3a 162
+server/src/__tests__/issue-feedback-routes.test.ts
+  b20a0920352ccc3a 75,140
+server/src/__tests__/issue-workspace-command-authz.test.ts
+  b20a0920352ccc3a 235,262
+server/src/services/plugin-loader.ts
+  b20a0920352ccc3a 8,66,109,161,184,344,508,514,702,1752
+server/src/__tests__/activity-service.test.ts
+  b20a0920352ccc3a 55
+server/src/__tests__/heartbeat-process-recovery.test.ts
+  b20a0920352ccc3a 49-51,253
+server/src/__tests__/user-profile-routes.test.ts
+  b20a0920352ccc3a 40
+tests/e2e/onboarding.spec.ts
+  b20a0920352ccc3a 158
+server/src/__tests__/agent-auth-jwt.test.ts
+  b20a0920352ccc3a 53-54,96-97
+server/src/__tests__/issue-thread-interactions-service.test.ts
+  b20a0920352ccc3a 35
+server/src/__tests__/issue-comment-cancel-routes.test.ts
+  b20a0920352ccc3a 43,168
+server/src/__tests__/routines-service.test.ts
+  b20a0920352ccc3a 45,626,640-641,644
+ui/src/lib/agent-skills-state.test.ts
+  b20a0920352ccc3a 12,16-17,26-27,30,34-35,44-45,48,52-53,67,72-73,78
+ui/src/lib/mention-chips.ts
+  b20a0920352ccc3a 96,102,115,140,146-147
+server/src/__tests__/dev-runner-worktree.test.ts
+  b20a0920352ccc3a 28-29,35,37,41,60,67-68
+server/src/__tests__/invite-accept-replay.test.ts
+  b20a0920352ccc3a 65,72,86
+ui/storybook/stories/issue-management.stories.tsx
+  b20a0920352ccc3a 75,77,107,462-464,467,568
+server/src/__tests__/cursor-local-execute.test.ts
+  b20a0920352ccc3a 15,46,57-58,92,106,133,167,191,198,226-227,236,239
+server/src/__tests__/codex-local-skill-injection.test.ts
+  b20a0920352ccc3a 16,35,44-46,51-54,66-67,71-72,78-79,81-82,87,93,99-101,106-108,114-115,119-120,125-127,132,147-148,165-166,170,181-182,186
+server/src/__tests__/agent-instructions-service.test.ts
+  b20a0920352ccc3a 45-46,85,96,125,166,197-198,240-241,280-281,322-323
+server/src/__tests__/adapter-routes-authz.test.ts
+  b20a0920352ccc3a 87,267
+server/src/__tests__/heartbeat-dependency-scheduling.test.ts
+  b20a0920352ccc3a 92
+server/src/__tests__/claude-local-execute.test.ts
+  b20a0920352ccc3a 141,171,208,238,268,331,373,402,408,443,480,543,547,560,566,602,633,651,665,704,730,767,788,824
+server/src/__tests__/gemini-local-skill-sync.test.ts
+  b20a0920352ccc3a 24,35,49,53,64,78,87
+server/src/__tests__/plugin-dev-watcher.test.ts
+  b20a0920352ccc3a 17,30
+server/src/__tests__/agent-skills-routes.test.ts
+  b20a0920352ccc3a 64,98,246,255,401,408,424,433,606,635,646
+server/src/__tests__/company-skills-service.test.ts
+  b20a0920352ccc3a 29,48
+server/src/__tests__/quota-windows.test.ts
+  b20a0920352ccc3a 229,235,248,261,275,289,378,384,397,410,429,479
+server/src/__tests__/heartbeat-run-log.test.ts
+  b20a0920352ccc3a 21
+server/src/__tests__/pi-local-skill-sync.test.ts
+  b20a0920352ccc3a 24,35,49,53,64,78,87
+server/src/__tests__/plugin-sdk-orchestration-contract.test.ts
+  b20a0920352ccc3a 8,80,127,130,134,143,150
+server/src/__tests__/dashboard-service.test.ts
+  b20a0920352ccc3a 45
+server/src/__tests__/pi-local-execute.test.ts
+  b20a0920352ccc3a 51,97,153,188
+server/src/__tests__/opencode-local-skill-sync.test.ts
+  b20a0920352ccc3a 24,35,50,54,65,79,88
+server/src/__tests__/agent-skill-contract.test.ts
+  b20a0920352ccc3a 35
+server/src/__tests__/codex-local-execute.test.ts
+  b20a0920352ccc3a 17,46,56,61,110,154,187,210,248,274,306,382,413,432,469,494,532,536,570,602,671,724,756,820,861,915,930,935,944,985,1000,1028,1047,1053,1093,1105
+server/src/__tests__/plugin-scoped-api-routes.test.ts
+  b20a0920352ccc3a 43
+server/src/__tests__/execution-workspaces-service.test.ts
+  b20a0920352ccc3a 135,138,153,203,215,349,352-353,405,425
+server/src/__tests__/inbox-dismissals.test.ts
+  b20a0920352ccc3a 36
+server/src/__tests__/environment-runtime-driver-contract.test.ts
+  b20a0920352ccc3a 287,307
+server/src/__tests__/issue-tree-control-service.test.ts
+  b20a0920352ccc3a 36
+ui/storybook/stories/ux-labs.stories.tsx
+  b20a0920352ccc3a 8-9
+server/src/__tests__/access-service.test.ts
+  b20a0920352ccc3a 51
+server/src/__tests__/cursor-local-adapter-environment.test.ts
+  b20a0920352ccc3a 41,66,97,130,170
+server/src/__tests__/issue-thread-interaction-routes.test.ts
+  b20a0920352ccc3a 28
+ui/storybook/stories/projects-goals-workspaces.stories.tsx
+  b20a0920352ccc3a 57,59,259,302,416-419,449-451,454
+server/src/__tests__/workspace-runtime-service-authz.test.ts
+  b20a0920352ccc3a 35,78,96
+packages/shared/src/types/work-product.ts
+  b20a0920352ccc3a 11
+server/src/__tests__/gemini-local-adapter-environment.test.ts
+  b20a0920352ccc3a 48,73,110
+server/src/__tests__/environment-run-orchestrator.test.ts
+  b20a0920352ccc3a 19
+ui/src/adapters/openclaw-gateway/config-fields.tsx
+  b20a0920352ccc3a 142-143,146,159,178,182
+server/src/__tests__/company-portability-routes.test.ts
+  b20a0920352ccc3a 124,152,206,227,244,265
+server/src/services/projects.ts
+  b20a0920352ccc3a 25
+server/src/__tests__/feedback-share-client.test.ts
+  b20a0920352ccc3a 34,67
+packages/mcp-server/src/tools.ts
+  b20a0920352ccc3a 227
+server/src/services/feedback.ts
+  b20a0920352ccc3a 51-53,1525,1538,1546
+packages/db/src/schema/feedback_exports.ts
+  b20a0920352ccc3a 24-25
+server/src/__tests__/claude-local-skill-sync.test.ts
+  b20a0920352ccc3a 23,52,69-70,77,79,83
+server/src/ui-branding.ts
+  b20a0920352ccc3a 185-188
+server/src/__tests__/worktree-config.test.ts
+  b20a0920352ccc3a 68,86,88-90,94,143,145-147,152,214,218-220,224,259,321,327-329,333,369,443,445-446,450,485,525,527-528,532,537,567,603,625,637
+ui/src/api/plugins.ts
+  b20a0920352ccc3a 188
+server/src/__tests__/heartbeat-plugin-environment.test.ts
+  b20a0920352ccc3a 80,128
+server/src/__tests__/openclaw-gateway-adapter.test.ts
+  b20a0920352ccc3a 425,430,436,492
+server/src/__tests__/environment-probe.test.ts
+  b20a0920352ccc3a 8,51,65,84-85,228
+server/src/__tests__/company-portability.test.ts
+  b20a0920352ccc3a 162,284-285,287,299-300,350,395,398,409,413,439-441,446,456,561-563,581,599,693,707-709,828,973,985,1001,1051,1522,1542,1558,1637,1651,1672,1711,1764,1964
+server/src/services/heartbeat.ts
+  b20a0920352ccc3a 146-147,149,847
+server/src/__tests__/heartbeat-list.test.ts
+  b20a0920352ccc3a 24
+ui/src/plugins/bridge.ts
+  b20a0920352ccc3a 136
+server/src/__tests__/server-startup-feedback-export.test.ts
+  b20a0920352ccc3a 61,66,71,73-74,96,303,310-311
+ui/storybook/stories/control-plane-surfaces.stories.tsx
+  b20a0920352ccc3a 33,35,45-47,50
+server/src/__tests__/telemetry-client-flush.test.ts
+  b20a0920352ccc3a 43
+server/src/__tests__/invite-list-route.test.ts
+  b20a0920352ccc3a 45
+server/src/__tests__/adapter-routes.test.ts
+  b20a0920352ccc3a 96
+server/src/__tests__/environment-routes.test.ts
+  b20a0920352ccc3a 504,531,959,1060
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "f22d5a3112497f8711675ebebe89f243a42772e9",
+  "prompts": {
+    "b20a0920352ccc3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "614338e0-1cb7-476f-bbbc-9faa2f355769",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 92870,
+      "total_deletions": 1214,
+      "accepted_lines": 107254,
+      "overriden_lines": 1
+    }
+  }
+}
