@@ -49,7 +49,6 @@
     "@mercuryai/server": "workspace:*",
     "@mercuryai/shared": "workspace:*",
     "drizzle-orm": "0.38.4",
-    "dotenv": "^17.0.1",
     "commander": "^13.1.0",
     "embedded-postgres": "^18.1.0-beta.16",
     "picocolors": "^1.1.1"

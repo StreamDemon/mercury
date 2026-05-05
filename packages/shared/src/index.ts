@@ -983,3 +983,10 @@ export {
   resolveMercuryConfigPath,
   resolveMercuryEnvPath,
 } from "./config-discovery.js";
+
+export {
+  formatEnvEntries,
+  loadEnvFileIntoProcessEnv,
+  parseEnvFile,
+  readEnvEntries,
+} from "./env-file.js";
