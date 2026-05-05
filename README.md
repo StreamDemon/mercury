@@ -20,10 +20,6 @@ It looks like a task manager — but under the hood it has org charts, budgets, 
 
 <br/>
 
-> **COMING SOON: Clipmart** — Download and run entire companies with one click. Browse pre-built company templates — full org structures, agent configs, and skills — and import them into your Mercury instance in seconds.
-
-<br/>
-
 <div align="center">
 <table>
   <tr>
