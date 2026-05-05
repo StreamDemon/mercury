@@ -1,21 +1,10 @@
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import type { MercuryConfig } from "@mercuryai/shared";
+import { resolveHomeAwarePath, type MercuryConfig } from "@mercuryai/shared";
 import { resolveMercuryConfigPath, resolveMercuryEnvPath } from "./paths.js";
 
 function nonEmpty(value: string | null | undefined): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
-}
-
-function expandHomePrefix(value: string): string {
-  if (value === "~") return os.homedir();
-  if (value.startsWith("~/")) return path.resolve(os.homedir(), value.slice(2));
-  return value;
-}
-
-function resolveHomeAwarePath(value: string): string {
-  return path.resolve(expandHomePrefix(value));
 }
 
 function sanitizeWorktreeInstanceId(rawValue: string): string {

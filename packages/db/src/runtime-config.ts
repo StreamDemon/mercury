@@ -1,11 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
-import os from "node:os";
 import path from "node:path";
+import {
+  resolveDefaultEmbeddedPostgresDir,
+  resolveHomeAwarePath,
+  resolveMercuryHomeDir,
+  resolveMercuryInstanceId,
+} from "@mercuryai/shared";
 
-const DEFAULT_INSTANCE_ID = "default";
 const CONFIG_BASENAME = "config.json";
 const ENV_BASENAME = ".env";
-const INSTANCE_ID_RE = /^[a-zA-Z0-9_-]+$/;
 
 type PartialConfig = {
   database?: {
@@ -35,26 +38,6 @@ export type ResolvedDatabaseTarget =
       envPath: string;
     };
 
-function expandHomePrefix(value: string): string {
-  if (value === "~") return os.homedir();
-  if (value.startsWith("~/")) return path.resolve(os.homedir(), value.slice(2));
-  return value;
-}
-
-function resolveMercuryHomeDir(): string {
-  const envHome = process.env.MERCURY_HOME?.trim();
-  if (envHome) return path.resolve(expandHomePrefix(envHome));
-  return path.resolve(os.homedir(), ".mercury");
-}
-
-function resolveMercuryInstanceId(): string {
-  const raw = process.env.MERCURY_INSTANCE_ID?.trim() || DEFAULT_INSTANCE_ID;
-  if (!INSTANCE_ID_RE.test(raw)) {
-    throw new Error(`Invalid MERCURY_INSTANCE_ID '${raw}'.`);
-  }
-  return raw;
-}
-
 function resolveDefaultConfigPath(): string {
   return path.resolve(
     resolveMercuryHomeDir(),
@@ -62,14 +45,6 @@ function resolveDefaultConfigPath(): string {
     resolveMercuryInstanceId(),
     CONFIG_BASENAME,
   );
-}
-
-function resolveDefaultEmbeddedPostgresDir(): string {
-  return path.resolve(resolveMercuryHomeDir(), "instances", resolveMercuryInstanceId(), "db");
-}
-
-function resolveHomeAwarePath(value: string): string {
-  return path.resolve(expandHomePrefix(value));
 }
 
 function findConfigFileFromAncestors(startDir: string): string | null {
