@@ -25,10 +25,16 @@ export function parseEnvFile(contents: string): Record<string, string> {
 
     const quote = value.startsWith("\"") ? "\"" : value.startsWith("'") ? "'" : null;
     if (quote) {
+      if (value.length >= 2 && value.endsWith(quote)) {
+        // Strict paired quotes — slice content verbatim, preserving any
+        // backslash-escaped quotes inside (e.g. `"a\"b"` -> `a\"b`).
+        entries[key] = value.slice(1, -1);
+        continue;
+      }
       const closeIdx = value.indexOf(quote, 1);
       if (closeIdx > 0) {
-        // Quoted value — slice between the quotes; trailing content (including
-        // inline comments after the close quote) is dropped.
+        // Open quote with trailing content (typically an inline comment) —
+        // slice up to the first close quote and drop the rest.
         entries[key] = value.slice(1, closeIdx);
         continue;
       }

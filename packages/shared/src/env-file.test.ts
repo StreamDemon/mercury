@@ -53,6 +53,13 @@ BAZ=qux
     expect(parseEnvFile('FOO="unmatched')).toEqual({ FOO: '"unmatched' });
   });
 
+  it("preserves a backslash-escaped quote inside a paired-quote value", () => {
+    // The hand-rolled parser does not process escape sequences; backslash and
+    // quote pass through verbatim. Strict paired-quote detection ensures the
+    // inner `\"` is not treated as the closing delimiter.
+    expect(parseEnvFile('PASSWORD="a\\"b"')).toEqual({ PASSWORD: 'a\\"b' });
+  });
+
   it("treats # immediately after = as an empty value (the dev-runner-worktree fix)", () => {
     expect(parseEnvFile("FOO=#bar")).toEqual({ FOO: "" });
   });
