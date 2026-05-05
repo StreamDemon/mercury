@@ -1,13 +1,10 @@
-﻿import fs from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { config as loadDotenv, parse as parseEnvFileContents } from "dotenv";
-import { resolveConfigPath } from "./store.js";
+import { resolveMercuryEnvPath } from "@mercuryai/shared";
 
 const JWT_SECRET_ENV_KEY = "MERCURY_AGENT_JWT_SECRET";
-function resolveEnvFilePath(configPath?: string) {
-  return path.resolve(path.dirname(resolveConfigPath(configPath)), ".env");
-}
 const loadedEnvFiles = new Set<string>();
 
 function isNonEmpty(value: unknown): value is string {
@@ -40,18 +37,18 @@ function renderEnvFile(entries: Record<string, string>) {
 }
 
 export function resolveMercuryEnvFile(configPath?: string): string {
-  return resolveEnvFilePath(configPath);
+  return resolveMercuryEnvPath(configPath);
 }
 
 export function resolveAgentJwtEnvFile(configPath?: string): string {
-  return resolveEnvFilePath(configPath);
+  return resolveMercuryEnvPath(configPath);
 }
 
 export function loadMercuryEnvFile(configPath?: string): void {
-  loadAgentJwtEnvFile(resolveEnvFilePath(configPath));
+  loadAgentJwtEnvFile(resolveMercuryEnvPath(configPath));
 }
 
-export function loadAgentJwtEnvFile(filePath = resolveEnvFilePath()): void {
+export function loadAgentJwtEnvFile(filePath = resolveMercuryEnvPath()): void {
   if (loadedEnvFiles.has(filePath)) return;
 
   if (!fs.existsSync(filePath)) return;
@@ -60,12 +57,12 @@ export function loadAgentJwtEnvFile(filePath = resolveEnvFilePath()): void {
 }
 
 export function readAgentJwtSecretFromEnv(configPath?: string): string | null {
-  loadAgentJwtEnvFile(resolveEnvFilePath(configPath));
+  loadAgentJwtEnvFile(resolveMercuryEnvPath(configPath));
   const raw = process.env[JWT_SECRET_ENV_KEY];
   return isNonEmpty(raw) ? raw!.trim() : null;
 }
 
-export function readAgentJwtSecretFromEnvFile(filePath = resolveEnvFilePath()): string | null {
+export function readAgentJwtSecretFromEnvFile(filePath = resolveMercuryEnvPath()): string | null {
   if (!fs.existsSync(filePath)) return null;
 
   const raw = fs.readFileSync(filePath, "utf-8");
@@ -80,7 +77,7 @@ export function ensureAgentJwtSecret(configPath?: string): { secret: string; cre
     return { secret: existingEnv, created: false };
   }
 
-  const envFilePath = resolveEnvFilePath(configPath);
+  const envFilePath = resolveMercuryEnvPath(configPath);
   const existingFile = readAgentJwtSecretFromEnvFile(envFilePath);
   const secret = existingFile ?? randomBytes(32).toString("hex");
   const created = !existingFile;
@@ -92,16 +89,16 @@ export function ensureAgentJwtSecret(configPath?: string): { secret: string; cre
   return { secret, created };
 }
 
-export function writeAgentJwtEnv(secret: string, filePath = resolveEnvFilePath()): void {
+export function writeAgentJwtEnv(secret: string, filePath = resolveMercuryEnvPath()): void {
   mergeMercuryEnvEntries({ [JWT_SECRET_ENV_KEY]: secret }, filePath);
 }
 
-export function readMercuryEnvEntries(filePath = resolveEnvFilePath()): Record<string, string> {
+export function readMercuryEnvEntries(filePath = resolveMercuryEnvPath()): Record<string, string> {
   if (!fs.existsSync(filePath)) return {};
   return parseEnvFile(fs.readFileSync(filePath, "utf-8"));
 }
 
-export function writeMercuryEnvEntries(entries: Record<string, string>, filePath = resolveEnvFilePath()): void {
+export function writeMercuryEnvEntries(entries: Record<string, string>, filePath = resolveMercuryEnvPath()): void {
   const dir = path.dirname(filePath);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(filePath, renderEnvFile(entries), {
@@ -111,7 +108,7 @@ export function writeMercuryEnvEntries(entries: Record<string, string>, filePath
 
 export function mergeMercuryEnvEntries(
   entries: Record<string, string>,
-  filePath = resolveEnvFilePath(),
+  filePath = resolveMercuryEnvPath(),
 ): Record<string, string> {
   const current = readMercuryEnvEntries(filePath);
   const next = {

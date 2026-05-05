@@ -1,7 +1,7 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
 import type { MercuryConfig } from "../config/schema.js";
-import { configExists, readConfig, resolveConfigPath } from "../config/store.js";
+import { configExists, readConfig, resolveMercuryConfigPath } from "../config/store.js";
 import {
   readAgentJwtSecretFromEnv,
   readAgentJwtSecretFromEnvFile,
@@ -39,7 +39,7 @@ function defaultStorageBaseDir(): string {
 export async function envCommand(opts: { config?: string }): Promise<void> {
   p.intro(pc.bgCyan(pc.black(" mercury env ")));
 
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   let config: MercuryConfig | null = null;
   let configReadError: string | null = null;
 
@@ -380,7 +380,7 @@ function collectDeploymentEnvRows(config: MercuryConfig | null, configPath: stri
     },
   ];
 
-  const defaultConfigPath = resolveConfigPath();
+  const defaultConfigPath = resolveMercuryConfigPath();
   if (process.env.MERCURY_CONFIG || configPath !== defaultConfigPath) {
     rows.push({
       key: "MERCURY_CONFIG",

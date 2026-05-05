@@ -976,3 +976,10 @@ export {
   resolveMercuryInstanceId,
   resolveMercuryInstanceRoot,
 } from "./paths.js";
+
+export {
+  findConfigFileFromAncestors,
+  migrateLegacyConfig,
+  resolveMercuryConfigPath,
+  resolveMercuryEnvPath,
+} from "./config-discovery.js";

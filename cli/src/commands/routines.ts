@@ -13,7 +13,7 @@ import {
 } from "@mercuryai/db";
 import { eq, inArray } from "drizzle-orm";
 import { loadMercuryEnvFile } from "../config/env.js";
-import { readConfig, resolveConfigPath } from "../config/store.js";
+import { readConfig, resolveMercuryConfigPath } from "../config/store.js";
 
 type RoutinesDisableAllOptions = {
   config?: string;
@@ -233,7 +233,7 @@ async function openConfiguredDb(configPath: string): Promise<{
 export async function disableAllRoutinesInConfig(
   options: Pick<RoutinesDisableAllOptions, "config" | "companyId">,
 ): Promise<DisableAllRoutinesResult> {
-  const configPath = resolveConfigPath(options.config);
+  const configPath = resolveMercuryConfigPath(options.config);
   loadMercuryEnvFile(configPath);
   const companyId =
     nonEmpty(options.companyId)

@@ -1,7 +1,7 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
 import type { MercuryConfig } from "../config/schema.js";
-import { readConfig, resolveConfigPath } from "../config/store.js";
+import { readConfig, resolveMercuryConfigPath } from "../config/store.js";
 import {
   agentJwtSecretCheck,
   configCheck,
@@ -31,7 +31,7 @@ export async function doctor(opts: {
   printMercuryCliBanner();
   p.intro(pc.bgCyan(pc.black(" mercury doctor ")));
 
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   loadMercuryEnvFile(configPath);
   const results: CheckResult[] = [];
 

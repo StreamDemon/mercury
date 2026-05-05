@@ -5,7 +5,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import { createDb, instanceUserRoles, invites } from "@mercuryai/db";
 import { inferBindModeFromHost } from "@mercuryai/shared";
 import { loadMercuryEnvFile } from "../config/env.js";
-import { readConfig, resolveConfigPath } from "../config/store.js";
+import { readConfig, resolveMercuryConfigPath } from "../config/store.js";
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -58,7 +58,7 @@ export async function bootstrapCeoInvite(opts: {
   baseUrl?: string;
   dbUrl?: string;
 }) {
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   loadMercuryEnvFile(configPath);
   const config = readConfig(configPath);
   if (!config) {

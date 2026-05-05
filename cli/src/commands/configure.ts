@@ -1,6 +1,6 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { readConfig, writeConfig, configExists, resolveConfigPath } from "../config/store.js";
+import { readConfig, writeConfig, configExists, resolveMercuryConfigPath } from "../config/store.js";
 import type { MercuryConfig } from "../config/schema.js";
 import { ensureLocalSecretsKeyFile } from "../config/secrets-key.js";
 import { promptDatabase } from "../prompts/database.js";
@@ -78,7 +78,7 @@ export async function configure(opts: {
 }): Promise<void> {
   printMercuryCliBanner();
   p.intro(pc.bgCyan(pc.black(" mercury configure ")));
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
 
   if (!configExists(opts.config)) {
     p.log.error("No config file found. Run `mercuryai onboard` first.");
