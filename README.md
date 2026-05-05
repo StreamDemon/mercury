@@ -1,29 +1,3 @@
-<p align="center">
-  <img src="doc/assets/header.png" alt="Mercury — runs your business" width="720" />
-</p>
-
-<p align="center">
-  <a href="#quickstart"><strong>Quickstart</strong></a> &middot;
-  <a href="https://mercury.ing/docs"><strong>Docs</strong></a> &middot;
-  <a href="https://github.com/StreamDemon/mercury"><strong>GitHub</strong></a> &middot;
-  <a href="https://discord.gg/m4HZY7xNG3"><strong>Discord</strong></a> &middot;
-  <a href="https://x.com/ModernMethodAI"><strong>Twitter</strong></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/StreamDemon/mercury/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
-  <a href="https://github.com/StreamDemon/mercury/stargazers"><img src="https://img.shields.io/github/stars/StreamDemon/mercury?style=flat" alt="Stars" /></a>
-  <a href="https://discord.gg/m4HZY7xNG3"><img src="https://img.shields.io/discord/000000000?label=discord" alt="Discord" /></a>
-</p>
-
-<br/>
-
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/773bdfb2-6d1e-4e30-8c5f-3487d5b70c8f" width="600" controls></video>
-</div>
-
-<br/>
-
 ## What is Mercury?
 
 # Open-source orchestration for zero-human companies
