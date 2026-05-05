@@ -1,0 +1,57 @@
+cli/src/commands/db-backup.ts
+  35316ac2f3e5e837 10,53
+cli/src/config/env.ts
+  35316ac2f3e5e837 1,5,40,44,48,51,60,65,80,92,96,101,111
+packages/shared/src/config-discovery.test.ts
+  35316ac2f3e5e837 1-168
+cli/src/commands/run.ts
+  35316ac2f3e5e837 11,45
+cli/src/commands/allowed-hostname.ts
+  35316ac2f3e5e837 4,7
+cli/src/checks/config-check.ts
+  35316ac2f3e5e837 1,5
+cli/src/commands/configure.ts
+  35316ac2f3e5e837 3,81
+cli/src/commands/onboard.ts
+  35316ac2f3e5e837 20,332
+cli/src/commands/doctor.ts
+  35316ac2f3e5e837 4,34
+cli/src/commands/auth-bootstrap-ceo.ts
+  35316ac2f3e5e837 8,61
+cli/src/config/store.ts
+  35316ac2f3e5e837 1,3,6-11,37,52,68
+cli/src/commands/worktree.ts
+  35316ac2f3e5e837 53,807,1849,1890
+packages/shared/src/config-discovery.ts
+  35316ac2f3e5e837 1-65
+cli/src/commands/env.ts
+  35316ac2f3e5e837 4,42,383
+packages/shared/src/index.ts
+  35316ac2f3e5e837 979-985
+server/src/paths.ts
+  35316ac2f3e5e837 1-5
+packages/db/src/runtime-config.ts
+  35316ac2f3e5e837 3,6-7,92-93,96
+cli/src/commands/routines.ts
+  35316ac2f3e5e837 16,236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a161288fbeac7e98c3d4cc4842603b532349d2fc",
+  "prompts": {
+    "35316ac2f3e5e837": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c97f19f-fca8-4856-bfc8-9e1a37d6e289",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 308,
+      "total_deletions": 218,
+      "accepted_lines": 301,
+      "overriden_lines": 0
+    }
+  }
+}
