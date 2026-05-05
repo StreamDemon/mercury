@@ -41,6 +41,18 @@ BAZ=qux
     expect(parseEnvFile('FOO="bar#baz"')).toEqual({ FOO: "bar#baz" });
   });
 
+  it("strips inline comments after quoted values", () => {
+    expect(parseEnvFile('FOO="bar" # comment')).toEqual({ FOO: "bar" });
+  });
+
+  it("strips inline comments with no space after the closing quote", () => {
+    expect(parseEnvFile('FOO="bar"#comment')).toEqual({ FOO: "bar" });
+  });
+
+  it("preserves an unmatched opening quote as a literal", () => {
+    expect(parseEnvFile('FOO="unmatched')).toEqual({ FOO: '"unmatched' });
+  });
+
   it("treats # immediately after = as an empty value (the dev-runner-worktree fix)", () => {
     expect(parseEnvFile("FOO=#bar")).toEqual({ FOO: "" });
   });
