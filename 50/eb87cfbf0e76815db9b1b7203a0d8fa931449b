@@ -1,0 +1,23 @@
+packages/shared/src/__tests__/main-barrel-browser-safety.test.ts
+  0536e085d74793cc 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "50eb87cfbf0e76815db9b1b7203a0d8fa931449b",
+  "prompts": {
+    "0536e085d74793cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 43,
+      "total_deletions": 0,
+      "accepted_lines": 114,
+      "overriden_lines": 0
+    }
+  }
+}
