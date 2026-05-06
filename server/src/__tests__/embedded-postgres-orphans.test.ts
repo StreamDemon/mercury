@@ -155,6 +155,28 @@ describe("recoverEmbeddedPostgresOrphans", () => {
     expect(warning).toBeDefined();
   });
 
+  it("does NOT kill an io_worker whose parent is still alive (sibling worktree safety)", async () => {
+    // Regression guard: a healthy sibling Mercury worktree's io_workers must not be
+    // killed just because their binary path resolves to the same shared pnpm store.
+    // The parent-alive check is the safety boundary.
+    const logger = silentLogger();
+    const kill = vi.fn(async () => {});
+    const liveParentPid = process.pid; // guaranteed alive — it's us
+    const siblingWorker: OrphanProcess = {
+      pid: 99999,
+      parentPid: liveParentPid,
+      commandLine: `${embeddedBinary} --forkchild="io_worker" 5972`,
+    };
+    const outcome = await recoverEmbeddedPostgresOrphans({
+      dataDir,
+      logger,
+      listProcesses: async () => [siblingWorker],
+      killProcessTree: kill,
+    });
+    expect(outcome.kind).toBe("ambiguous");
+    expect(kill).not.toHaveBeenCalled();
+  });
+
   it("returns ambiguous when only a system postgres is running", async () => {
     const logger = silentLogger();
     const kill = vi.fn(async () => {});
