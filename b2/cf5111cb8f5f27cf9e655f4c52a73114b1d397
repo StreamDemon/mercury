@@ -1,0 +1,73 @@
+packages/adapters/hermes-local/dist/shared/constants.js
+  0536e085d74793cc 1-39
+packages/adapters/hermes-local/dist/server/detect-model.d.ts
+  0536e085d74793cc 1-20
+packages/adapters/hermes-local/dist/server/index.js
+  0536e085d74793cc 1-42
+packages/adapters/hermes-local/dist/cli/format-event.d.ts
+  0536e085d74793cc 1-13
+packages/adapters/hermes-local/dist/server/execute.d.ts
+  0536e085d74793cc 1-19
+packages/adapters/hermes-local/dist/index.js
+  0536e085d74793cc 1-80
+packages/adapters/hermes-local/dist/server/detect-model.js
+  0536e085d74793cc 1-62
+packages/adapters/hermes-local/dist/server/test.d.ts
+  0536e085d74793cc 1-8
+packages/adapters/hermes-local/dist/server/index.d.ts
+  0536e085d74793cc 1-15
+packages/adapters/hermes-local/dist/ui/index.js
+  0536e085d74793cc 1-6
+packages/adapters/hermes-local/dist/server/skills.d.ts
+  0536e085d74793cc 1-7
+packages/adapters/hermes-local/dist/index.d.ts
+  0536e085d74793cc 1-27
+packages/adapters/hermes-local/dist/ui/build-config.d.ts
+  0536e085d74793cc 1-11
+packages/adapters/hermes-local/dist/ui/parse-stdout.d.ts
+  0536e085d74793cc 1-24
+packages/adapters/hermes-local/dist/cli/index.d.ts
+  0536e085d74793cc 1-4
+packages/adapters/hermes-local/dist/ui/parse-stdout.js
+  0536e085d74793cc 1-236
+packages/adapters/hermes-local/dist/cli/format-event.js
+  0536e085d74793cc 1-51
+packages/adapters/hermes-local/dist/shared/constants.d.ts
+  0536e085d74793cc 1-30
+packages/adapters/hermes-local/dist/cli/index.js
+  0536e085d74793cc 1-4
+packages/adapters/hermes-local/dist/server/test.js
+  0536e085d74793cc 1-195
+packages/adapters/hermes-local/dist/server/skills.js
+  0536e085d74793cc 1-178
+packages/adapters/hermes-local/dist/server/execute.js
+  0536e085d74793cc 1-388
+packages/adapters/hermes-local/dist/ui/build-config.js
+  0536e085d74793cc 1-46
+packages/adapters/hermes-local/UPSTREAM.md
+  0536e085d74793cc 9-18
+.gitignore
+  0536e085d74793cc 6-9
+packages/adapters/hermes-local/dist/ui/index.d.ts
+  0536e085d74793cc 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "b2cf5111cb8f5f27cf9e655f4c52a73114b1d397",
+  "prompts": {
+    "0536e085d74793cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 1525,
+      "total_deletions": 2,
+      "accepted_lines": 1591,
+      "overriden_lines": 0
+    }
+  }
+}
