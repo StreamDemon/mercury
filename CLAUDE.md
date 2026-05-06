@@ -14,9 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Mercury is a Node.js + React control plane that orchestrates a team of AI agents (Claude Code, Codex, Cursor, Gemini, OpenClaw, HTTP bots, etc.) into "zero-human companies" with org charts, goals, budgets, governance, and audit logging. **Not** a chatbot, agent framework, or workflow builder.
-
-This checkout is the `HenkDz/mercury` fork (see `AGENTS.md` §11) on branch `feat/externalize-hermes-adapter` — the Hermes adapter is **plugin-only** here (no `hermes-mercury-adapter` import in `server/` or `ui/` source despite being in `package.json`).
+Mercury is a Node.js + React control plane that orchestrates a team of AI agents (Claude Code, Codex, Cursor, Gemini, opencode, Pi, Hermes, OpenClaw, HTTP bots) into "zero-human companies" with org charts, goals, budgets, governance, and audit logging. **Not** a chatbot, agent framework, or workflow builder.
 
 ## Workspace layout
 
@@ -25,10 +23,10 @@ pnpm monorepo (`pnpm-workspace.yaml`). Top-level workspaces:
 - `server/` (`@mercuryai/server`) — Express REST API, orchestration services, heartbeat execution, plugin runtime. Entry: `server/src/index.ts`. Routes in `server/src/routes/`, services in `server/src/services/`.
 - `ui/` (`@mercuryai/ui`) — React 19 + Vite board UI. Served by the API in dev middleware mode at the same origin.
 - `cli/` — `mercuryai` CLI (onboard, doctor, configure, worktree, issue, context, etc.).
-- `packages/db/` — Drizzle schema + migrations. **Embedded PGlite/Postgres** is started automatically when `DATABASE_URL` is unset.
+- `packages/db/` — Drizzle schema + migrations. **Embedded PostgreSQL** is started automatically when `DATABASE_URL` is unset (the `pglite` mode label is legacy and migrated to `embedded-postgres` by `migrateLegacyConfig` in `@mercuryai/shared/config-discovery`).
 - `packages/shared/` — API types, validators, constants, path constants. **Sync changes here whenever schema or routes change.**
 - `packages/adapter-utils/` — shared adapter utilities.
-- `packages/adapters/*` — per-agent adapters (`claude-local`, `codex-local`, `cursor-local`, `gemini-local`, `opencode-local`, `pi-local`, `openclaw-gateway`).
+- `packages/adapters/*` — per-agent adapters (`claude-local`, `codex-local`, `cursor-local`, `gemini-local`, `hermes-local`, `opencode-local`, `pi-local`, `openclaw-gateway`).
 - `packages/plugins/*` — plugin SDK, sandbox-provider plugins, examples. Note `pnpm-workspace.yaml` excludes `sandbox-providers/**` and `examples/plugin-orchestration-smoke-example` from the workspace lockfile to keep them installable as standalone packages.
 - `packages/mcp-server/` — MCP server bridge.
 
@@ -103,7 +101,7 @@ These are the invariants — not generic advice.
 
 `AGENTS.md` §10 is mandatory: every PR must fill in **all** sections of `.github/PULL_REQUEST_TEMPLATE.md` — Thinking Path, What Changed, Verification, Risks, Model Used, Checklist. The repo also uses Greptile (`CONTRIBUTING.md`); a PR needs 5/5 with all comments addressed before merge.
 
-`pnpm-lock.yaml` is **owned by GitHub Actions on `master`** — do **not** commit lockfile changes in pull requests.
+`pnpm-lock.yaml` is **owned by GitHub Actions on `main`** — do **not** commit lockfile changes in pull requests.
 
 ## Mercury-specific notes
 
