@@ -1,6 +1,6 @@
 import { existsSync, lstatSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { loadEnvFileIntoProcessEnv } from "@mercuryai/shared";
+import { loadEnvFileIntoProcessEnv } from "@mercuryai/shared/env-file";
 
 type WorktreeEnvBootstrapResult =
   | { envPath: null; missingEnv: false }

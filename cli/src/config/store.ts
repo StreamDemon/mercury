@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { migrateLegacyConfig, resolveMercuryConfigPath } from "@mercuryai/shared";
+import {
+  migrateLegacyConfig,
+  resolveMercuryConfigPath,
+} from "@mercuryai/shared/config-discovery";
 import { mercuryConfigSchema, type MercuryConfig } from "./schema.js";
 
 export {
@@ -8,7 +11,7 @@ export {
   migrateLegacyConfig,
   resolveMercuryConfigPath,
   resolveMercuryEnvPath,
-} from "@mercuryai/shared";
+} from "@mercuryai/shared/config-discovery";
 
 function parseJson(filePath: string): unknown {
   try {

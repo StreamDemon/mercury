@@ -1,11 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import {
-  formatEnvEntries,
-  readEnvEntries,
-  resolveHomeAwarePath,
-  type MercuryConfig,
-} from "@mercuryai/shared";
+import { type MercuryConfig } from "@mercuryai/shared";
+import { formatEnvEntries, readEnvEntries } from "@mercuryai/shared/env-file";
+import { resolveHomeAwarePath } from "@mercuryai/shared/paths";
 import { resolveMercuryConfigPath, resolveMercuryEnvPath } from "./paths.js";
 
 const WORKTREE_ENV_HEADER_LINES = [

@@ -11,7 +11,6 @@ import {
   DEPLOYMENT_MODES,
   SECRET_PROVIDERS,
   STORAGE_PROVIDERS,
-  loadEnvFileIntoProcessEnv,
   type BindMode,
   type AuthBaseUrlMode,
   type DeploymentExposure,
@@ -22,6 +21,7 @@ import {
   resolveRuntimeBind,
   validateConfiguredBindMode,
 } from "@mercuryai/shared";
+import { loadEnvFileIntoProcessEnv } from "@mercuryai/shared/env-file";
 import {
   resolveDefaultBackupDir,
   resolveDefaultEmbeddedPostgresDir,

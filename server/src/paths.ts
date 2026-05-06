@@ -2,4 +2,4 @@ export {
   findConfigFileFromAncestors,
   resolveMercuryConfigPath,
   resolveMercuryEnvPath,
-} from "@mercuryai/shared";
+} from "@mercuryai/shared/config-discovery";

@@ -961,32 +961,11 @@ export type {
   EnvironmentSupportStatus,
 } from "./environment-support.js";
 
-export {
-  DEFAULT_INSTANCE_ID,
-  INSTANCE_ID_RE,
-  expandHomePrefix,
-  resolveDefaultBackupDir,
-  resolveDefaultConfigPath,
-  resolveDefaultEmbeddedPostgresDir,
-  resolveDefaultLogsDir,
-  resolveDefaultSecretsKeyFilePath,
-  resolveDefaultStorageDir,
-  resolveHomeAwarePath,
-  resolveMercuryHomeDir,
-  resolveMercuryInstanceId,
-  resolveMercuryInstanceRoot,
-} from "./paths.js";
-
-export {
-  findConfigFileFromAncestors,
-  migrateLegacyConfig,
-  resolveMercuryConfigPath,
-  resolveMercuryEnvPath,
-} from "./config-discovery.js";
-
-export {
-  formatEnvEntries,
-  loadEnvFileIntoProcessEnv,
-  parseEnvFile,
-  readEnvEntries,
-} from "./env-file.js";
+// Node-only modules (paths, config-discovery, env-file) are NOT re-exported
+// here. They use node:fs / node:os and would crash the browser bundle if
+// pulled into the UI's import graph via this main barrel.
+//
+// Server, CLI, and db code must import them via subpaths instead:
+//   import { resolveMercuryHomeDir } from "@mercuryai/shared/paths";
+//   import { resolveMercuryConfigPath } from "@mercuryai/shared/config-discovery";
+//   import { readEnvEntries } from "@mercuryai/shared/env-file";
