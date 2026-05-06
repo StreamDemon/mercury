@@ -1,0 +1,47 @@
+server/src/__tests__/workspace-runtime.test.ts
+  0536e085d74793cc 8
+cli/src/config/store.ts
+  0536e085d74793cc 3-6,14
+server/src/config.ts
+  0536e085d74793cc 24
+server/src/paths.ts
+  0536e085d74793cc 5
+server/src/home-paths.ts
+  0536e085d74793cc 16
+server/src/dev-runner-worktree.ts
+  0536e085d74793cc 3
+packages/shared/src/index.ts
+  0536e085d74793cc 964-971
+packages/db/src/runtime-config.ts
+  0536e085d74793cc 6-11
+packages/db/src/backup.ts
+  0536e085d74793cc 6
+server/src/worktree-config.ts
+  0536e085d74793cc 3-5
+server/src/startup-banner.ts
+  0536e085d74793cc 3-4
+cli/src/config/home.ts
+  0536e085d74793cc 16
+cli/src/config/env.ts
+  0536e085d74793cc 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a24874854cf772c17f2c047b941a3cd36535f7d0",
+  "prompts": {
+    "0536e085d74793cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 47,
+      "total_deletions": 52,
+      "accepted_lines": 5814,
+      "overriden_lines": 0
+    }
+  }
+}
