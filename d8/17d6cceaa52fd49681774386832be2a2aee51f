@@ -1,0 +1,61 @@
+packages/adapters/hermes-local/src/index.ts
+  0536e085d74793cc 11,13,16,24-25,31-33,43-57,64,68,72-79,81,85,107,109-112
+packages/adapters/hermes-local/src/server/detect-model.ts
+  0536e085d74793cc 2,4-8,10,14-28,30-34,36-51,53-93,95-111,113,115-151,153-199,201-204
+packages/adapters/hermes-local/src/server/skills.ts
+  0536e085d74793cc 4-12,14,16,20-22,24-31,33-53,55-57,59-84,86,88-92,94-122,124,128-205,207-211,213-220,222-227
+packages/adapters/hermes-local/src/server/profiles.ts
+  0536e085d74793cc 1-182
+packages/adapters/hermes-local/src/server/execute.ts
+  0536e085d74793cc 17-18,20-65,69-71,73-74,76-77,79-82,84,88,98-103,116,118,120,127,136,139,144,146,150-216,218,222,225-243,245-247,250-258,262,265,267-304,306-311,313-317,319-324,326-333,335-353,355-375,377-386,388-392,394-461,463-495,497-501,503-527,529-593,595-713,715,717-746,748-765,767-1005,1007-1136,1138-1171,1173-1244,1246-1254,1256-1264
+packages/adapters/hermes-local/src/ui/parse-stdout.ts
+  0536e085d74793cc 5-9,13-22,24-26,28,30,36-38,40,42,44-45,47,49-50,52,60-155,157,159,161,166-209,211,213-220,222,224,235-374,376-381,383-386,388-390,392-413,415-446,448-456,458-466,468-474
+packages/adapters/hermes-local/UPSTREAM.md
+  0536e085d74793cc 3-5,8-44
+packages/adapters/hermes-local/package.json
+  0536e085d74793cc 3,11-12,22-24,26-54,59-63,65-73
+packages/adapters/hermes-local/src/cli/format-event.ts
+  0536e085d74793cc 7,9,16-60
+packages/adapters/hermes-local/src/cli/index.ts
+  0536e085d74793cc 4
+AGENTS.md
+  0536e085d74793cc 183,187
+packages/adapters/hermes-local/src/server/index.ts
+  0536e085d74793cc 4,7-20,22-56,63-161
+packages/adapters/hermes-local/README.md
+  0536e085d74793cc 5
+packages/adapters/hermes-local/src/ui/index.ts
+  0536e085d74793cc 5
+packages/adapters/hermes-local/tsconfig.json
+  0536e085d74793cc 1-20
+packages/adapters/hermes-local/src/ui-parser.ts
+  0536e085d74793cc 1-424
+packages/adapters/hermes-local/src/shared/constants.ts
+  0536e085d74793cc 4,7,10,13-16,19-25,28,31,34-86,88,91,93-95,98,101,104-320
+packages/adapters/hermes-local/src/server/test.ts
+  0536e085d74793cc 7-13,16-19,21-23,25,29-45,47-50,52-66,68-81,83-94,96-99,101,103-111,113-118,120-123,125-130,132-155,157-160,162-176,178-276,280-293,295,298-331
+packages/adapters/hermes-local/src/ui/build-config.ts
+  0536e085d74793cc 6-10,12,14-21,25-89
+CLAUDE.md
+  0536e085d74793cc 108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d817d6cceaa52fd49681774386832be2a2aee51f",
+  "prompts": {
+    "0536e085d74793cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 10036,
+      "total_deletions": 4120,
+      "accepted_lines": 6444,
+      "overriden_lines": 3
+    }
+  }
+}
