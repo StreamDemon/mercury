@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import {
   migrateLegacyConfig,
+  readEnvEntries,
   resolveDefaultEmbeddedPostgresDir,
   resolveHomeAwarePath,
   resolveMercuryConfigPath,
@@ -34,42 +35,6 @@ export type ResolvedDatabaseTarget =
       configPath: string;
       envPath: string;
     };
-
-function parseEnvFile(contents: string): Record<string, string> {
-  const entries: Record<string, string> = {};
-
-  for (const rawLine of contents.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-
-    const match = rawLine.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
-    if (!match) continue;
-
-    const [, key, rawValue] = match;
-    const value = rawValue.trim();
-    if (!value) {
-      entries[key] = "";
-      continue;
-    }
-
-    if (
-      (value.startsWith("\"") && value.endsWith("\"")) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      entries[key] = value.slice(1, -1);
-      continue;
-    }
-
-    entries[key] = value.replace(/\s+#.*$/, "").trim();
-  }
-
-  return entries;
-}
-
-function readEnvEntries(envPath: string): Record<string, string> {
-  if (!existsSync(envPath)) return {};
-  return parseEnvFile(readFileSync(envPath, "utf8"));
-}
 
 function asPositiveInt(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
