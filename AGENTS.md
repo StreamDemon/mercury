@@ -33,7 +33,7 @@ Before making changes, read in this order:
 
 ## 4. Dev Setup (Auto DB)
 
-Use embedded PGlite in dev by leaving `DATABASE_URL` unset.
+Use embedded PostgreSQL in dev by leaving `DATABASE_URL` unset. (The `pglite` mode label is legacy and is migrated to `embedded-postgres` by `migrateLegacyConfig` in `@mercuryai/shared/config-discovery`.)
 
 ```sh
 pnpm install
@@ -55,7 +55,7 @@ curl http://localhost:3100/api/companies
 Reset local dev DB:
 
 ```sh
-rm -rf data/pglite
+rm -rf ~/.mercury/instances/default/db/
 pnpm dev
 ```
 
@@ -176,7 +176,7 @@ A change is done when all are true:
 4. Docs updated when behavior or commands change
 5. PR description follows the [PR template](.github/PULL_REQUEST_TEMPLATE.md) with all sections filled in (including Model Used)
 
-## 11. Mercury-specific notes
+## 12. Mercury-specific notes
 
 ### Hermes adapter (vendored)
 
