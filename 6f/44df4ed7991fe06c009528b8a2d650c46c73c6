@@ -1,0 +1,23 @@
+server/src/index.ts
+  0536e085d74793cc 29-32,380-386,389-409,411,902-910,913-918,922,930,934,937-948
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6f44df4ed7991fe06c009528b8a2d650c46c73c6",
+  "prompts": {
+    "0536e085d74793cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 515,
+      "overriden_lines": 0
+    }
+  }
+}
