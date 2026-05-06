@@ -5,8 +5,8 @@ import {
   formatEnvEntries,
   loadEnvFileIntoProcessEnv,
   parseEnvFile,
-  resolveMercuryEnvPath,
-} from "@mercuryai/shared";
+} from "@mercuryai/shared/env-file";
+import { resolveMercuryEnvPath } from "@mercuryai/shared/config-discovery";
 
 const JWT_SECRET_ENV_KEY = "MERCURY_AGENT_JWT_SECRET";
 const CLI_ENV_HEADER_LINES = [

@@ -1,12 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import {
   migrateLegacyConfig,
-  readEnvEntries,
-  resolveDefaultEmbeddedPostgresDir,
-  resolveHomeAwarePath,
   resolveMercuryConfigPath,
   resolveMercuryEnvPath,
-} from "@mercuryai/shared";
+} from "@mercuryai/shared/config-discovery";
+import { readEnvEntries } from "@mercuryai/shared/env-file";
+import {
+  resolveDefaultEmbeddedPostgresDir,
+  resolveHomeAwarePath,
+} from "@mercuryai/shared/paths";
 
 type PartialConfig = {
   database?: {

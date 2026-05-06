@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolveMercuryConfigPath, resolveMercuryEnvPath } from "./paths.js";
-import { parseEnvFile, type BindMode, type DeploymentExposure, type DeploymentMode } from "@mercuryai/shared";
+import type { BindMode, DeploymentExposure, DeploymentMode } from "@mercuryai/shared";
+import { parseEnvFile } from "@mercuryai/shared/env-file";
 
 type UiMode = "none" | "static" | "vite-dev";
 

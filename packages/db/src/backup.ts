@@ -3,7 +3,7 @@ import {
   resolveDefaultBackupDir,
   resolveDefaultConfigPath,
   resolveHomeAwarePath,
-} from "@mercuryai/shared";
+} from "@mercuryai/shared/paths";
 import { formatDatabaseBackupResult, runDatabaseBackup } from "./backup-lib.js";
 
 type PartialConfig = {

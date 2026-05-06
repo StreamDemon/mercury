@@ -13,7 +13,7 @@ import {
   resolveMercuryHomeDir,
   resolveMercuryInstanceId,
   resolveMercuryInstanceRoot,
-} from "@mercuryai/shared";
+} from "@mercuryai/shared/paths";
 
 export {
   DEFAULT_INSTANCE_ID,
