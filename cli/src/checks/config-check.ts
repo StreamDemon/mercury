@@ -1,8 +1,8 @@
-﻿import { readConfig, configExists, resolveConfigPath } from "../config/store.js";
+﻿import { readConfig, configExists, resolveMercuryConfigPath } from "../config/store.js";
 import type { CheckResult } from "./index.js";
 
 export function configCheck(configPath?: string): CheckResult {
-  const filePath = resolveConfigPath(configPath);
+  const filePath = resolveMercuryConfigPath(configPath);
 
   if (!configExists(configPath)) {
     return {

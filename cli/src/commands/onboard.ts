@@ -17,7 +17,7 @@ import {
   type SecretProvider,
   type StorageProvider,
 } from "@mercuryai/shared";
-import { configExists, readConfig, resolveConfigPath, writeConfig } from "../config/store.js";
+import { configExists, readConfig, resolveMercuryConfigPath, writeConfig } from "../config/store.js";
 import type { MercuryConfig } from "../config/schema.js";
 import { ensureAgentJwtSecret, resolveAgentJwtEnvFile } from "../config/env.js";
 import { ensureLocalSecretsKeyFile } from "../config/secrets-key.js";
@@ -329,7 +329,7 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
 
   printMercuryCliBanner();
   p.intro(pc.bgCyan(pc.black(" mercuryai onboard ")));
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   const instance = describeLocalInstancePaths(resolveMercuryInstanceId());
   p.log.message(
     pc.dim(

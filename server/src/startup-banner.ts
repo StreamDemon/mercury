@@ -1,8 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolveMercuryConfigPath, resolveMercuryEnvPath } from "./paths.js";
-import type { BindMode, DeploymentExposure, DeploymentMode } from "@mercuryai/shared";
-
-import { parse as parseEnvFileContents } from "dotenv";
+import { parseEnvFile, type BindMode, type DeploymentExposure, type DeploymentMode } from "@mercuryai/shared";
 
 type UiMode = "none" | "static" | "vite-dev";
 
@@ -81,7 +79,7 @@ function resolveAgentJwtSecretStatus(
   }
 
   if (existsSync(envFilePath)) {
-    const parsed = parseEnvFileContents(readFileSync(envFilePath, "utf-8"));
+    const parsed = parseEnvFile(readFileSync(envFilePath, "utf-8"));
     const fileValue = typeof parsed.MERCURY_AGENT_JWT_SECRET === "string" ? parsed.MERCURY_AGENT_JWT_SECRET.trim() : "";
     if (fileValue) {
       return {

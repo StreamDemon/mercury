@@ -2,7 +2,6 @@ import { readConfigFile } from "./config-file.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, realpathSync } from "node:fs";
 import { resolve } from "node:path";
-import { config as loadDotenv } from "dotenv";
 import { resolveMercuryEnvPath } from "./paths.js";
 import { maybeRepairLegacyWorktreeConfigAndEnvFiles } from "./worktree-config.js";
 import {
@@ -12,6 +11,7 @@ import {
   DEPLOYMENT_MODES,
   SECRET_PROVIDERS,
   STORAGE_PROVIDERS,
+  loadEnvFileIntoProcessEnv,
   type BindMode,
   type AuthBaseUrlMode,
   type DeploymentExposure,
@@ -31,16 +31,14 @@ import {
 } from "./home-paths.js";
 
 const MERCURY_ENV_FILE_PATH = resolveMercuryEnvPath();
-if (existsSync(MERCURY_ENV_FILE_PATH)) {
-  loadDotenv({ path: MERCURY_ENV_FILE_PATH, override: false, quiet: true });
-}
+loadEnvFileIntoProcessEnv(MERCURY_ENV_FILE_PATH);
 
 const CWD_ENV_PATH = resolve(process.cwd(), ".env");
 const isSameFile = existsSync(CWD_ENV_PATH) && existsSync(MERCURY_ENV_FILE_PATH)
   ? realpathSync(CWD_ENV_PATH) === realpathSync(MERCURY_ENV_FILE_PATH)
   : CWD_ENV_PATH === MERCURY_ENV_FILE_PATH;
-if (!isSameFile && existsSync(CWD_ENV_PATH)) {
-  loadDotenv({ path: CWD_ENV_PATH, override: false, quiet: true });
+if (!isSameFile) {
+  loadEnvFileIntoProcessEnv(CWD_ENV_PATH);
 }
 
 maybeRepairLegacyWorktreeConfigAndEnvFiles();

@@ -1,11 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-
-const DEFAULT_INSTANCE_ID = "default";
-const CONFIG_BASENAME = "config.json";
-const ENV_BASENAME = ".env";
-const INSTANCE_ID_RE = /^[a-zA-Z0-9_-]+$/;
+import {
+  migrateLegacyConfig,
+  readEnvEntries,
+  resolveDefaultEmbeddedPostgresDir,
+  resolveHomeAwarePath,
+  resolveMercuryConfigPath,
+  resolveMercuryEnvPath,
+} from "@mercuryai/shared";
 
 type PartialConfig = {
   database?: {
@@ -35,135 +36,6 @@ export type ResolvedDatabaseTarget =
       envPath: string;
     };
 
-function expandHomePrefix(value: string): string {
-  if (value === "~") return os.homedir();
-  if (value.startsWith("~/")) return path.resolve(os.homedir(), value.slice(2));
-  return value;
-}
-
-function resolveMercuryHomeDir(): string {
-  const envHome = process.env.MERCURY_HOME?.trim();
-  if (envHome) return path.resolve(expandHomePrefix(envHome));
-  return path.resolve(os.homedir(), ".mercury");
-}
-
-function resolveMercuryInstanceId(): string {
-  const raw = process.env.MERCURY_INSTANCE_ID?.trim() || DEFAULT_INSTANCE_ID;
-  if (!INSTANCE_ID_RE.test(raw)) {
-    throw new Error(`Invalid MERCURY_INSTANCE_ID '${raw}'.`);
-  }
-  return raw;
-}
-
-function resolveDefaultConfigPath(): string {
-  return path.resolve(
-    resolveMercuryHomeDir(),
-    "instances",
-    resolveMercuryInstanceId(),
-    CONFIG_BASENAME,
-  );
-}
-
-function resolveDefaultEmbeddedPostgresDir(): string {
-  return path.resolve(resolveMercuryHomeDir(), "instances", resolveMercuryInstanceId(), "db");
-}
-
-function resolveHomeAwarePath(value: string): string {
-  return path.resolve(expandHomePrefix(value));
-}
-
-function findConfigFileFromAncestors(startDir: string): string | null {
-  let currentDir = path.resolve(startDir);
-
-  while (true) {
-    const candidate = path.resolve(currentDir, ".mercury", CONFIG_BASENAME);
-    if (existsSync(candidate)) return candidate;
-
-    const nextDir = path.resolve(currentDir, "..");
-    if (nextDir === currentDir) return null;
-    currentDir = nextDir;
-  }
-}
-
-function resolveMercuryConfigPath(): string {
-  if (process.env.MERCURY_CONFIG?.trim()) {
-    return path.resolve(process.env.MERCURY_CONFIG.trim());
-  }
-  return findConfigFileFromAncestors(process.cwd()) ?? resolveDefaultConfigPath();
-}
-
-function resolveMercuryEnvPath(configPath: string): string {
-  return path.resolve(path.dirname(configPath), ENV_BASENAME);
-}
-
-function parseEnvFile(contents: string): Record<string, string> {
-  const entries: Record<string, string> = {};
-
-  for (const rawLine of contents.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-
-    const match = rawLine.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
-    if (!match) continue;
-
-    const [, key, rawValue] = match;
-    const value = rawValue.trim();
-    if (!value) {
-      entries[key] = "";
-      continue;
-    }
-
-    if (
-      (value.startsWith("\"") && value.endsWith("\"")) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      entries[key] = value.slice(1, -1);
-      continue;
-    }
-
-    entries[key] = value.replace(/\s+#.*$/, "").trim();
-  }
-
-  return entries;
-}
-
-function readEnvEntries(envPath: string): Record<string, string> {
-  if (!existsSync(envPath)) return {};
-  return parseEnvFile(readFileSync(envPath, "utf8"));
-}
-
-function migrateLegacyConfig(raw: unknown): PartialConfig | null {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
-
-  const config = { ...(raw as Record<string, unknown>) };
-  const databaseRaw = config.database;
-  if (typeof databaseRaw !== "object" || databaseRaw === null || Array.isArray(databaseRaw)) {
-    return config;
-  }
-
-  const database = { ...(databaseRaw as Record<string, unknown>) };
-  if (database.mode === "pglite") {
-    database.mode = "embedded-postgres";
-
-    if (
-      typeof database.embeddedPostgresDataDir !== "string" &&
-      typeof database.pgliteDataDir === "string"
-    ) {
-      database.embeddedPostgresDataDir = database.pgliteDataDir;
-    }
-    if (
-      typeof database.embeddedPostgresPort !== "number" &&
-      typeof database.pglitePort === "number" &&
-      Number.isFinite(database.pglitePort)
-    ) {
-      database.embeddedPostgresPort = database.pglitePort;
-    }
-  }
-
-  config.database = database;
-  return config as PartialConfig;
-}
-
 function asPositiveInt(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
   const rounded = Math.trunc(value);
@@ -182,10 +54,11 @@ function readConfig(configPath: string): PartialConfig | null {
     );
   }
 
-  const migrated = migrateLegacyConfig(parsed);
-  if (migrated === null || typeof migrated !== "object" || Array.isArray(migrated)) {
+  const migratedRaw = migrateLegacyConfig(parsed);
+  if (typeof migratedRaw !== "object" || migratedRaw === null || Array.isArray(migratedRaw)) {
     throw new Error(`Invalid config at ${configPath}: expected a JSON object`);
   }
+  const migrated = migratedRaw as PartialConfig;
 
   const database =
     typeof migrated.database === "object" &&

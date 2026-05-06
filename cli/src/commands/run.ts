@@ -8,7 +8,7 @@ import { bootstrapCeoInvite } from "./auth-bootstrap-ceo.js";
 import { onboard } from "./onboard.js";
 import { doctor } from "./doctor.js";
 import { loadMercuryEnvFile } from "../config/env.js";
-import { configExists, resolveConfigPath } from "../config/store.js";
+import { configExists, resolveMercuryConfigPath } from "../config/store.js";
 import type { MercuryConfig } from "../config/schema.js";
 import { readConfig } from "../config/store.js";
 import {
@@ -42,7 +42,7 @@ export async function runCommand(opts: RunOptions): Promise<void> {
   const paths = describeLocalInstancePaths(instanceId);
   fs.mkdirSync(paths.instanceRoot, { recursive: true });
 
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   process.env.MERCURY_CONFIG = configPath;
   loadMercuryEnvFile(configPath);
 

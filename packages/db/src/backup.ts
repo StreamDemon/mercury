@@ -1,6 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import {
+  resolveDefaultBackupDir,
+  resolveDefaultConfigPath,
+  resolveHomeAwarePath,
+} from "@mercuryai/shared";
 import { formatDatabaseBackupResult, runDatabaseBackup } from "./backup-lib.js";
 
 type PartialConfig = {
@@ -14,30 +17,6 @@ type PartialConfig = {
     };
   };
 };
-
-function expandHomePrefix(value: string): string {
-  if (value === "~") return os.homedir();
-  if (value.startsWith("~/")) return path.resolve(os.homedir(), value.slice(2));
-  return value;
-}
-
-function resolveMercuryHomeDir(): string {
-  const envHome = process.env.MERCURY_HOME?.trim();
-  if (envHome) return path.resolve(expandHomePrefix(envHome));
-  return path.resolve(os.homedir(), ".mercury");
-}
-
-function resolveMercuryInstanceId(): string {
-  const raw = process.env.MERCURY_INSTANCE_ID?.trim() || "default";
-  if (!/^[a-zA-Z0-9_-]+$/.test(raw)) {
-    throw new Error(`Invalid MERCURY_INSTANCE_ID '${raw}'.`);
-  }
-  return raw;
-}
-
-function resolveDefaultConfigPath(): string {
-  return path.resolve(resolveMercuryHomeDir(), "instances", resolveMercuryInstanceId(), "config.json");
-}
 
 function readConfig(configPath: string): PartialConfig | null {
   if (!existsSync(configPath)) return null;
@@ -72,14 +51,10 @@ function resolveConnectionString(config: PartialConfig | null): string {
   return `postgres://mercury:mercury@127.0.0.1:${port}/mercury`;
 }
 
-function resolveDefaultBackupDir(): string {
-  return path.resolve(resolveMercuryHomeDir(), "instances", resolveMercuryInstanceId(), "data", "backups");
-}
-
 function resolveBackupDir(config: PartialConfig | null): string {
   const raw = config?.database?.backup?.dir;
   if (typeof raw === "string" && raw.trim().length > 0) {
-    return path.resolve(expandHomePrefix(raw.trim()));
+    return resolveHomeAwarePath(raw.trim());
   }
   return resolveDefaultBackupDir();
 }

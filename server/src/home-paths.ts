@@ -1,58 +1,38 @@
-import os from "node:os";
 import path from "node:path";
+import {
+  DEFAULT_INSTANCE_ID,
+  INSTANCE_ID_RE,
+  expandHomePrefix,
+  resolveDefaultBackupDir,
+  resolveDefaultConfigPath,
+  resolveDefaultEmbeddedPostgresDir,
+  resolveDefaultLogsDir,
+  resolveDefaultSecretsKeyFilePath,
+  resolveDefaultStorageDir,
+  resolveHomeAwarePath,
+  resolveMercuryHomeDir,
+  resolveMercuryInstanceId,
+  resolveMercuryInstanceRoot,
+} from "@mercuryai/shared";
 
-const DEFAULT_INSTANCE_ID = "default";
-const INSTANCE_ID_RE = /^[a-zA-Z0-9_-]+$/;
+export {
+  DEFAULT_INSTANCE_ID,
+  INSTANCE_ID_RE,
+  expandHomePrefix,
+  resolveDefaultBackupDir,
+  resolveDefaultConfigPath,
+  resolveDefaultEmbeddedPostgresDir,
+  resolveDefaultLogsDir,
+  resolveDefaultSecretsKeyFilePath,
+  resolveDefaultStorageDir,
+  resolveHomeAwarePath,
+  resolveMercuryHomeDir,
+  resolveMercuryInstanceId,
+  resolveMercuryInstanceRoot,
+};
+
 const PATH_SEGMENT_RE = /^[a-zA-Z0-9_-]+$/;
 const FRIENDLY_PATH_SEGMENT_RE = /[^a-zA-Z0-9._-]+/g;
-
-function expandHomePrefix(value: string): string {
-  if (value === "~") return os.homedir();
-  if (value.startsWith("~/")) return path.resolve(os.homedir(), value.slice(2));
-  return value;
-}
-
-export function resolveMercuryHomeDir(): string {
-  const envHome = process.env.MERCURY_HOME?.trim();
-  if (envHome) return path.resolve(expandHomePrefix(envHome));
-  return path.resolve(os.homedir(), ".mercury");
-}
-
-export function resolveMercuryInstanceId(): string {
-  const raw = process.env.MERCURY_INSTANCE_ID?.trim() || DEFAULT_INSTANCE_ID;
-  if (!INSTANCE_ID_RE.test(raw)) {
-    throw new Error(`Invalid MERCURY_INSTANCE_ID '${raw}'.`);
-  }
-  return raw;
-}
-
-export function resolveMercuryInstanceRoot(): string {
-  return path.resolve(resolveMercuryHomeDir(), "instances", resolveMercuryInstanceId());
-}
-
-export function resolveDefaultConfigPath(): string {
-  return path.resolve(resolveMercuryInstanceRoot(), "config.json");
-}
-
-export function resolveDefaultEmbeddedPostgresDir(): string {
-  return path.resolve(resolveMercuryInstanceRoot(), "db");
-}
-
-export function resolveDefaultLogsDir(): string {
-  return path.resolve(resolveMercuryInstanceRoot(), "logs");
-}
-
-export function resolveDefaultSecretsKeyFilePath(): string {
-  return path.resolve(resolveMercuryInstanceRoot(), "secrets", "master.key");
-}
-
-export function resolveDefaultStorageDir(): string {
-  return path.resolve(resolveMercuryInstanceRoot(), "data", "storage");
-}
-
-export function resolveDefaultBackupDir(): string {
-  return path.resolve(resolveMercuryInstanceRoot(), "data", "backups");
-}
 
 export function resolveDefaultAgentWorkspaceDir(agentId: string): string {
   const trimmed = agentId.trim();
@@ -88,8 +68,4 @@ export function resolveManagedProjectWorkspaceDir(input: {
     sanitizeFriendlyPathSegment(projectId, "project"),
     sanitizeFriendlyPathSegment(input.repoName, "_default"),
   );
-}
-
-export function resolveHomeAwarePath(value: string): string {
-  return path.resolve(expandHomePrefix(value));
 }

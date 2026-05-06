@@ -960,3 +960,33 @@ export type {
   EnvironmentProviderCapability,
   EnvironmentSupportStatus,
 } from "./environment-support.js";
+
+export {
+  DEFAULT_INSTANCE_ID,
+  INSTANCE_ID_RE,
+  expandHomePrefix,
+  resolveDefaultBackupDir,
+  resolveDefaultConfigPath,
+  resolveDefaultEmbeddedPostgresDir,
+  resolveDefaultLogsDir,
+  resolveDefaultSecretsKeyFilePath,
+  resolveDefaultStorageDir,
+  resolveHomeAwarePath,
+  resolveMercuryHomeDir,
+  resolveMercuryInstanceId,
+  resolveMercuryInstanceRoot,
+} from "./paths.js";
+
+export {
+  findConfigFileFromAncestors,
+  migrateLegacyConfig,
+  resolveMercuryConfigPath,
+  resolveMercuryEnvPath,
+} from "./config-discovery.js";
+
+export {
+  formatEnvEntries,
+  loadEnvFileIntoProcessEnv,
+  parseEnvFile,
+  readEnvEntries,
+} from "./env-file.js";
