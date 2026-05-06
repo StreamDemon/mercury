@@ -26,6 +26,10 @@ import {
 import detectPort from "detect-port";
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
+import {
+  formatOrphanCandidatesForDiagnostic,
+  recoverEmbeddedPostgresOrphans,
+} from "./embedded-postgres-orphans.js";
 import { logger } from "./middleware/logger.js";
 import { setupLiveEventsWebSocketServer } from "./realtime/live-events-ws.js";
 import {
@@ -373,11 +377,38 @@ export async function startServer(): Promise<StartedServer> {
           `Embedded PostgreSQL appears to already be reachable without a pid file; reusing existing server on configured port ${configuredPort}`,
         );
       } catch {
+        // Connection failed for one of two reasons:
+        //   (a) the configured port is free — fresh first-ever start, nothing on the port; or
+        //   (b) the port is busy with something we can't authenticate as Mercury's postgres,
+        //       most often an orphan from our own prior unclean shutdown.
+        // We never fall back to a different port — two postgres instances cannot share a
+        // data directory, and silently picking a new port produces cryptic
+        // "pre-existing shared memory block is still in use" errors on retry.
         const detectedPort = await detectPort(configuredPort);
         if (detectedPort !== configuredPort) {
-          logger.warn(`Embedded PostgreSQL port is in use; using next free port (requestedPort=${configuredPort}, selectedPort=${detectedPort})`);
+          const recovery = await recoverEmbeddedPostgresOrphans({
+            dataDir,
+            logger: {
+              info: (ctx, msg) => logger.info(ctx, msg),
+              warn: (ctx, msg) => logger.warn(ctx, msg),
+            },
+          });
+          if (recovery.kind === "no-orphans") {
+            throw new Error(
+              `Embedded PostgreSQL port ${configuredPort} is in use by a non-Mercury process. ` +
+                `Stop that process, or set database.embeddedPostgresPort in mercury.config.json to a free port.`,
+            );
+          }
+          if (recovery.kind === "ambiguous") {
+            throw new Error(
+              `Embedded PostgreSQL cannot start on port ${configuredPort}: found postgres ` +
+                `processes that could not be disambiguated as Mercury's. Inspect them and run ` +
+                `\`taskkill /pid <pid> /f /t\` (Windows) or \`kill -9 <pid>\` (Unix) for any that are stuck:\n` +
+                formatOrphanCandidatesForDiagnostic(recovery.candidates),
+            );
+          }
         }
-        port = detectedPort;
+        port = configuredPort;
         logger.info(`Using embedded PostgreSQL because no DATABASE_URL set (dataDir=${dataDir}, port=${port})`);
         embeddedPostgres = new EmbeddedPostgres({
           databaseDir: dataDir,
@@ -868,15 +899,27 @@ export async function startServer(): Promise<StartedServer> {
   });
   
   {
-    const shutdown = async (signal: "SIGINT" | "SIGTERM") => {
+    // Note: on Windows, child.kill("SIGTERM") from a parent process maps to
+    // TerminateProcess and bypasses these handlers entirely. Likewise, closing
+    // the terminal window (X button) terminates the Node process without any
+    // signal. For those uncatchable cases, the orphan-recovery path on next
+    // startup is what cleans up — see embedded-postgres-orphans.ts.
+    let shutdownInProgress = false;
+    const shutdown = async (reason: string, exitCode: number) => {
+      if (shutdownInProgress) return;
+      shutdownInProgress = true;
       const telemetryClient = getTelemetryClient();
       if (telemetryClient) {
-        telemetryClient.stop();
-        await telemetryClient.flush();
+        try {
+          telemetryClient.stop();
+          await telemetryClient.flush();
+        } catch (err) {
+          logger.error({ err }, "Failed to stop telemetry cleanly");
+        }
       }
 
       if (embeddedPostgres && embeddedPostgresStartedByThisProcess) {
-        logger.info({ signal }, "Stopping embedded PostgreSQL");
+        logger.info({ reason }, "Stopping embedded PostgreSQL");
         try {
           await embeddedPostgres?.stop();
         } catch (err) {
@@ -884,14 +927,25 @@ export async function startServer(): Promise<StartedServer> {
         }
       }
 
-      process.exit(0);
+      process.exit(exitCode);
     };
 
     process.once("SIGINT", () => {
-      void shutdown("SIGINT");
+      void shutdown("SIGINT", 0);
     });
     process.once("SIGTERM", () => {
-      void shutdown("SIGTERM");
+      void shutdown("SIGTERM", 0);
+    });
+    process.once("SIGHUP", () => {
+      void shutdown("SIGHUP", 0);
+    });
+    process.once("uncaughtException", (err) => {
+      logger.error({ err }, "uncaughtException; shutting down embedded PostgreSQL before exit");
+      void shutdown("uncaughtException", 1);
+    });
+    process.once("unhandledRejection", (reason) => {
+      logger.error({ reason }, "unhandledRejection; shutting down embedded PostgreSQL before exit");
+      void shutdown("unhandledRejection", 1);
     });
   }
 
