@@ -7,7 +7,7 @@ import {
   resolveDefaultBackupDir,
   resolveMercuryInstanceId,
 } from "../config/home.js";
-import { readConfig, resolveConfigPath } from "../config/store.js";
+import { readConfig, resolveMercuryConfigPath } from "../config/store.js";
 import { printMercuryCliBanner } from "../utils/banner.js";
 
 type DbBackupOptions = {
@@ -50,7 +50,7 @@ export async function dbBackupCommand(opts: DbBackupOptions): Promise<void> {
   printMercuryCliBanner();
   p.intro(pc.bgCyan(pc.black(" mercury db:backup ")));
 
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   const config = readConfig(opts.config);
   const connection = resolveConnectionString(opts.config);
   const defaultDir = resolveDefaultBackupDir(resolveMercuryInstanceId());

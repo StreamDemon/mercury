@@ -50,7 +50,7 @@ import type { Command } from "commander";
 import { ensureAgentJwtSecret, loadMercuryEnvFile, mergeMercuryEnvEntries, readMercuryEnvEntries, resolveMercuryEnvFile } from "../config/env.js";
 import { expandHomePrefix } from "../config/home.js";
 import type { MercuryConfig } from "../config/schema.js";
-import { readConfig, resolveConfigPath, writeConfig } from "../config/store.js";
+import { readConfig, resolveMercuryConfigPath, writeConfig } from "../config/store.js";
 import { printMercuryCliBanner } from "../utils/banner.js";
 import { resolveRuntimeLikePath } from "../utils/path-resolver.js";
 import {
@@ -804,7 +804,7 @@ export function resolveSourceConfigPath(opts: WorktreeInitOptions): string {
   if (opts.sourceConfigPathOverride) return path.resolve(opts.sourceConfigPathOverride);
   if (opts.fromConfig) return path.resolve(opts.fromConfig);
   if (!opts.fromDataDir && !opts.fromInstance) {
-    return resolveConfigPath();
+    return resolveMercuryConfigPath();
   }
   const sourceHome = path.resolve(expandHomePrefix(opts.fromDataDir ?? "~/.mercury"));
   const sourceInstanceId = sanitizeWorktreeInstanceId(opts.fromInstance ?? "default");
@@ -1846,7 +1846,7 @@ export async function worktreeCleanupCommand(nameArg: string, opts: WorktreeClea
 }
 
 export async function worktreeEnvCommand(opts: WorktreeEnvOptions): Promise<void> {
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   const envPath = resolveMercuryEnvFile(configPath);
   const envEntries = readMercuryEnvEntries(envPath);
   const out = {
@@ -1887,7 +1887,7 @@ async function closeDb(db: ClosableDb): Promise<void> {
 function resolveCurrentEndpoint(): ResolvedWorktreeEndpoint {
   return {
     rootPath: path.resolve(process.cwd()),
-    configPath: resolveConfigPath(),
+    configPath: resolveMercuryConfigPath(),
     label: "current",
     isCurrent: true,
   };

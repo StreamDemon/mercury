@@ -1,10 +1,10 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { normalizeHostnameInput } from "../config/hostnames.js";
-import { readConfig, resolveConfigPath, writeConfig } from "../config/store.js";
+import { readConfig, resolveMercuryConfigPath, writeConfig } from "../config/store.js";
 
 export async function addAllowedHostname(host: string, opts: { config?: string }): Promise<void> {
-  const configPath = resolveConfigPath(opts.config);
+  const configPath = resolveMercuryConfigPath(opts.config);
   const config = readConfig(opts.config);
 
   if (!config) {

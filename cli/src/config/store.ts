@@ -1,36 +1,14 @@
-﻿import fs from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
+import { migrateLegacyConfig, resolveMercuryConfigPath } from "@mercuryai/shared";
 import { mercuryConfigSchema, type MercuryConfig } from "./schema.js";
-import {
-  resolveDefaultConfigPath,
-  resolveMercuryInstanceId,
-} from "./home.js";
 
-const DEFAULT_CONFIG_BASENAME = "config.json";
-
-function findConfigFileFromAncestors(startDir: string): string | null {
-  const absoluteStartDir = path.resolve(startDir);
-  let currentDir = absoluteStartDir;
-
-  while (true) {
-    const candidate = path.resolve(currentDir, ".mercury", DEFAULT_CONFIG_BASENAME);
-    if (fs.existsSync(candidate)) {
-      return candidate;
-    }
-
-    const nextDir = path.resolve(currentDir, "..");
-    if (nextDir === currentDir) break;
-    currentDir = nextDir;
-  }
-
-  return null;
-}
-
-export function resolveConfigPath(overridePath?: string): string {
-  if (overridePath) return path.resolve(overridePath);
-  if (process.env.MERCURY_CONFIG) return path.resolve(process.env.MERCURY_CONFIG);
-  return findConfigFileFromAncestors(process.cwd()) ?? resolveDefaultConfigPath(resolveMercuryInstanceId());
-}
+export {
+  findConfigFileFromAncestors,
+  migrateLegacyConfig,
+  resolveMercuryConfigPath,
+  resolveMercuryEnvPath,
+} from "@mercuryai/shared";
 
 function parseJson(filePath: string): unknown {
   try {
@@ -38,34 +16,6 @@ function parseJson(filePath: string): unknown {
   } catch (err) {
     throw new Error(`Failed to parse JSON at ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
   }
-}
-
-function migrateLegacyConfig(raw: unknown): unknown {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return raw;
-  const config = { ...(raw as Record<string, unknown>) };
-  const databaseRaw = config.database;
-  if (typeof databaseRaw !== "object" || databaseRaw === null || Array.isArray(databaseRaw)) {
-    return config;
-  }
-
-  const database = { ...(databaseRaw as Record<string, unknown>) };
-  if (database.mode === "pglite") {
-    database.mode = "embedded-postgres";
-
-    if (typeof database.embeddedPostgresDataDir !== "string" && typeof database.pgliteDataDir === "string") {
-      database.embeddedPostgresDataDir = database.pgliteDataDir;
-    }
-    if (
-      typeof database.embeddedPostgresPort !== "number" &&
-      typeof database.pglitePort === "number" &&
-      Number.isFinite(database.pglitePort)
-    ) {
-      database.embeddedPostgresPort = database.pglitePort;
-    }
-  }
-
-  config.database = database;
-  return config;
 }
 
 function formatValidationError(err: unknown): string {
@@ -84,7 +34,7 @@ function formatValidationError(err: unknown): string {
 }
 
 export function readConfig(configPath?: string): MercuryConfig | null {
-  const filePath = resolveConfigPath(configPath);
+  const filePath = resolveMercuryConfigPath(configPath);
   if (!fs.existsSync(filePath)) return null;
   const raw = parseJson(filePath);
   const migrated = migrateLegacyConfig(raw);
@@ -99,11 +49,10 @@ export function writeConfig(
   config: MercuryConfig,
   configPath?: string,
 ): void {
-  const filePath = resolveConfigPath(configPath);
+  const filePath = resolveMercuryConfigPath(configPath);
   const dir = path.dirname(filePath);
   fs.mkdirSync(dir, { recursive: true });
 
-  // Backup existing config before overwriting
   if (fs.existsSync(filePath)) {
     const backupPath = filePath + ".backup";
     fs.copyFileSync(filePath, backupPath);
@@ -116,5 +65,5 @@ export function writeConfig(
 }
 
 export function configExists(configPath?: string): boolean {
-  return fs.existsSync(resolveConfigPath(configPath));
+  return fs.existsSync(resolveMercuryConfigPath(configPath));
 }
