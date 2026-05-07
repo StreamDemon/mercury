@@ -52,7 +52,15 @@ import {
 import { ensureOpenCodeModelConfiguredAndAvailable } from "@mercuryai/adapter-opencode-local/server";
 import { findServerAdapter } from "../adapters/index.js";
 import { forbidden, notFound, unprocessable } from "../errors.js";
-import { ghFetch, gitHubApiBase, resolveRawGitHubUrl } from "./github-fetch.js";
+import {
+  gitHubApiBase,
+  resolveRawGitHubUrl,
+  fetchText,
+  fetchOptionalText,
+  fetchBinary,
+  fetchJson,
+  parseCompanyPackageGitHubUrl,
+} from "./github-fetch.js";
 import type { StorageService } from "../storage/types.js";
 import { accessService } from "./access.js";
 import { agentService } from "./agents.js";
@@ -2051,43 +2059,6 @@ function buildYamlFile(value: Record<string, unknown>, opts?: { preserveEmptyStr
   return renderYamlBlock(cleaned, 0).join("\n") + "\n";
 }
 
-async function fetchText(url: string) {
-  const response = await ghFetch(url);
-  if (!response.ok) {
-    throw unprocessable(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return response.text();
-}
-
-async function fetchOptionalText(url: string) {
-  const response = await ghFetch(url);
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw unprocessable(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return response.text();
-}
-
-async function fetchBinary(url: string) {
-  const response = await ghFetch(url);
-  if (!response.ok) {
-    throw unprocessable(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return Buffer.from(await response.arrayBuffer());
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await ghFetch(url, {
-    headers: {
-      accept: "application/vnd.github+json",
-    },
-  });
-  if (!response.ok) {
-    throw unprocessable(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-}
-
 function dedupeEnvInputs(values: CompanyPortabilityManifest["envInputs"]) {
   const seen = new Set<string>();
   const out: CompanyPortabilityManifest["envInputs"] = [];
@@ -2553,62 +2524,6 @@ function buildManifestFromPackageFiles(
 }
 
 
-function normalizeGitHubSourcePath(value: string | null | undefined) {
-  if (!value) return "";
-  return value.trim().replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
-}
-
-export function parseGitHubSourceUrl(rawUrl: string) {
-  const url = new URL(rawUrl);
-  if (url.protocol !== "https:") {
-    throw unprocessable("GitHub source URL must use HTTPS");
-  }
-  const hostname = url.hostname;
-  const parts = url.pathname.split("/").filter(Boolean);
-  if (parts.length < 2) {
-    throw unprocessable("Invalid GitHub URL");
-  }
-  const owner = parts[0]!;
-  const repo = parts[1]!.replace(/\.git$/i, "");
-  const queryRef = url.searchParams.get("ref")?.trim();
-  const queryPath = normalizeGitHubSourcePath(url.searchParams.get("path"));
-  const queryCompanyPath = normalizeGitHubSourcePath(url.searchParams.get("companyPath"));
-  if (queryRef || queryPath || queryCompanyPath) {
-    const companyPath = queryCompanyPath || [queryPath, "COMPANY.md"].filter(Boolean).join("/") || "COMPANY.md";
-    let basePath = queryPath;
-    if (!basePath && companyPath !== "COMPANY.md") {
-      basePath = path.posix.dirname(companyPath);
-      if (basePath === ".") basePath = "";
-    }
-    return {
-      hostname,
-      owner,
-      repo,
-      ref: queryRef || "main",
-      basePath,
-      companyPath,
-    };
-  }
-  let ref = "main";
-  let basePath = "";
-  let companyPath = "COMPANY.md";
-  if (parts[2] === "tree") {
-    ref = parts[3] ?? "main";
-    basePath = parts.slice(4).join("/");
-  } else if (parts[2] === "blob") {
-    ref = parts[3] ?? "main";
-    const blobPath = parts.slice(4).join("/");
-    if (!blobPath) {
-      throw unprocessable("Invalid GitHub blob URL");
-    }
-    companyPath = blobPath;
-    basePath = path.posix.dirname(blobPath);
-    if (basePath === ".") basePath = "";
-  }
-  return { hostname, owner, repo, ref, basePath, companyPath };
-}
-
-
 export function companyPortabilityService(db: Db, storage?: StorageService) {
   const companies = companyService(db);
   const agents = agentService(db);
@@ -2714,7 +2629,7 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
       );
     }
 
-    const parsed = parseGitHubSourceUrl(source.url);
+    const parsed = parseCompanyPackageGitHubUrl(source.url);
     let ref = parsed.ref;
     const warnings: string[] = [];
     const companyRelativePath = parsed.companyPath === "COMPANY.md"

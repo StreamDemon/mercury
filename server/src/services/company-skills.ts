@@ -30,7 +30,15 @@ import { normalizeAgentUrlKey } from "@mercuryai/shared";
 import { parseFrontmatterMarkdown } from "@mercuryai/shared/yaml-codec";
 import { resolveMercuryInstanceRoot } from "../home-paths.js";
 import { notFound, unprocessable } from "../errors.js";
-import { ghFetch, gitHubApiBase, resolveRawGitHubUrl } from "./github-fetch.js";
+import {
+  gitHubApiBase,
+  resolveRawGitHubUrl,
+  fetchText,
+  fetchJson,
+  parseSkillSourceGitHubUrl,
+  resolveGitHubCommitSha,
+  resolveGitHubPinnedRef,
+} from "./github-fetch.js";
 import { agentService } from "./agents.js";
 import { projectService } from "./projects.js";
 
@@ -407,90 +415,6 @@ function deriveTrustLevel(fileInventory: CompanySkillFileInventoryEntry[]): Comp
   if (fileInventory.some((entry) => entry.kind === "asset" || entry.kind === "other")) return "assets";
   return "markdown_only";
 }
-
-async function fetchText(url: string) {
-  const response = await ghFetch(url);
-  if (!response.ok) {
-    throw unprocessable(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return response.text();
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await ghFetch(url, {
-    headers: {
-      accept: "application/vnd.github+json",
-    },
-  });
-  if (!response.ok) {
-    throw unprocessable(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-}
-
-
-async function resolveGitHubDefaultBranch(owner: string, repo: string, apiBase: string) {
-  const response = await fetchJson<{ default_branch?: string }>(
-    `${apiBase}/repos/${owner}/${repo}`,
-  );
-  return asString(response.default_branch) ?? "main";
-}
-
-async function resolveGitHubCommitSha(owner: string, repo: string, ref: string, apiBase: string) {
-  const response = await fetchJson<{ sha?: string }>(
-    `${apiBase}/repos/${owner}/${repo}/commits/${encodeURIComponent(ref)}`,
-  );
-  const sha = asString(response.sha);
-  if (!sha) {
-    throw unprocessable(`Failed to resolve GitHub ref ${ref}`);
-  }
-  return sha;
-}
-
-function parseGitHubSourceUrl(rawUrl: string) {
-  const url = new URL(rawUrl);
-  if (url.protocol !== "https:") {
-    throw unprocessable("GitHub source URL must use HTTPS");
-  }
-  const parts = url.pathname.split("/").filter(Boolean);
-  if (parts.length < 2) {
-    throw unprocessable("Invalid GitHub URL");
-  }
-  const owner = parts[0]!;
-  const repo = parts[1]!.replace(/\.git$/i, "");
-  let ref = "main";
-  let basePath = "";
-  let filePath: string | null = null;
-  let explicitRef = false;
-  if (parts[2] === "tree") {
-    ref = parts[3] ?? "main";
-    basePath = parts.slice(4).join("/");
-    explicitRef = true;
-  } else if (parts[2] === "blob") {
-    ref = parts[3] ?? "main";
-    filePath = parts.slice(4).join("/");
-    basePath = filePath ? path.posix.dirname(filePath) : "";
-    explicitRef = true;
-  }
-  return { hostname: url.hostname, owner, repo, ref, basePath, filePath, explicitRef };
-}
-
-async function resolveGitHubPinnedRef(parsed: ReturnType<typeof parseGitHubSourceUrl>) {
-  const apiBase = gitHubApiBase(parsed.hostname);
-  if (/^[0-9a-f]{40}$/i.test(parsed.ref.trim())) {
-    return {
-      pinnedRef: parsed.ref,
-      trackingRef: parsed.explicitRef ? parsed.ref : null,
-    };
-  }
-
-  const trackingRef = parsed.explicitRef
-    ? parsed.ref
-    : await resolveGitHubDefaultBranch(parsed.owner, parsed.repo, apiBase);
-  const pinnedRef = await resolveGitHubCommitSha(parsed.owner, parsed.repo, trackingRef, apiBase);
-  return { pinnedRef, trackingRef };
-}
-
 
 function extractCommandTokens(raw: string) {
   const matches = raw.match(/"[^"]*"|'[^']*'|\S+/g) ?? [];
@@ -930,7 +854,7 @@ async function readUrlSkillImports(
     return segments.length >= 2 && !parsed.pathname.endsWith(".md");
   } catch { return false; } })();
   if (looksLikeRepoUrl) {
-    const parsed = parseGitHubSourceUrl(url);
+    const parsed = parseSkillSourceGitHubUrl(url);
     const apiBase = gitHubApiBase(parsed.hostname);
     const { pinnedRef, trackingRef } = await resolveGitHubPinnedRef(parsed);
     let ref = pinnedRef;
