@@ -5,10 +5,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   discoverProjectWorkspaceSkillDirectories,
   findMissingLocalSkillIds,
-  normalizeGitHubSkillDirectory,
-  parseSkillImportSourceInput,
   readLocalSkillImportFromDirectory,
 } from "../services/company-skills.js";
+import {
+  normalizeGitHubSkillDirectory,
+  parseSkillImportSourceInput,
+} from "../services/skill-source.js";
 
 const cleanupDirs = new Set<string>();
 

@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { execFile } from "node:child_process";
 import path from "node:path";
@@ -44,6 +43,13 @@ import {
   envConfigSchema,
   normalizeAgentUrlKey,
 } from "@mercuryai/shared";
+import {
+  asString,
+  hashSkillValue,
+  isPlainRecord,
+  normalizeSkillKey,
+  normalizeSkillSlug,
+} from "./skill-source.js";
 import { parseYamlFrontmatter, parseFrontmatterMarkdown } from "@mercuryai/shared/yaml-codec";
 import {
   readMercurySkillSyncPreference,
@@ -155,19 +161,6 @@ function classifyPortableFileKind(pathValue: string): CompanyPortabilityExportPr
   return "other";
 }
 
-function normalizeSkillSlug(value: string | null | undefined) {
-  return value ? normalizeAgentUrlKey(value, { preserveCase: true }) ?? null : null;
-}
-
-function normalizeSkillKey(value: string | null | undefined) {
-  if (!value) return null;
-  const segments = value
-    .split("/")
-    .map((segment) => normalizeSkillSlug(segment))
-    .filter((segment): segment is string => Boolean(segment));
-  return segments.length > 0 ? segments.join("/") : null;
-}
-
 function readSkillKey(frontmatter: Record<string, unknown>) {
   const metadata = isPlainRecord(frontmatter.metadata) ? frontmatter.metadata : null;
   const mercury = isPlainRecord(metadata?.mercury) ? metadata?.mercury as Record<string, unknown> : null;
@@ -210,10 +203,6 @@ function deriveManifestSkillKey(
     }
   }
   return slug;
-}
-
-function hashSkillValue(value: string) {
-  return createHash("sha256").update(value).digest("hex").slice(0, 8);
 }
 
 function normalizeExportPathSegment(value: string | null | undefined, preserveCase = false) {
@@ -358,11 +347,11 @@ function buildSkillExportDirMap(skills: CompanySkill[], companyIssuePrefix: stri
 
     let packageDir = candidates.find((candidate) => !usedDirs.has(candidate)) ?? null;
     if (!packageDir) {
-      packageDir = appendSkillExportDirSuffix(candidates[0] ?? `skills/${slug}`, hashSkillValue(skill.key));
+      packageDir = appendSkillExportDirSuffix(candidates[0] ?? `skills/${slug}`, hashSkillValue(skill.key, 8));
       while (usedDirs.has(packageDir)) {
         packageDir = appendSkillExportDirSuffix(
           candidates[0] ?? `skills/${slug}`,
-          hashSkillValue(`${skill.key}:${packageDir}`),
+          hashSkillValue(`${skill.key}:${packageDir}`, 8),
         );
       }
     }
@@ -629,16 +618,6 @@ const ADAPTER_DEFAULT_RULES_BY_TYPE: Record<string, Array<{ path: string[]; valu
     { path: ["scopes"], value: ["operator.admin"] },
   ],
 };
-
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function asString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
 
 function asBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
