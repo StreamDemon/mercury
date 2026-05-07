@@ -156,7 +156,7 @@ function classifyPortableFileKind(pathValue: string): CompanyPortabilityExportPr
 }
 
 function normalizeSkillSlug(value: string | null | undefined) {
-  return value ? normalizeAgentUrlKey(value) ?? null : null;
+  return value ? normalizeAgentUrlKey(value, { preserveCase: true }) ?? null : null;
 }
 
 function normalizeSkillKey(value: string | null | undefined) {
