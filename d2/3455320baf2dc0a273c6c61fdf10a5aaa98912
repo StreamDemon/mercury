@@ -1,0 +1,45 @@
+server/src/adapters/registry.ts
+  s_0536e085d74793::t_c45165e990969e 235
+packages/adapters/hermes-local/src/ui/parse-stdout.ts
+  s_0536e085d74793::t_97857e6bca590e 376-379,382
+packages/adapters/hermes-local/src/server/detect-model.ts
+  s_0536e085d74793::t_3153d587bd3706 46-51
+packages/adapters/hermes-local/UPSTREAM.md
+  s_0536e085d74793::t_02deaf2d7e9af1 14,18-27
+packages/adapters/hermes-local/src/index.ts
+  s_0536e085d74793::t_fb0e018a6129f7 32
+packages/adapters/hermes-local/src/server/profiles.ts
+  s_0536e085d74793::t_984faf9a1acc11 12
+packages/adapters/hermes-local/src/server/execute.ts
+  s_0536e085d74793::t_e99eefc477ced8 63
+  s_0536e085d74793::t_e22f434a1f5772 431-436,438-440,442,450
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "d23455320baf2dc0a273c6c61fdf10a5aaa98912",
+  "prompts": {
+    "0536e085d74793cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>",
+      "total_additions": 66,
+      "total_deletions": 0,
+      "accepted_lines": 2212,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_0536e085d74793": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
