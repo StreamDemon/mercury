@@ -1,0 +1,108 @@
+ui/src/pages/CompanySkills.tsx
+  s_159d048f45fc31::t_8374cf7036246e 922
+ui/src/adapters/codex-local/config-fields.tsx
+  s_159d048f45fc31::t_d57b7f6c93e5bd 48
+ui/src/components/WorkspaceRuntimeControls.tsx
+  s_159d048f45fc31::t_d74a8566a684a4 418
+ui/src/pages/RoutineDetail.tsx
+  s_159d048f45fc31::t_de6491358e5a91 452,486,508,555,578,600,622,770
+ui/src/pages/ProjectWorkspaceDetail.tsx
+  s_159d048f45fc31::t_0f1b1813273b02 40,391,551
+ui/src/pages/PluginManager.tsx
+  s_159d048f45fc31::t_aa0de3c969994d 49
+ui/src/components/agent-config-primitives.tsx
+  s_159d048f45fc31::t_8b4f31cc6d7230 38,49-50
+ui/src/adapters/dynamic-loader.ts
+  s_159d048f45fc31::t_c51a3b31b9b2cc 4
+ui/src/pages/DesignGuide.tsx
+  s_159d048f45fc31::t_6f7f2e6751312e 198,755
+ui/src/pages/ExecutionWorkspaceDetail.tsx
+  s_159d048f45fc31::t_a71acc86c523a0 528,675
+ui/src/pages/CompanyExport.tsx
+  s_159d048f45fc31::t_40e33de1fc3ebf 80,479,482,787
+ui/src/components/CompanyRail.tsx
+  s_159d048f45fc31::t_fc9577a28bb0ee 203
+ui/src/components/IssueChatThread.tsx
+  s_159d048f45fc31::t_38e321efa4add8 1720
+ui/src/pages/Dashboard.tsx
+  s_159d048f45fc31::t_59651f74f9b460 179
+ui/src/components/ProjectProperties.tsx
+  s_159d048f45fc31::t_e005af5ad41caf 745,777
+ui/src/api/plugins.ts
+  s_159d048f45fc31::t_885f21c043b7b4 2
+ui/src/components/CloudAccessGate.tsx
+  s_159d048f45fc31::t_86e585d5a1187c 15-16,33
+ui/src/components/ExecutionWorkspaceCloseDialog.tsx
+  s_159d048f45fc31::t_c007a527e5ca44 96
+ui/src/pages/CliAuth.tsx
+  s_159d048f45fc31::t_ee13f86a4305d2 79,123,125
+ui/src/adapters/openclaw-gateway/config-fields.tsx
+  s_159d048f45fc31::t_07bab7369c0c6b 137,239
+ui/src/pages/CompanyInvites.tsx
+  s_159d048f45fc31::t_1c4732be6c97e2 251
+ui/src/pages/InviteLanding.tsx
+  s_159d048f45fc31::t_b84933d23e499f 83,91,287,554,557,563,576,661-662,782,802
+ui/src/pages/CompanyImport.tsx
+  s_159d048f45fc31::t_bf583854a277bd 707,1099
+ui/src/pages/ProfileSettings.tsx
+  s_159d048f45fc31::t_a98f6da14f085e 137-138
+ui/src/components/SidebarAccountMenu.test.tsx
+  s_159d048f45fc31::t_0f76e8e9077cad 110
+ui/src/components/OutputFeedbackButtons.tsx
+  s_159d048f45fc31::t_ebd08456bf0da1 196
+ui/src/components/AccountingModelCard.tsx
+  s_159d048f45fc31::t_89e171963f07e0 37
+ui/src/components/RoutineVariablesEditor.tsx
+  s_159d048f45fc31::t_84624adb2e71bd 278,292
+ui/src/pages/AgentDetail.tsx
+  s_159d048f45fc31::t_1951b0ce9b5fc0 2044,2099,2653,2655,2813,2830,4143
+ui/src/pages/NewAgent.tsx
+  s_159d048f45fc31::t_b766ddd233b4ac 278
+ui/src/fixtures/issueChatUxFixtures.ts
+  s_159d048f45fc31::t_ec3466734bd92d 84
+ui/src/pages/CompanyInvites.test.tsx
+  s_159d048f45fc31::t_74b4064ae2957c 199
+ui/src/pages/InstanceGeneralSettings.tsx
+  s_159d048f45fc31::t_329edcd11cd7b5 282,357
+ui/src/pages/RunTranscriptUxLab.tsx
+  s_159d048f45fc31::t_8adf39b6c6dd13 213
+ui/src/pages/InviteLanding.test.tsx
+  s_159d048f45fc31::t_098d43baae8269 275
+  s_159d048f45fc31::t_07abd759204cd1 149
+ui/src/pages/Routines.tsx
+  s_159d048f45fc31::t_4d954cf7b68ace 439,474,888
+ui/src/context/BreadcrumbContext.tsx
+  s_159d048f45fc31::t_5c28ba5ae08792 42,45
+ui/src/pages/InviteUxLab.tsx
+  s_159d048f45fc31::t_26f601a56b9ed9 203,258-259,315,460,463,588,814,826
+ui/src/components/SidebarAccountMenu.tsx
+  s_159d048f45fc31::t_407c46ce80fb24 183,212
+ui/src/components/IssueRunLedger.tsx
+  s_159d048f45fc31::t_d8726ecd7ba1d1 101,338
+ui/src/pages/Auth.tsx
+  s_159d048f45fc31::t_174ae01a22b6d4 82,86
+ui/src/components/JsonSchemaForm.tsx
+  s_159d048f45fc31::t_b4cdb87c5bdefe 497
+ui/src/pages/CompanySettings.tsx
+  s_159d048f45fc31::t_2a423100847792 838,971,1317,1319,1321,1324,1330,1333,1339,1345,1355,1362
+ui/src/fixtures/runTranscriptFixtures.ts
+  s_159d048f45fc31::t_8c968d1f767eeb 47,73,80
+ui/src/fixtures/issueChatLongThreadFixture.ts
+  s_159d048f45fc31::t_46c39475c2953d 65,194
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "0eb81b58a18cc2c116c733cd98957af6a9963068",
+  "prompts": {},
+  "sessions": {
+    "s_159d048f45fc31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4579be6a-7bfd-404c-a19e-67d1885530cf",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
