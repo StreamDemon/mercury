@@ -9,7 +9,7 @@
  *   - listProfiles(): enumerate available profiles
  *   - resolveProfilePath(): get the HERMES_HOME for a profile name
  *   - ensureProfile(): auto-create a profile if it doesn't exist (--clone)
- *   - getProfileConfig(): read a profile's model/provider from its config.yaml
+ *   - getProfileConfigContent(): read a profile's config.yaml content (with fallback to default)
  */
 
 import { readdir, stat, readFile } from "node:fs/promises";

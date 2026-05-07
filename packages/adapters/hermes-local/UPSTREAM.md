@@ -11,9 +11,20 @@ The original code was authored by Nous Research as `hermes-paperclip-adapter` (s
    - The `@mercuryai/adapter-hermes` package name (in `package.json`).
    - The `paperclip → mercury` rename pass — see "Rename pass" below.
    - The dep swap: upstream `@paperclipai/adapter-utils` → workspace `@mercuryai/adapter-utils`.
-   - The Mercury-specific patches in `src/server/execute.ts` (search for `processGroupId` — Mercury's `RunningProcess` and `onSpawn` callbacks require that field, the upstream interface doesn't pass it).
+   - The Mercury-specific patches listed under "Mercury patches" below — re-apply each one by hand after merging upstream changes.
 4. Bump the `version` in `package.json` to match upstream.
 5. Update this file with the new sync date.
+
+## Mercury patches
+
+Surgical fixes layered on top of upstream `src/`. Each one fixes a real issue
+in upstream that a Mercury reviewer flagged; re-applying them on every re-sync
+is required, otherwise the bug returns silently.
+
+1. **`src/server/execute.ts` — `processGroupId` plumbing.** Mercury's `RunningProcess` and `onSpawn` interfaces require a `processGroupId: number | null` field that upstream's interface does not pass. Search for `processGroupId` in the file; both the `runningProcesses.set(...)` call and the `onSpawn(...)` invocation need it (setting to `null` is fine — Mercury only uses it on POSIX where the field is meaningful).
+2. **`src/server/execute.ts` — `execFileSync` for the SQLite usage query (around line 443).** Upstream uses `execSync` with a backticked `python3 -c "..."` template that interpolates `dbPath` and `sessionId` as python string literals. That is a shell-injection + python-literal-injection vector. Mercury rewrites the call to `execFileSync("python3", ["-c", script, dbPath, sessionId], …)` and reads the values via `sys.argv[1]` / `sys.argv[2]` in the script. No shell layer, no string-literal escaping — neither vector survives.
+3. **`src/server/detect-model.ts` — profile-name path-traversal guard (around line 48).** Upstream calls `join(homedir(), ".hermes", "profiles", profileName, "config.yaml")` without validating `profileName`, so a caller could read arbitrary `config.yaml` files via `../`. Mercury adds the same `^[a-z0-9_-]+$` regex check that `profiles.ts:resolveProfilePath` uses, gating the profile-config branch on it.
+4. **`src/ui/parse-stdout.ts` — `┊` continuation kind (around line 381).** Upstream's continuation-mode handler returns `kind: "assistant"` for `┊`-prefixed lines while the inline comment claims they are tool activity. Mercury changes the kind to `"stdout"` (matching the "raw `┊` line that doesn't match tool format" fallback elsewhere in the file) so tool activity is not mislabeled as prose in the UI.
 
 ## Rename pass
 

@@ -60,7 +60,7 @@ import {
 import * as fs from "node:fs/promises";
 import * as fsSync from "node:fs";
 import * as nodePath from "node:path";
-import { execSync, spawn, type ChildProcess } from "node:child_process";
+import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { homedir } from "node:os";
 
 // ---------------------------------------------------------------------------
@@ -428,11 +428,18 @@ function readSessionUsageFromDb(
 
     // Use python3 to query SQLite (available wherever Hermes is installed).
     // This avoids adding better-sqlite3 as a Node.js dependency.
+    //
+    // dbPath and sessionId are passed as positional argv (sys.argv[1], [2])
+    // rather than interpolated into the script. execFileSync invokes python3
+    // directly without a shell, so neither argument can break out into shell
+    // syntax or python string literals — eliminates injection regardless of
+    // what characters appear in either value.
     const pythonScript = [
-      "import sqlite3, json",
-      "conn = sqlite3.connect('" + dbPath.replace(/'/g, "\\'") + "')",
+      "import sqlite3, json, sys",
+      "db_path, session_id = sys.argv[1], sys.argv[2]",
+      "conn = sqlite3.connect(db_path)",
       "conn.row_factory = sqlite3.Row",
-      "row = conn.execute('SELECT input_tokens, output_tokens, cache_read_tokens, estimated_cost_usd, actual_cost_usd FROM sessions WHERE id = ?', ('" + sessionId + "',)).fetchone()",
+      "row = conn.execute('SELECT input_tokens, output_tokens, cache_read_tokens, estimated_cost_usd, actual_cost_usd FROM sessions WHERE id = ?', (session_id,)).fetchone()",
       "conn.close()",
       "if row:",
       "    print(json.dumps({'input_tokens': row['input_tokens'] or 0, 'output_tokens': row['output_tokens'] or 0, 'cache_read_tokens': row['cache_read_tokens'] or 0, 'estimated_cost_usd': row['estimated_cost_usd'] or 0, 'actual_cost_usd': row['actual_cost_usd'] or 0}))",
@@ -440,7 +447,7 @@ function readSessionUsageFromDb(
       "    print('')",
     ].join("\n");
 
-    const result = execSync(`python3 -c "${pythonScript.replace(/"/g, '\\"')}"`, {
+    const result = execFileSync("python3", ["-c", pythonScript, dbPath, sessionId], {
       encoding: "utf-8",
       timeout: 5000,
       stdio: ["pipe", "pipe", "pipe"],

@@ -373,12 +373,13 @@ export function parseHermesStdoutLine(
       suppressContinuation = false;
       return [];
     }
-    // Lines starting with ┊ are new tool/message activity, not continuation
+    // Lines starting with ┊ are new tool/message activity, not continuation.
+    // We can't re-enter the ┊ handler above from here, so emit as raw stdout —
+    // matches the "raw ┊ line that doesn't match tool format" fallback above
+    // (kind: "stdout") rather than mislabeling tool activity as assistant prose.
     if (trimmed.startsWith(TOOL_OUTPUT_PREFIX)) {
       suppressContinuation = false;
-      // Don't return here — let the ┊ handler above process it on next call
-      // Actually we can't re-enter, so fall through after resetting
-      return [{ kind: "assistant", ts, text: trimmed }];
+      return [{ kind: "stdout", ts, text: trimmed }];
     }
     // Duration at end of a continuation line: '-d '{"status":"done"}'  1.0s'
     if (/\d+\.\d+s\s*$/.test(trimmed) && /^(["']?\s*[-\\])/.test(trimmed)) {

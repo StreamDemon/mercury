@@ -43,8 +43,12 @@ export async function detectModel(
     return content ? parseModelFromConfig(content) : null;
   }
 
-  // Profile-aware detection: try profile config first, then default
-  if (profileName && profileName !== "default") {
+  // Profile-aware detection: try profile config first, then default.
+  // Profile names are restricted to lowercase alphanumeric/underscore/hyphen
+  // (matching profiles.ts:resolveProfilePath validation) to prevent path
+  // traversal — a profileName of "../foo" would otherwise let a caller read
+  // arbitrary config.yaml files outside ~/.hermes/profiles/.
+  if (profileName && profileName !== "default" && /^[a-z0-9_-]+$/.test(profileName)) {
     const profileConfigPath = join(homedir(), ".hermes", "profiles", profileName, "config.yaml");
     const profileContent = await readFile(profileConfigPath, "utf-8").catch(() => null);
     if (profileContent) {

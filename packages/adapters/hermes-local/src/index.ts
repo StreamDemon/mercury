@@ -29,7 +29,7 @@ export const models: { id: string; label: string }[] = [];
 export const agentConfigurationDoc = `# Hermes Agent Configuration
 
 Adapter: hermes_local
-Registration: external plugin (loaded via adapter plugin system, not hardcoded)
+Registration: vendored workspace adapter (wired through Mercury's built-in registry)
 
 Hermes Agent is a full-featured AI agent by Nous Research with 30+ native
 tools, persistent memory, session persistence, skills, and MCP support.
