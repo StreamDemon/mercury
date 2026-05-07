@@ -1,0 +1,30 @@
+server/src/services/company-portability.ts
+  s_0536e085d74793::t_27574de06b7ecf 55-63
+  s_0536e085d74793::t_e8f2c103c7b888 2632
+server/src/services/github-fetch.ts
+  s_0536e085d74793::t_cab763b0cf4385 1,4-5,22-23,31-252
+server/src/services/company-skills.ts
+  s_0536e085d74793::t_27f7a5f6d66181 857
+  s_0536e085d74793::t_9c95f97f5895db 33-41
+server/src/services/github-fetch.test.ts
+  s_0536e085d74793::t_f0313367e7f030 1-183,185-195,198-274
+  s_0536e085d74793::t_2c6a00803a6233 184,196-197
+server/src/__tests__/company-portability.test.ts
+  s_0536e085d74793::t_331975f0696205 116-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "3bbb86d5ea189aba734f3f3f7c799fa857e8d3e8",
+  "prompts": {},
+  "sessions": {
+    "s_0536e085d74793": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
