@@ -1,0 +1,29 @@
+server/src/services/skill-source.test.ts
+  s_159d048f45fc31::t_e30a3f0f95c85b 1-428
+server/src/services/company-portability.ts
+  s_159d048f45fc31::t_78fd1697766117 46-52
+  s_159d048f45fc31::t_33766ff43164ac 350,354
+server/src/services/company-skills.ts
+  s_159d048f45fc31::t_f11a7d59905297 40-59,63-64
+server/src/__tests__/company-skills.test.ts
+  s_159d048f45fc31::t_8a84cf119bb208 10-13
+server/src/services/skill-source.ts
+  s_159d048f45fc31::t_33e8efcbcff9e6 35,41
+  s_159d048f45fc31::t_7ad014a161cc46 1-34,36-40,42-372
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "fe22ecda16e2a2b30c4203222e5ac336c289d9d5",
+  "prompts": {},
+  "sessions": {
+    "s_159d048f45fc31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4579be6a-7bfd-404c-a19e-67d1885530cf",
+        "model": "unknown"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
