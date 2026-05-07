@@ -146,6 +146,12 @@ describe("parseSkillSourceGitHubUrl", () => {
   it("rejects non-https URLs", () => {
     expect(() => parseSkillSourceGitHubUrl("http://github.com/foo/bar")).toThrow(/must use HTTPS/i);
   });
+
+  it("rejects /blob/<ref>/ with no file path (mirrors parseCompanyPackageGitHubUrl)", () => {
+    expect(() =>
+      parseSkillSourceGitHubUrl("https://github.com/StreamDemon/mercury/blob/main/"),
+    ).toThrow(/Invalid GitHub blob URL/);
+  });
 });
 
 // ─── fetchOptionalText ─────────────────────────────────────────────────────

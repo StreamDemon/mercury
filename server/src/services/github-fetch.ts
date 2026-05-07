@@ -188,8 +188,13 @@ export function parseSkillSourceGitHubUrl(rawUrl: string): SkillSourceGitHubSour
     explicitRef = true;
   } else if (parts[2] === "blob") {
     ref = parts[3] ?? "main";
-    filePath = parts.slice(4).join("/");
-    basePath = filePath ? path.posix.dirname(filePath) : "";
+    const blobPath = parts.slice(4).join("/");
+    if (!blobPath) {
+      throw unprocessable("Invalid GitHub blob URL");
+    }
+    filePath = blobPath;
+    basePath = path.posix.dirname(blobPath);
+    if (basePath === ".") basePath = "";
     explicitRef = true;
   }
   return { hostname, owner, repo, ref, basePath, filePath, explicitRef };
