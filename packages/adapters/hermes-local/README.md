@@ -2,7 +2,7 @@
 
 Mercury workspace adapter that lets you run [Hermes Agent](https://github.com/NousResearch/hermes-agent) as a managed employee in a Mercury company.
 
-> **Vendored from upstream.** This package is a vendored copy of [`hermes-paperclip-adapter`](https://github.com/NousResearch/hermes-paperclip-adapter)@0.2.0 by [Nous Research](https://nousresearch.com). For the upstream re-sync procedure, see [`UPSTREAM.md`](./UPSTREAM.md). For original credit and the upstream license, see [`LICENSE`](./LICENSE).
+> **Vendored from upstream.** This package is src-vendored from [`HenkDz/hermes-paperclip-adapter`](https://github.com/HenkDz/hermes-paperclip-adapter)@0.4.3 (the active fork; original code by [Nous Research](https://nousresearch.com)). Mercury applies a paperclip→mercury rename pass on import. For the re-sync procedure, see [`UPSTREAM.md`](./UPSTREAM.md). For original credit and the upstream license, see [`LICENSE`](./LICENSE).
 
 Hermes Agent is a full-featured AI agent with 30+ native tools, persistent memory, session persistence, 80+ skills, MCP support, and multi-provider model access.
 

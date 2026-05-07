@@ -1,6 +1,6 @@
 {
   "name": "@mercuryai/adapter-hermes",
-  "version": "0.2.0",
+  "version": "0.4.3",
   "description": "Mercury adapter for Hermes Agent — run Hermes as a managed employee in a Mercury company",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,8 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/StreamDemon/mercury"
+    "url": "https://github.com/StreamDemon/mercury",
+    "directory": "packages/adapters/hermes-local"
   },
   "keywords": [
     "mercury",
@@ -18,16 +19,57 @@
     "adapter",
     "orchestration"
   ],
+  "mercury": {
+    "adapterUiParser": "1.0.0"
+  },
   "exports": {
-    ".": "./dist/index.js",
-    "./server": "./dist/server/index.js",
-    "./ui": "./dist/ui/index.js",
-    "./cli": "./dist/cli/index.js"
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts",
+    "./ui": "./src/ui/index.ts",
+    "./ui-parser": "./src/ui-parser.ts",
+    "./cli": "./src/cli/index.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./server": {
+        "types": "./dist/server/index.d.ts",
+        "import": "./dist/server/index.js"
+      },
+      "./ui": {
+        "types": "./dist/ui/index.d.ts",
+        "import": "./dist/ui/index.js"
+      },
+      "./ui-parser": {
+        "types": "./dist/ui-parser.d.ts",
+        "import": "./dist/ui-parser.js"
+      },
+      "./cli": {
+        "types": "./dist/cli/index.d.ts",
+        "import": "./dist/cli/index.js"
+      }
+    }
   },
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
   "dependencies": {
-    "@mercuryai/adapter-utils": "workspace:*"
+    "@mercuryai/adapter-utils": "workspace:*",
+    "picocolors": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

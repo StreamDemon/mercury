@@ -232,7 +232,7 @@ const piLocalAdapter: ServerAdapterModule = {
   agentConfigurationDoc: piAgentConfigurationDoc,
 };
 
-// @mercuryai/adapter-hermes (vendored from hermes-paperclip-adapter@0.2.0) predates the authToken field; cast is
+// @mercuryai/adapter-hermes (vendored from HenkDz/hermes-paperclip-adapter@0.4.3) predates the authToken field; cast is
 // intentional until hermes ships a matching AdapterExecutionContext type.
 const executeHermesLocal = hermesExecute as unknown as ServerAdapterModule["execute"];
 

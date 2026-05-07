@@ -105,6 +105,6 @@ These are the invariants — not generic advice.
 
 ## Mercury-specific notes
 
-- Hermes adapter is **vendored** at `packages/adapters/hermes-local/` as `@mercuryai/adapter-hermes` (workspace package, sourced from `https://github.com/NousResearch/hermes-paperclip-adapter@0.2.0`). Re-sync procedure in `packages/adapters/hermes-local/UPSTREAM.md`. Adapter type stays `hermes_local` for backward compat.
+- Hermes adapter is **vendored** at `packages/adapters/hermes-local/` as `@mercuryai/adapter-hermes` (workspace package, src-vendored from `https://github.com/HenkDz/hermes-paperclip-adapter@0.4.3` on 2026-05-06; the original code is by Nous Research). Mercury applies a paperclip→mercury rename pass and swaps `@paperclipai/adapter-utils` (upstream npm dep) for our workspace `@mercuryai/adapter-utils`. Re-sync procedure in `packages/adapters/hermes-local/UPSTREAM.md`. Adapter type stays `hermes_local` for backward compat.
 - UI conventions in `RunTranscriptView.tsx` (stderr_group accordion, tool_group accordion) and `LatestRunCard` (markdown-stripped 3-line/280-char dashboard excerpt) are part of Mercury's source, not patches.
 - Plugin loader (`server/src/adapters/plugin-loader.ts`) must stay free of hardcoded adapter imports. `createServerAdapter()` must include all optional fields, especially `detectModel`. Built-in UI adapters can shadow external plugin parsers — remove the built-in when fully externalizing.

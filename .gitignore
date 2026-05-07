@@ -3,10 +3,6 @@ node_modules/
 **/node_modules
 **/node_modules/
 dist/
-# hermes-local is vendored dist-only from upstream (see UPSTREAM.md); the
-# global dist/ rule above would hide it from fresh clones.
-!packages/adapters/hermes-local/dist/
-!packages/adapters/hermes-local/dist/**
 ui/storybook-static/
 .env
 *.tsbuildinfo
