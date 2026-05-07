@@ -113,7 +113,8 @@ vi.mock("../routes/org-chart-svg.js", () => ({
   renderOrgChartPng: vi.fn(async () => Buffer.from("png")),
 }));
 
-const { companyPortabilityService, parseGitHubSourceUrl } = await import("../services/company-portability.js");
+const { companyPortabilityService } = await import("../services/company-portability.js");
+const { parseCompanyPackageGitHubUrl: parseGitHubSourceUrl } = await import("../services/github-fetch.js");
 
 function asTextFile(entry: CompanyPortabilityFileEntry | undefined) {
   expect(typeof entry).toBe("string");
