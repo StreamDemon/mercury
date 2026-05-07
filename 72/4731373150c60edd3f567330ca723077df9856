@@ -1,0 +1,25 @@
+server/src/services/company-portability.ts
+  s_0536e085d74793::t_d5c20228d402ef 47,1509,2219
+packages/shared/src/yaml-codec.ts
+  s_0536e085d74793::t_cc78abfd916dcb 1-180
+server/src/services/company-skills.ts
+  s_0536e085d74793::t_d5c20228d402ef 30
+packages/shared/src/yaml-codec.test.ts
+  s_0536e085d74793::t_f9ef596fa96c9a 1-258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "724731373150c60edd3f567330ca723077df9856",
+  "prompts": {},
+  "sessions": {
+    "s_0536e085d74793": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
