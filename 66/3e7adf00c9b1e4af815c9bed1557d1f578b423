@@ -1,0 +1,21 @@
+server/src/services/github-fetch.ts
+  s_0536e085d74793::t_3cce5ba1749695 191-197
+server/src/services/github-fetch.test.ts
+  s_0536e085d74793::t_0e7f329df668b1 149-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "663e7adf00c9b1e4af815c9bed1557d1f578b423",
+  "prompts": {},
+  "sessions": {
+    "s_0536e085d74793": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72a9c1b2-781e-464b-b8e1-7573be94e6a3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
