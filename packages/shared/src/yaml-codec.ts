@@ -1,0 +1,180 @@
+/**
+ * Hand-rolled YAML / markdown-frontmatter parser shared across Mercury services.
+ *
+ * Pure string operations — no Node imports, browser-safe. Kept hand-rolled
+ * (rather than pulling in `js-yaml`) per Mercury's supply-chain minimalism
+ * preference; `dotenv` was dropped from cli/server in PR #3 of wince #1 for
+ * the same reason.
+ *
+ * Limitations: this is NOT a full YAML 1.2 parser. It handles the subset
+ * Mercury actually emits and consumes:
+ *   - Scalars: null/~, booleans, ints/floats, [], {}, quoted strings,
+ *     inline JSON arrays/objects (with malformed-JSON falling back to string)
+ *   - Nested records and arrays (indentation-based)
+ *   - Arrays of records with an inline first key
+ *   - `#` line comments
+ *   - `---`-delimited markdown frontmatter
+ *
+ * Multi-document streams, anchors/aliases, block scalars (`|`/`>`), tags,
+ * and explicit type coercion are NOT supported.
+ */
+
+export type MarkdownDoc = {
+  frontmatter: Record<string, unknown>;
+  body: string;
+};
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function prepareYamlLines(raw: string) {
+  return raw
+    .split("\n")
+    .map((line) => ({
+      indent: line.match(/^ */)?.[0].length ?? 0,
+      content: line.trim(),
+    }))
+    .filter((line) => line.content.length > 0 && !line.content.startsWith("#"));
+}
+
+function parseYamlScalar(rawValue: string): unknown {
+  const trimmed = rawValue.trim();
+  if (trimmed === "") return "";
+  if (trimmed === "null" || trimmed === "~") return null;
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  if (trimmed === "[]") return [];
+  if (trimmed === "{}") return {};
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) return Number(trimmed);
+  if (
+    trimmed.startsWith("\"") ||
+    trimmed.startsWith("[") ||
+    trimmed.startsWith("{")
+  ) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+}
+
+function parseYamlBlock(
+  lines: Array<{ indent: number; content: string }>,
+  startIndex: number,
+  indentLevel: number,
+): { value: unknown; nextIndex: number } {
+  let index = startIndex;
+  while (index < lines.length && lines[index]!.content.length === 0) {
+    index += 1;
+  }
+  if (index >= lines.length || lines[index]!.indent < indentLevel) {
+    return { value: {}, nextIndex: index };
+  }
+
+  const isArray = lines[index]!.indent === indentLevel && lines[index]!.content.startsWith("-");
+  if (isArray) {
+    const values: unknown[] = [];
+    while (index < lines.length) {
+      const line = lines[index]!;
+      if (line.indent < indentLevel) break;
+      if (line.indent !== indentLevel || !line.content.startsWith("-")) break;
+      const remainder = line.content.slice(1).trim();
+      index += 1;
+      if (!remainder) {
+        const nested = parseYamlBlock(lines, index, indentLevel + 2);
+        values.push(nested.value);
+        index = nested.nextIndex;
+        continue;
+      }
+      const inlineObjectSeparator = remainder.indexOf(":");
+      if (
+        inlineObjectSeparator > 0 &&
+        !remainder.startsWith("\"") &&
+        !remainder.startsWith("{") &&
+        !remainder.startsWith("[")
+      ) {
+        const key = remainder.slice(0, inlineObjectSeparator).trim();
+        const rawValue = remainder.slice(inlineObjectSeparator + 1).trim();
+        const nextObject: Record<string, unknown> = {
+          [key]: parseYamlScalar(rawValue),
+        };
+        if (index < lines.length && lines[index]!.indent > indentLevel) {
+          const nested = parseYamlBlock(lines, index, indentLevel + 2);
+          if (isPlainRecord(nested.value)) {
+            Object.assign(nextObject, nested.value);
+          }
+          index = nested.nextIndex;
+        }
+        values.push(nextObject);
+        continue;
+      }
+      values.push(parseYamlScalar(remainder));
+    }
+    return { value: values, nextIndex: index };
+  }
+
+  const record: Record<string, unknown> = {};
+  while (index < lines.length) {
+    const line = lines[index]!;
+    if (line.indent < indentLevel) break;
+    if (line.indent !== indentLevel) {
+      index += 1;
+      continue;
+    }
+    const separatorIndex = line.content.indexOf(":");
+    if (separatorIndex <= 0) {
+      index += 1;
+      continue;
+    }
+    const key = line.content.slice(0, separatorIndex).trim();
+    const remainder = line.content.slice(separatorIndex + 1).trim();
+    index += 1;
+    if (!remainder) {
+      const nested = parseYamlBlock(lines, index, indentLevel + 2);
+      record[key] = nested.value;
+      index = nested.nextIndex;
+      continue;
+    }
+    record[key] = parseYamlScalar(remainder);
+  }
+
+  return { value: record, nextIndex: index };
+}
+
+/**
+ * Parse a YAML document into a record. Top-level non-record values resolve
+ * to an empty record (Mercury manifests are always record-shaped at top level).
+ */
+export function parseYamlFrontmatter(raw: string): Record<string, unknown> {
+  const prepared = prepareYamlLines(raw);
+  if (prepared.length === 0) return {};
+  const parsed = parseYamlBlock(prepared, 0, prepared[0]!.indent);
+  return isPlainRecord(parsed.value) ? parsed.value : {};
+}
+
+/**
+ * Split a markdown document into its `---`-delimited frontmatter (parsed) and
+ * remaining body. Returns an empty frontmatter when no frontmatter is present
+ * or when the closing `---` is missing.
+ *
+ * CRLF line endings are normalized to LF before parsing.
+ */
+export function parseFrontmatterMarkdown(raw: string): MarkdownDoc {
+  const normalized = raw.replace(/\r\n/g, "\n");
+  if (!normalized.startsWith("---\n")) {
+    return { frontmatter: {}, body: normalized.trim() };
+  }
+  const closing = normalized.indexOf("\n---\n", 4);
+  if (closing < 0) {
+    return { frontmatter: {}, body: normalized.trim() };
+  }
+  const frontmatterRaw = normalized.slice(4, closing).trim();
+  const body = normalized.slice(closing + 5).trim();
+  return {
+    frontmatter: parseYamlFrontmatter(frontmatterRaw),
+    body,
+  };
+}
