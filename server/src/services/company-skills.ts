@@ -258,7 +258,7 @@ function normalizePackageFileMap(files: Record<string, string>) {
 }
 
 function normalizeSkillSlug(value: string | null | undefined) {
-  return value ? normalizeAgentUrlKey(value) ?? null : null;
+  return value ? normalizeAgentUrlKey(value, { preserveCase: true }) ?? null : null;
 }
 
 function normalizeSkillKey(value: string | null | undefined) {
@@ -518,7 +518,7 @@ function matchesRequestedSkill(relativeSkillPath: string, requestedSkillSlug: st
 function deriveImportedSkillSlug(frontmatter: Record<string, unknown>, fallback: string) {
   return normalizeSkillSlug(asString(frontmatter.slug))
     ?? normalizeSkillSlug(asString(frontmatter.name))
-    ?? normalizeAgentUrlKey(fallback)
+    ?? normalizeAgentUrlKey(fallback, { preserveCase: true })
     ?? "skill";
 }
 
