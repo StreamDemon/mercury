@@ -1,0 +1,21 @@
+server/src/services/skill-source.test.ts
+  s_159d048f45fc31::t_542edbac9e6834 424-434
+server/src/services/skill-source.ts
+  s_159d048f45fc31::t_bd33f7399c33e0 309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "f5827c66fa159bc8f70762fb5de550d0326ff146",
+  "prompts": {},
+  "sessions": {
+    "s_159d048f45fc31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4579be6a-7bfd-404c-a19e-67d1885530cf",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
