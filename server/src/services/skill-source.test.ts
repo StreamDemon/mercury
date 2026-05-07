@@ -421,6 +421,17 @@ describe("parseSkillImportSourceInput", () => {
     expect(parsed.requestedSkillSlug).toBe("my-skill");
   });
 
+  it("matches mixed-case `npx Skills Add` consistently with the case-insensitive pre-check", () => {
+    const parsed = parseSkillImportSourceInput("Npx Skills Add Owner/Repo");
+    expect(parsed.resolvedSource).toBe("https://github.com/Owner/Repo");
+  });
+
+  it("matches uppercase `NPX SKILLS ADD` and still extracts --skill", () => {
+    const parsed = parseSkillImportSourceInput("NPX SKILLS ADD Owner/Repo --skill my-skill");
+    expect(parsed.resolvedSource).toBe("https://github.com/Owner/Repo");
+    expect(parsed.requestedSkillSlug).toBe("my-skill");
+  });
+
   it("throws on empty input", () => {
     expect(() => parseSkillImportSourceInput("")).toThrow();
     expect(() => parseSkillImportSourceInput("   ")).toThrow();

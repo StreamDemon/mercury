@@ -306,7 +306,7 @@ export function parseSkillImportSourceInput(rawInput: string): ParsedSkillImport
     const tokens = extractCommandTokens(trimmed);
     const addIndex = tokens.findIndex(
       (token, index) =>
-        token === "add"
+        token.toLowerCase() === "add"
         && index > 0
         && tokens[index - 1]?.toLowerCase() === "skills",
     );
