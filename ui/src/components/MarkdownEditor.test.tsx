@@ -516,12 +516,12 @@ describe("MarkdownEditor", () => {
   });
 
   it("keeps mention queries active across spaces", () => {
-    expect(findMentionMatch("Ping @Paperclip App", "Ping @Paperclip App".length)).toEqual({
+    expect(findMentionMatch("Ping @Mercury App", "Ping @Mercury App".length)).toEqual({
       trigger: "mention",
       marker: "@",
-      query: "Paperclip App",
+      query: "Mercury App",
       atPos: 5,
-      endPos: "Ping @Paperclip App".length,
+      endPos: "Ping @Mercury App".length,
     });
   });
 
@@ -626,13 +626,13 @@ describe("MarkdownEditor", () => {
     await act(async () => {
       root.render(
         <MarkdownEditor
-          value="@Pap"
+          value="@Mer"
           onChange={handleChange}
           mentions={[
             {
               id: "project:project-123",
               kind: "project",
-              name: "Paperclip App",
+              name: "Mercury App",
               projectId: "project-123",
               projectColor: "#336699",
             },
@@ -651,7 +651,7 @@ describe("MarkdownEditor", () => {
 
     const selection = window.getSelection();
     const range = document.createRange();
-    range.setStart(textNode!, "@Pap".length);
+    range.setStart(textNode!, "@Mer".length);
     range.collapse(true);
     selection?.removeAllRanges();
     selection?.addRange(range);
@@ -663,7 +663,7 @@ describe("MarkdownEditor", () => {
     await flush();
 
     const option = Array.from(document.body.querySelectorAll('button[type="button"]'))
-      .find((node) => node.textContent?.includes("Paperclip App"));
+      .find((node) => node.textContent?.includes("Mercury App"));
     expect(option).toBeTruthy();
 
     act(() => {
@@ -671,7 +671,7 @@ describe("MarkdownEditor", () => {
     });
 
     expect(handleChange).toHaveBeenCalledWith(
-      `[@Paperclip App](${buildProjectMentionHref("project-123", "#336699")}) `,
+      `[@Mercury App](${buildProjectMentionHref("project-123", "#336699")}) `,
     );
 
     await act(async () => {
