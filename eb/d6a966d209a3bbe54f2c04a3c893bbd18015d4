@@ -1,0 +1,24 @@
+ui/src/components/AsciiArtAnimation.tsx
+  s_66ce7c1620b383::t_7d11cbe6a84b29 209-215
+  s_66ce7c1620b383::t_ca870444115d14 141
+  s_66ce7c1620b383::t_29c77fd7da7159 162
+  s_66ce7c1620b383::t_10fac6573dc8c2 7,9-16,19-26,30,34-38
+  s_66ce7c1620b383::t_e6886ba0880815 48,64
+  s_66ce7c1620b383::t_ccf73155d7344f 31-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ebd6a966d209a3bbe54f2c04a3c893bbd18015d4",
+  "prompts": {},
+  "sessions": {
+    "s_66ce7c1620b383": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2b0f280-2673-4c38-ae78-cc59a2b98a20",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
