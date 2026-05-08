@@ -1,0 +1,24 @@
+ui/src/components/EnvVarEditor.tsx
+  s_66ce7c1620b383::t_d92b5675f7b485 248
+ui/src/api/agents.ts
+  s_66ce7c1620b383::t_e5007ec5807205 205
+ui/storybook/stories/agent-management.stories.tsx
+  s_66ce7c1620b383::t_f56fb014696b9b 591
+  s_66ce7c1620b383::t_add5739e199fa9 110,444
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "dd41a81149245834d7a37329217120b3b8edd4a8",
+  "prompts": {},
+  "sessions": {
+    "s_66ce7c1620b383": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2b0f280-2673-4c38-ae78-cc59a2b98a20",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
