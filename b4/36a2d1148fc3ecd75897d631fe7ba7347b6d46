@@ -1,0 +1,61 @@
+ui/storybook/stories/forms-editors.stories.tsx
+  s_66ce7c1620b383::t_890e650f3b5fd6 306
+ui/storybook/stories/sub-issues-workflow.stories.tsx
+  s_66ce7c1620b383::t_61e3ff15b027a9 49,59-60,70-71,81-82,92-93,104-105,115-116,127-128,138-139,149-150,225,264
+server/src/services/recovery/service.ts
+  s_66ce7c1620b383::t_7d332ecbc2c9dc 168
+  s_66ce7c1620b383::t_2af81718a3bb3d 567
+ui/storybook/stories/chat-comments.stories.tsx
+  s_66ce7c1620b383::t_506f340540e774 209
+server/src/services/productivity-review.ts
+  s_66ce7c1620b383::t_10fa8030805053 178
+ui/storybook/.storybook/preview.tsx
+  s_66ce7c1620b383::t_5dc87f420b0835 185
+ui/storybook/stories/dialogs-modals.stories.tsx
+  s_66ce7c1620b383::t_26dfa109dab26e 148,155,172,186-187,205,617
+ui/storybook/stories/foundations.stories.tsx
+  s_66ce7c1620b383::t_b32f1a9620ec15 120
+packages/db/src/schema/companies.ts
+  s_66ce7c1620b383::t_43cf814c95b4db 12
+ui/storybook/stories/data-viz-misc.stories.tsx
+  s_66ce7c1620b383::t_3208d566c73946 173,182,196-197,205,349,354,472,500,535
+ui/src/components/IssueChatThread.tsx
+  s_66ce7c1620b383::t_7ef6c65d4dcef6 2304
+  s_66ce7c1620b383::t_a80c6c50420b48 3365
+ui/storybook/stories/issue-thread-interactions.stories.tsx
+  s_66ce7c1620b383::t_9ed88d1930b02d 677
+ui/storybook/stories/navigation-layout.stories.tsx
+  s_66ce7c1620b383::t_6e9858dfe483ae 289
+ui/src/components/IssueColumns.tsx
+  s_66ce7c1620b383::t_3540e042d84d19 38
+ui/src/hooks/useCompanyPageMemory.test.ts
+  s_66ce7c1620b383::t_09412ed4329328 59,61,68,77,86
+  s_66ce7c1620b383::t_365f32e6c96d17 9
+ui/storybook/stories/agent-management.stories.tsx
+  s_66ce7c1620b383::t_b2b3c964984b4a 234,238-239
+packages/shared/src/issue-references.test.ts
+  s_66ce7c1620b383::t_9a9f0995a6c9f0 31-32,34-35
+  s_66ce7c1620b383::t_9d7e8ad4b07991 44
+ui/storybook/stories/projects-goals-workspaces.stories.tsx
+  s_66ce7c1620b383::t_c5a3e1822e187e 417,428
+ui/storybook/stories/status-language.stories.tsx
+  s_66ce7c1620b383::t_828a247fb40255 83,86,108,111,133-134,137,147,173,186,195,234,241,248,260,270,279,290-291,300,307,318,370,390,404,418,432,663
+ui/storybook/fixtures/mercuryData.ts
+  s_66ce7c1620b383::t_ac5f41371b4be2 497,499,502,525,527,530,715,761,771,791,809,828,847,866,887,1211-1217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "b436a2d1148fc3ecd75897d631fe7ba7347b6d46",
+  "prompts": {},
+  "sessions": {
+    "s_66ce7c1620b383": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2b0f280-2673-4c38-ae78-cc59a2b98a20",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
