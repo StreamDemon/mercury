@@ -1,0 +1,71 @@
+ui/storybook/stories/control-plane-surfaces.stories.tsx
+  s_66ce7c1620b383::t_49fe1fb6dec677 53,256
+ui/src/pages/IssueDetail.test.tsx
+  s_66ce7c1620b383::t_ddda027b161e43 121,123
+ui/src/pages/ProfileSettings.test.tsx
+  s_66ce7c1620b383::t_ce53445089b274 42,90
+ui/src/components/Layout.test.tsx
+  s_66ce7c1620b383::t_05cf57c652d6c8 117,119
+ui/src/lib/issue-reference.test.ts
+  s_66ce7c1620b383::t_481b49f81454f2 17,54
+ui/storybook/stories/budget-finance.stories.tsx
+  s_66ce7c1620b383::t_000340be9ddeb9 108,129
+ui/src/lib/issueDetailBreadcrumb.test.ts
+  s_66ce7c1620b383::t_e47e32dbe5d8b1 79,181,204
+ui/src/pages/CompanyAccess.test.tsx
+  s_66ce7c1620b383::t_e4a11954928304 46
+ui/storybook/stories/agent-management.stories.tsx
+  s_66ce7c1620b383::t_264ab9013fdfb6 747
+ui/storybook/stories/dialogs-modals.stories.tsx
+  s_66ce7c1620b383::t_28c02e13075de4 41,677
+ui/src/components/MarkdownBody.test.tsx
+  s_66ce7c1620b383::t_5dea5b8a4471a7 96
+ui/src/context/CompanyContext.test.tsx
+  s_66ce7c1620b383::t_d61af8986a2d7c 32
+ui/storybook/.storybook/preview.tsx
+  s_66ce7c1620b383::t_3330955257c15b 220
+ui/src/components/IssueChatThread.test.tsx
+  s_66ce7c1620b383::t_574c89899d323a 1397
+ui/src/lib/company-members.test.ts
+  s_66ce7c1620b383::t_0aa9da15f12ced 75,81
+ui/src/lib/zip.test.ts
+  s_66ce7c1620b383::t_dade8da97804a9 216,260
+ui/storybook/stories/forms-editors.stories.tsx
+  s_66ce7c1620b383::t_8b4a4ed7a2a0de 136,276,622,697
+ui/src/pages/CompanyInvites.test.tsx
+  s_66ce7c1620b383::t_905ca89ff5c05d 30,70
+ui/src/pages/CompanySettings.test.tsx
+  s_66ce7c1620b383::t_7b75667e704474 84,87,125
+ui/storybook/stories/data-viz-misc.stories.tsx
+  s_66ce7c1620b383::t_5adffc64664279 192,558
+ui/storybook/stories/chat-comments.stories.tsx
+  s_66ce7c1620b383::t_038d6b92b0b825 382,653
+ui/storybook/stories/overview.stories.tsx
+  s_66ce7c1620b383::t_2bb1f91df1a634 119,125,193
+ui/src/components/Sidebar.test.tsx
+  s_66ce7c1620b383::t_9c00d4a224cc43 46
+cli/src/__tests__/worktree.test.ts
+  s_66ce7c1620b383::t_5ffe10beeb17e9 148
+ui/src/components/NewIssueDialog.test.tsx
+  s_66ce7c1620b383::t_a93625d63ee95f 20,29
+ui/src/components/CompanySettingsSidebar.test.tsx
+  s_66ce7c1620b383::t_e66fd6049cda90 33,105
+ui/storybook/stories/foundations.stories.tsx
+  s_66ce7c1620b383::t_0a558c33804bae 75,129,290
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "c7e627dddb1d10da35e6e0cc0d2142520c26c9bb",
+  "prompts": {},
+  "sessions": {
+    "s_66ce7c1620b383": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2b0f280-2673-4c38-ae78-cc59a2b98a20",
+        "model": "unknown"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
