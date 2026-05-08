@@ -93,7 +93,7 @@ describe("MarkdownBody", () => {
       <QueryClientProvider client={new QueryClient()}>
         <ThemeProvider>
           <MarkdownBody>
-            {`[@Taylor](${buildUserMentionHref("user-123")}) [@CodexCoder](${buildAgentMentionHref("agent-123", "code")}) [@Paperclip App](${buildProjectMentionHref("project-456", "#336699")}) [/release-changelog](${buildSkillMentionHref("skill-789", "release-changelog")})`}
+            {`[@Taylor](${buildUserMentionHref("user-123")}) [@CodexCoder](${buildAgentMentionHref("agent-123", "code")}) [@Mercury App](${buildProjectMentionHref("project-456", "#336699")}) [/release-changelog](${buildSkillMentionHref("skill-789", "release-changelog")})`}
           </MarkdownBody>
         </ThemeProvider>
       </QueryClientProvider>,
