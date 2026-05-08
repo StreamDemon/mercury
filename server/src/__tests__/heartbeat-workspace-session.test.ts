@@ -226,12 +226,12 @@ describe("buildRealizedExecutionWorkspaceFromPersisted", () => {
         sourceIssueId: "issue-1",
         mode: "isolated_workspace",
         strategyType: "git_worktree",
-        name: "PAP-880-thumbs-capture-for-evals-feature",
+        name: "MERC-880-thumbs-capture-for-evals-feature",
         status: "active",
         cwd: "/tmp/reused-worktree",
         repoUrl: "https://example.com/mercury.git",
         baseRef: "main",
-        branchName: "PAP-880-thumbs-capture-for-evals-feature",
+        branchName: "MERC-880-thumbs-capture-for-evals-feature",
         providerType: "git_worktree",
         providerRef: "/tmp/reused-worktree",
         derivedFromExecutionWorkspaceId: null,
@@ -251,7 +251,7 @@ describe("buildRealizedExecutionWorkspaceFromPersisted", () => {
     expect(result.strategy).toBe("git_worktree");
     expect(result.cwd).toBe("/tmp/reused-worktree");
     expect(result.worktreePath).toBe("/tmp/reused-worktree");
-    expect(result.branchName).toBe("PAP-880-thumbs-capture-for-evals-feature");
+    expect(result.branchName).toBe("MERC-880-thumbs-capture-for-evals-feature");
     expect(result.source).toBe("task_session");
   });
 });

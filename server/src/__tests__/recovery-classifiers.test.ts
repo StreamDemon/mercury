@@ -28,7 +28,7 @@ describe("recovery classifier boundary", () => {
         {
           id: issueId,
           companyId,
-          identifier: "PAP-2073",
+          identifier: "MERC-2073",
           title: "Centralize recovery classifiers",
           status: "blocked",
           assigneeAgentId: agentId,
@@ -40,7 +40,7 @@ describe("recovery classifier boundary", () => {
         {
           id: blockerId,
           companyId,
-          identifier: "PAP-2074",
+          identifier: "MERC-2074",
           title: "Move recovery side effects",
           status: "todo",
           assigneeAgentId: null,
@@ -85,7 +85,7 @@ describe("recovery classifier boundary", () => {
       issue: {
         id: issueId,
         companyId,
-        identifier: "PAP-2073",
+        identifier: "MERC-2073",
         title: "Centralize recovery classifiers",
         status: "in_progress",
         assigneeAgentId: agentId,

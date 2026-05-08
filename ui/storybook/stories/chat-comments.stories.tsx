@@ -206,7 +206,7 @@ const markdownComments = [
       "",
       "- Cover empty, single, and long comment states",
       "- Show a code block in a comment",
-      "- Include a link to [the issue guide](/issues/PAP-1676)",
+      "- Include a link to [the issue guide](/issues/MERC-1676)",
       "",
       "```ts",
       "const success = stories.some((story) => story.includes(\"IssueChatThread\"));",

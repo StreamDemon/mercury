@@ -206,7 +206,7 @@ function createRevision(overrides: Partial<DocumentRevision> = {}): DocumentRevi
 function createIssue(): Issue {
   return {
     id: "issue-1",
-    identifier: "PAP-807",
+    identifier: "MERC-807",
     companyId: "company-1",
     projectId: null,
     projectWorkspaceId: null,

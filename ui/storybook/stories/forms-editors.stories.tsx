@@ -303,7 +303,7 @@ const storybookProject: Project = {
 };
 
 const entityOptions: InlineEntityOption[] = [
-  { id: "issue-1672", label: "Storybook forms and editors", searchText: "PAP-1672 ui story coverage" },
+  { id: "issue-1672", label: "Storybook forms and editors", searchText: "MERC-1672 ui story coverage" },
   { id: "project-board-ui", label: "Board UI", searchText: "project frontend Storybook" },
   { id: "agent-codex", label: "CodexCoder", searchText: "engineer implementation" },
 ];

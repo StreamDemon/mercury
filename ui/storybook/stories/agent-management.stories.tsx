@@ -231,12 +231,12 @@ const runtimeState: AgentRuntimeState = {
   sessionId: "session-codex-storybook-management-20260420",
   sessionDisplayId: "codex-storybook-20260420",
   sessionParamsJson: {
-    issueIdentifier: "PAP-1670",
+    issueIdentifier: "MERC-1670",
     workspaceStrategy: "git_worktree",
   },
   stateJson: {
-    currentIssue: "PAP-1670",
-    workspace: "PAP-1641-create-super-detailed-storybooks-for-our-project",
+    currentIssue: "MERC-1670",
+    workspace: "MERC-1641-create-super-detailed-storybooks-for-our-project",
   },
   lastRunId: "run-agent-management-live",
   lastRunStatus: "running",

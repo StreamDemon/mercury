@@ -216,7 +216,7 @@ describe("issue attachment routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: "11111111-1111-4111-8111-111111111111",
       companyId: "company-1",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
     });
     mockIssueService.createAttachment.mockResolvedValue(makeAttachment("application/zip", "bundle.zip"));
 
@@ -249,7 +249,7 @@ describe("issue attachment routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: "11111111-1111-4111-8111-111111111111",
       companyId: "company-1",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
     });
     mockIssueService.createAttachment.mockResolvedValue(makeAttachment("application/octet-stream", "large.bin"));
 
@@ -275,7 +275,7 @@ describe("issue attachment routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: "11111111-1111-4111-8111-111111111111",
       companyId: "company-1",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
     });
 
     const app = await createApp(storage);

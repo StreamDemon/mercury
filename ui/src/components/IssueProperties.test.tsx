@@ -144,7 +144,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
     createdByAgentId: null,
     createdByUserId: "user-1",
     issueNumber: 1,
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     requestDepth: 0,
     billingCode: null,
     assigneeAdapterOverrides: null,
@@ -219,14 +219,14 @@ function createExecutionWorkspace(overrides: Partial<ExecutionWorkspace> = {}): 
     sourceIssueId: "issue-1",
     mode: "isolated_workspace",
     strategyType: "git_worktree",
-    name: "PAP-1 workspace",
+    name: "MERC-1 workspace",
     status: "active",
-    cwd: "/tmp/mercury/PAP-1",
+    cwd: "/tmp/mercury/MERC-1",
     repoUrl: null,
     baseRef: "master",
-    branchName: "pap-1-workspace",
+    branchName: "merc-1-workspace",
     providerType: "git_worktree",
-    providerRef: "/tmp/mercury/PAP-1",
+    providerRef: "/tmp/mercury/MERC-1",
     derivedFromExecutionWorkspaceId: null,
     lastUsedAt: new Date("2026-04-06T12:04:00.000Z"),
     openedAt: new Date("2026-04-06T12:01:00.000Z"),
@@ -405,7 +405,7 @@ describe("IssueProperties", () => {
           coveredBlockerCount: 1,
           stalledBlockerCount: 0,
           attentionBlockerCount: 0,
-          sampleBlockerIdentifier: "PAP-2",
+          sampleBlockerIdentifier: "MERC-2",
           sampleStalledBlockerIdentifier: null,
         },
       }),
@@ -422,7 +422,7 @@ describe("IssueProperties", () => {
   it("renders blocked-by issues as direct chips and edits them from an add action", async () => {
     const onUpdate = vi.fn();
     mockIssuesApi.list.mockResolvedValue([
-      createIssue({ id: "issue-3", identifier: "PAP-3", title: "New blocker", status: "todo" }),
+      createIssue({ id: "issue-3", identifier: "MERC-3", title: "New blocker", status: "todo" }),
     ]);
 
     const root = renderProperties(container, {
@@ -430,7 +430,7 @@ describe("IssueProperties", () => {
         blockedBy: [
           {
             id: "issue-2",
-            identifier: "PAP-2",
+            identifier: "MERC-2",
             title: "Existing blocker",
             status: "in_progress",
             priority: "medium",
@@ -445,9 +445,9 @@ describe("IssueProperties", () => {
     });
     await flush();
 
-    const blockerLink = container.querySelector('a[href="/issues/PAP-2"]');
+    const blockerLink = container.querySelector('a[href="/issues/MERC-2"]');
     expect(blockerLink).not.toBeNull();
-    expect(blockerLink?.textContent).toContain("PAP-2");
+    expect(blockerLink?.textContent).toContain("MERC-2");
     expect(blockerLink?.closest("button")).toBeNull();
     expect(container.textContent).toContain("Add blocker");
     expect(container.querySelector('input[placeholder="Search issues..."]')).toBeNull();
@@ -464,7 +464,7 @@ describe("IssueProperties", () => {
     expect(container.querySelector('input[placeholder="Search issues..."]')).not.toBeNull();
 
     const candidateButton = Array.from(container.querySelectorAll("button"))
-      .find((button) => button.textContent?.includes("PAP-3 New blocker"));
+      .find((button) => button.textContent?.includes("MERC-3 New blocker"));
     expect(candidateButton).not.toBeUndefined();
 
     await act(async () => {
@@ -573,7 +573,7 @@ describe("IssueProperties", () => {
             {
               issue: {
                 id: "issue-22",
-                identifier: "PAP-22",
+                identifier: "MERC-22",
                 title: "Related task",
                 status: "todo",
                 priority: "medium",
@@ -581,7 +581,7 @@ describe("IssueProperties", () => {
                 assigneeUserId: null,
               },
               mentionCount: 1,
-              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "PAP-22" }],
+              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "MERC-22" }],
             },
           ],
           inbound: [],
@@ -594,7 +594,7 @@ describe("IssueProperties", () => {
 
     expect(container.textContent).not.toContain("Task ids");
     expect(container.textContent).toContain("Related Tasks");
-    expect(container.textContent).toContain("PAP-22");
+    expect(container.textContent).toContain("MERC-22");
 
     act(() => root.unmount());
   });
@@ -605,7 +605,7 @@ describe("IssueProperties", () => {
         blockedBy: [
           {
             id: "issue-22",
-            identifier: "PAP-22",
+            identifier: "MERC-22",
             title: "Blocker",
             status: "todo",
             priority: "medium",
@@ -616,7 +616,7 @@ describe("IssueProperties", () => {
         blocks: [
           {
             id: "issue-33",
-            identifier: "PAP-33",
+            identifier: "MERC-33",
             title: "Blocked issue",
             status: "todo",
             priority: "medium",
@@ -629,7 +629,7 @@ describe("IssueProperties", () => {
             {
               issue: {
                 id: "issue-22",
-                identifier: "PAP-22",
+                identifier: "MERC-22",
                 title: "Blocker",
                 status: "todo",
                 priority: "medium",
@@ -637,12 +637,12 @@ describe("IssueProperties", () => {
                 assigneeUserId: null,
               },
               mentionCount: 1,
-              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "PAP-22" }],
+              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "MERC-22" }],
             },
             {
               issue: {
                 id: "issue-33",
-                identifier: "PAP-33",
+                identifier: "MERC-33",
                 title: "Blocked issue",
                 status: "todo",
                 priority: "medium",
@@ -650,12 +650,12 @@ describe("IssueProperties", () => {
                 assigneeUserId: null,
               },
               mentionCount: 1,
-              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "PAP-33" }],
+              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "MERC-33" }],
             },
             {
               issue: {
                 id: "child-44",
-                identifier: "PAP-44",
+                identifier: "MERC-44",
                 title: "Child issue",
                 status: "todo",
                 priority: "medium",
@@ -663,7 +663,7 @@ describe("IssueProperties", () => {
                 assigneeUserId: null,
               },
               mentionCount: 1,
-              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "PAP-44" }],
+              sources: [{ kind: "description", sourceRecordId: null, label: "description", matchedText: "MERC-44" }],
             },
           ],
           inbound: [],
@@ -672,7 +672,7 @@ describe("IssueProperties", () => {
       childIssues: [
         createIssue({
           id: "child-44",
-          identifier: "PAP-44",
+          identifier: "MERC-44",
           title: "Child issue",
         }),
       ],
@@ -770,7 +770,7 @@ describe("IssueProperties", () => {
   it("allows setting and clearing a parent issue from the properties pane", async () => {
     const onUpdate = vi.fn();
     mockIssuesApi.list.mockResolvedValue([
-      createIssue({ id: "issue-2", identifier: "PAP-2", title: "Candidate parent", status: "in_progress" }),
+      createIssue({ id: "issue-2", identifier: "MERC-2", title: "Candidate parent", status: "in_progress" }),
     ]);
 
     const root = renderProperties(container, {
@@ -791,7 +791,7 @@ describe("IssueProperties", () => {
     await flush();
 
     const candidateButton = Array.from(container.querySelectorAll("button"))
-      .find((button) => button.textContent?.includes("PAP-2 Candidate parent"));
+      .find((button) => button.textContent?.includes("MERC-2 Candidate parent"));
     expect(candidateButton).not.toBeUndefined();
 
     await act(async () => {
@@ -806,7 +806,7 @@ describe("IssueProperties", () => {
       ancestors: [
         {
           id: "issue-2",
-          identifier: "PAP-2",
+          identifier: "MERC-2",
           title: "Candidate parent",
           description: null,
           status: "in_progress",
@@ -832,9 +832,9 @@ describe("IssueProperties", () => {
     await flush();
 
     const selectedParentTrigger = Array.from(container.querySelectorAll("button"))
-      .find((button) => button.textContent?.includes("PAP-2 Candidate parent"));
+      .find((button) => button.textContent?.includes("MERC-2 Candidate parent"));
     expect(selectedParentTrigger).not.toBeUndefined();
-    const parentLink = container.querySelector('a[href="/issues/PAP-2"]');
+    const parentLink = container.querySelector('a[href="/issues/MERC-2"]');
     expect(parentLink).not.toBeNull();
     expect(selectedParentTrigger!.contains(parentLink)).toBe(false);
 

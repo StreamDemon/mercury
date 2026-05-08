@@ -25,7 +25,7 @@ function issue(overrides: Record<string, unknown> = {}) {
   return {
     id: issueId,
     companyId,
-    identifier: "PAP-1577",
+    identifier: "MERC-1577",
     title: "Add bounded liveness continuation wakes",
     status: "in_progress",
     assigneeAgentId: agentId,

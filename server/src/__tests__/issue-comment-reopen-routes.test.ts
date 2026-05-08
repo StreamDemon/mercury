@@ -187,7 +187,7 @@ function makeIssue(status: "todo" | "done" | "blocked" | "cancelled" | "in_progr
     assigneeAgentId: "22222222-2222-4222-8222-222222222222",
     assigneeUserId: null,
     createdByUserId: "local-board",
-    identifier: "PAP-580",
+    identifier: "MERC-580",
     title: "Comment reopen default",
   };
 }

@@ -271,7 +271,7 @@ describe("NewIssueDialog", () => {
     mockIssuesApi.create.mockResolvedValue({
       id: "issue-2",
       companyId: "company-1",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
     });
   });
 
@@ -282,7 +282,7 @@ describe("NewIssueDialog", () => {
   it("shows sub-issue context only when opened from a sub-issue action", async () => {
     dialogState.newIssueDefaults = {
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       projectId: "project-1",
       goalId: "goal-1",
@@ -293,7 +293,7 @@ describe("NewIssueDialog", () => {
 
     expect(container.textContent).toContain("New sub-issue");
     expect(container.textContent).toContain("Sub-issue of");
-    expect(container.textContent).toContain("PAP-1");
+    expect(container.textContent).toContain("MERC-1");
     expect(container.textContent).toContain("Parent issue");
     expect(container.textContent).toContain("Create Sub-Issue");
 
@@ -329,7 +329,7 @@ describe("NewIssueDialog", () => {
         id: "workspace-1",
         name: "Parent workspace",
         status: "active",
-        branchName: "feature/pap-1",
+        branchName: "feature/merc-1",
         cwd: "/tmp/workspace-1",
         lastUsedAt: new Date("2026-04-06T16:00:00.000Z"),
       },
@@ -337,7 +337,7 @@ describe("NewIssueDialog", () => {
     mockInstanceSettingsApi.getExperimental.mockResolvedValue({ enableIsolatedWorkspaces: true });
     dialogState.newIssueDefaults = {
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       title: "Child issue",
       projectId: "project-1",
@@ -425,7 +425,7 @@ describe("NewIssueDialog", () => {
   it("submits the parent assignee when a sub-issue opens with inherited defaults", async () => {
     dialogState.newIssueDefaults = {
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       title: "Child issue",
       projectId: "project-1",
@@ -501,7 +501,7 @@ describe("NewIssueDialog", () => {
         id: "workspace-1",
         name: "Parent workspace",
         status: "active",
-        branchName: "feature/pap-1",
+        branchName: "feature/merc-1",
         cwd: "/tmp/workspace-1",
         lastUsedAt: new Date("2026-04-06T16:00:00.000Z"),
       },
@@ -509,7 +509,7 @@ describe("NewIssueDialog", () => {
         id: "workspace-2",
         name: "Other workspace",
         status: "active",
-        branchName: "feature/pap-2",
+        branchName: "feature/merc-2",
         cwd: "/tmp/workspace-2",
         lastUsedAt: new Date("2026-04-06T16:01:00.000Z"),
       },
@@ -517,7 +517,7 @@ describe("NewIssueDialog", () => {
     mockInstanceSettingsApi.getExperimental.mockResolvedValue({ enableIsolatedWorkspaces: true });
     dialogState.newIssueDefaults = {
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       title: "Child issue",
       projectId: "project-1",

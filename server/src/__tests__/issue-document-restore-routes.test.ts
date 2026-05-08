@@ -184,7 +184,7 @@ describe("issue document revision routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: issueId,
       companyId,
-      identifier: "PAP-881",
+      identifier: "MERC-881",
       title: "Document revisions",
       status: "in_progress",
     });

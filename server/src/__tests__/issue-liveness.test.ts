@@ -11,7 +11,7 @@ function issue(overrides: Record<string, unknown> = {}) {
   return {
     id: blockedId,
     companyId,
-    identifier: "PAP-1703",
+    identifier: "MERC-1703",
     title: "Parent work",
     status: "blocked",
     assigneeAgentId: coderId,
@@ -46,13 +46,13 @@ const manager = agent({
 const blocks = [{ companyId, blockerIssueId: blockerId, blockedIssueId: blockedId }];
 
 describe("issue graph liveness classifier", () => {
-  it("detects a PAP-1703-style blocked chain with an unassigned blocker and stable incident key", () => {
+  it("detects a MERC-1703-style blocked chain with an unassigned blocker and stable incident key", () => {
     const findings = classifyIssueGraphLiveness({
       issues: [
         issue(),
         issue({
           id: blockerId,
-          identifier: "PAP-1704",
+          identifier: "MERC-1704",
           title: "Missing unblock work",
           status: "todo",
           assigneeAgentId: null,
@@ -65,7 +65,7 @@ describe("issue graph liveness classifier", () => {
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({
       issueId: blockedId,
-      identifier: "PAP-1703",
+      identifier: "MERC-1703",
       state: "blocked_by_unassigned_issue",
       recoveryIssueId: blockerId,
       recommendedOwnerAgentId: managerId,
@@ -89,7 +89,7 @@ describe("issue graph liveness classifier", () => {
         }),
         issue({
           id: blockerId,
-          identifier: "PAP-1704",
+          identifier: "MERC-1704",
           title: "Missing unblock work",
           status: "todo",
           assigneeAgentId: null,
@@ -134,7 +134,7 @@ describe("issue graph liveness classifier", () => {
         issue(),
         issue({
           id: blockerId,
-          identifier: "PAP-1704",
+          identifier: "MERC-1704",
           title: "Live unblock work",
           status: "todo",
           assigneeAgentId: "blocker-agent",
@@ -158,7 +158,7 @@ describe("issue graph liveness classifier", () => {
         issue(),
         issue({
           id: blockerId,
-          identifier: "PAP-1704",
+          identifier: "MERC-1704",
           title: "Unassigned but already running",
           status: "todo",
           assigneeAgentId: null,
@@ -178,7 +178,7 @@ describe("issue graph liveness classifier", () => {
         issue(),
         issue({
           id: blockerId,
-          identifier: "PAP-1704",
+          identifier: "MERC-1704",
           title: "Cancelled unblock work",
           status: "cancelled",
           assigneeAgentId: "blocker-agent",
@@ -194,7 +194,7 @@ describe("issue graph liveness classifier", () => {
         issue(),
         issue({
           id: blockerId,
-          identifier: "PAP-1704",
+          identifier: "MERC-1704",
           title: "Paused unblock work",
           status: "todo",
           assigneeAgentId: "blocker-agent",
@@ -235,28 +235,28 @@ describe("issue graph liveness classifier", () => {
     });
   });
 
-  it("detects the PAP-2239-style blocked chain at the first stalled in_review leaf without duplicate findings", () => {
+  it("detects the MERC-2239-style blocked chain at the first stalled in_review leaf without duplicate findings", () => {
     const phaseIssueId = "phase-issue-1";
     const reviewLeafId = "review-leaf-1";
 
     const findings = classifyIssueGraphLiveness({
       issues: [
         issue({
-          id: "pap-2239",
-          identifier: "PAP-2239",
+          id: "merc-2239",
+          identifier: "MERC-2239",
           title: "External object reference project",
           status: "blocked",
         }),
         issue({
           id: phaseIssueId,
-          identifier: "PAP-2276",
+          identifier: "MERC-2276",
           title: "UX acceptance review phase",
           status: "blocked",
           assigneeAgentId: coderId,
         }),
         issue({
           id: reviewLeafId,
-          identifier: "PAP-2279",
+          identifier: "MERC-2279",
           title: "Screenshot acceptance review",
           status: "in_review",
           assigneeAgentId: coderId,
@@ -264,7 +264,7 @@ describe("issue graph liveness classifier", () => {
         }),
       ],
       relations: [
-        { companyId, blockerIssueId: phaseIssueId, blockedIssueId: "pap-2239" },
+        { companyId, blockerIssueId: phaseIssueId, blockedIssueId: "merc-2239" },
         { companyId, blockerIssueId: reviewLeafId, blockedIssueId: phaseIssueId },
       ],
       agents: [agent(), manager],
@@ -272,17 +272,17 @@ describe("issue graph liveness classifier", () => {
 
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({
-      issueId: "pap-2239",
-      identifier: "PAP-2239",
+      issueId: "merc-2239",
+      identifier: "MERC-2239",
       state: "in_review_without_action_path",
       recoveryIssueId: reviewLeafId,
       recommendedOwnerAgentId: coderId,
       dependencyPath: [
-        expect.objectContaining({ issueId: "pap-2239" }),
+        expect.objectContaining({ issueId: "merc-2239" }),
         expect.objectContaining({ issueId: phaseIssueId }),
         expect.objectContaining({ issueId: reviewLeafId }),
       ],
-      incidentKey: `harness_liveness:${companyId}:pap-2239:in_review_without_action_path:${reviewLeafId}`,
+      incidentKey: `harness_liveness:${companyId}:merc-2239:in_review_without_action_path:${reviewLeafId}`,
     });
   });
 
@@ -293,7 +293,7 @@ describe("issue graph liveness classifier", () => {
       issues: [
         issue({
           id: reviewIssueId,
-          identifier: "PAP-2279",
+          identifier: "MERC-2279",
           title: "Screenshot acceptance review",
           status: "in_review",
           assigneeAgentId: coderId,
@@ -322,7 +322,7 @@ describe("issue graph liveness classifier", () => {
     const reviewIssueId = "review-1";
     const baseReviewIssue = issue({
       id: reviewIssueId,
-      identifier: "PAP-2279",
+      identifier: "MERC-2279",
       title: "Screenshot acceptance review",
       status: "in_review",
       assigneeAgentId: coderId,
@@ -402,7 +402,7 @@ describe("issue graph liveness classifier", () => {
       issues: [
         issue({
           id: reviewIssueId,
-          identifier: "PAP-2279",
+          identifier: "MERC-2279",
           title: "Screenshot acceptance review",
           status: "in_review",
           assigneeAgentId: coderId,

@@ -9,7 +9,7 @@ describe("issue continuation summaries", () => {
     const body = buildContinuationSummaryMarkdown({
       issue: {
         id: "issue-1",
-        identifier: "PAP-1579",
+        identifier: "MERC-1579",
         title: "Add continuation summaries",
         description: [
           "## Objective",
@@ -60,7 +60,7 @@ describe("issue continuation summaries", () => {
     const body = buildContinuationSummaryMarkdown({
       issue: {
         id: "issue-1",
-        identifier: "PAP-1579",
+        identifier: "MERC-1579",
         title: "Add continuation summaries",
         description: null,
         status: "in_progress",

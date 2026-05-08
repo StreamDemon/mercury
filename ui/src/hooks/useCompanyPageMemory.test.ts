@@ -6,7 +6,7 @@ import {
 
 const companies = [
   { id: "for", issuePrefix: "FOR" },
-  { id: "pap", issuePrefix: "PAP" },
+  { id: "pap", issuePrefix: "MERC" },
 ];
 
 describe("getRememberedPathOwnerCompanyId", () => {
@@ -55,17 +55,17 @@ describe("sanitizeRememberedPathForCompany", () => {
   it("keeps remembered issue paths that belong to the target company", () => {
     expect(
       sanitizeRememberedPathForCompany({
-        path: "/issues/PAP-12",
-        companyPrefix: "PAP",
+        path: "/issues/MERC-12",
+        companyPrefix: "MERC",
       }),
-    ).toBe("/issues/PAP-12");
+    ).toBe("/issues/MERC-12");
   });
 
   it("falls back to dashboard for remembered issue identifiers from another company", () => {
     expect(
       sanitizeRememberedPathForCompany({
         path: "/issues/FOR-1",
-        companyPrefix: "PAP",
+        companyPrefix: "MERC",
       }),
     ).toBe("/dashboard");
   });
@@ -74,7 +74,7 @@ describe("sanitizeRememberedPathForCompany", () => {
     expect(
       sanitizeRememberedPathForCompany({
         path: null,
-        companyPrefix: "PAP",
+        companyPrefix: "MERC",
       }),
     ).toBe("/dashboard");
   });
@@ -83,7 +83,7 @@ describe("sanitizeRememberedPathForCompany", () => {
     expect(
       sanitizeRememberedPathForCompany({
         path: "/skills/skill-123/files/SKILL.md",
-        companyPrefix: "PAP",
+        companyPrefix: "MERC",
       }),
     ).toBe("/skills/skill-123/files/SKILL.md");
   });

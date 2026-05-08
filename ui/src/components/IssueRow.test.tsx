@@ -31,7 +31,7 @@ vi.mock("@/lib/router", () => ({
 function createIssue(overrides: Partial<Issue> = {}): Issue {
   return {
     id: "issue-1",
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     companyId: "company-1",
     projectId: null,
     projectWorkspaceId: null,
@@ -141,7 +141,7 @@ describe("IssueRow", () => {
 
     const link = container.querySelector("[data-inbox-issue-link]") as HTMLAnchorElement | null;
     expect(link).not.toBeNull();
-    expect(link?.getAttribute("to") ?? link?.getAttribute("href")).toBe("/issues/PAP-1");
+    expect(link?.getAttribute("to") ?? link?.getAttribute("href")).toBe("/issues/MERC-1");
 
     act(() => {
       root.unmount();
@@ -208,7 +208,7 @@ describe("IssueRow", () => {
     act(() => {
       root.render(
         <IssueRow
-          issue={createIssue({ identifier: "PAP-42" })}
+          issue={createIssue({ identifier: "MERC-42" })}
           checklistStepNumber="2.1"
           mobileMeta="updated now"
         />,
@@ -217,10 +217,10 @@ describe("IssueRow", () => {
 
     const link = container.querySelector("[data-inbox-issue-link]") as HTMLAnchorElement | null;
     const metaRow = Array.from(link?.querySelectorAll("span.flex.items-center.gap-2") ?? [])
-      .find((element) => element.textContent?.includes("PAP-42"));
+      .find((element) => element.textContent?.includes("MERC-42"));
 
     expect(metaRow).not.toBeUndefined();
-    expect(metaRow?.textContent?.replace(/\s+/g, "")).toContain("2.1.PAP-42");
+    expect(metaRow?.textContent?.replace(/\s+/g, "")).toContain("2.1.MERC-42");
 
     act(() => {
       root.unmount();

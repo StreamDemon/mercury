@@ -40,7 +40,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
     createdByAgentId: overrides.createdByAgentId ?? null,
     createdByUserId: overrides.createdByUserId ?? null,
     issueNumber: overrides.issueNumber ?? 1,
-    identifier: overrides.identifier ?? "PAP-1",
+    identifier: overrides.identifier ?? "MERC-1",
     requestDepth: overrides.requestDepth ?? 0,
     billingCode: overrides.billingCode ?? null,
     assigneeAdapterOverrides: overrides.assigneeAdapterOverrides ?? null,
@@ -61,9 +61,9 @@ function createSummary(overrides: Partial<ProjectWorkspaceSummary> = {}): Projec
     key: overrides.key ?? "execution:workspace-1",
     kind: overrides.kind ?? "execution_workspace",
     workspaceId: overrides.workspaceId ?? "workspace-1",
-    workspaceName: overrides.workspaceName ?? "PAP-989-multi-user-implementation",
-    cwd: overrides.cwd ?? "/worktrees/PAP-989-multi-user-implementation",
-    branchName: overrides.branchName ?? "PAP-989-multi-user-implementation",
+    workspaceName: overrides.workspaceName ?? "MERC-989-multi-user-implementation",
+    cwd: overrides.cwd ?? "/worktrees/MERC-989-multi-user-implementation",
+    branchName: overrides.branchName ?? "MERC-989-multi-user-implementation",
     lastUpdatedAt: overrides.lastUpdatedAt ?? new Date("2026-04-12T00:00:00Z"),
     projectWorkspaceId: overrides.projectWorkspaceId ?? "project-workspace-1",
     executionWorkspaceId: overrides.executionWorkspaceId ?? "workspace-1",
@@ -74,11 +74,11 @@ function createSummary(overrides: Partial<ProjectWorkspaceSummary> = {}): Projec
     primaryServiceUrlRunning: overrides.primaryServiceUrlRunning ?? false,
     hasRuntimeConfig: overrides.hasRuntimeConfig ?? true,
     issues: overrides.issues ?? [
-      createIssue({ id: "issue-1", identifier: "PAP-1364" }),
-      createIssue({ id: "issue-2", identifier: "PAP-1367" }),
-      createIssue({ id: "issue-3", identifier: "PAP-1362" }),
-      createIssue({ id: "issue-4", identifier: "PAP-1363" }),
-      createIssue({ id: "issue-5", identifier: "PAP-1340" }),
+      createIssue({ id: "issue-1", identifier: "MERC-1364" }),
+      createIssue({ id: "issue-2", identifier: "MERC-1367" }),
+      createIssue({ id: "issue-3", identifier: "MERC-1362" }),
+      createIssue({ id: "issue-4", identifier: "MERC-1363" }),
+      createIssue({ id: "issue-5", identifier: "MERC-1340" }),
     ],
   };
 }
@@ -155,7 +155,7 @@ describe("ProjectWorkspaceSummaryCard", () => {
             executionWorkspaceId: null,
             executionWorkspaceStatus: null,
             hasRuntimeConfig: false,
-            issues: [createIssue({ id: "issue-6", identifier: "PAP-1400" })],
+            issues: [createIssue({ id: "issue-6", identifier: "MERC-1400" })],
           })}
           runtimeActionKey={null}
           runtimeActionPending={false}
@@ -203,8 +203,8 @@ describe("ProjectWorkspaceSummaryCard", () => {
   it("copies branch and path from both text and icon controls with feedback", async () => {
     const root = createRoot(container);
     const summary = createSummary({
-      branchName: "PAP-1552-workspace-polish",
-      cwd: "/Users/dotta/mercury/.worktrees/PAP-1552-workspace-polish",
+      branchName: "MERC-1552-workspace-polish",
+      cwd: "/Users/dotta/mercury/.worktrees/MERC-1552-workspace-polish",
     });
 
     await act(async () => {

@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MercuryApiClient } from "./client.js";
 import { createToolDefinitions } from "./tools.js";
 
@@ -38,13 +38,13 @@ describe("mercury MCP tools", () => {
 
     const tool = getTool("mercuryUpdateIssue");
     await tool.execute({
-      issueId: "PAP-1135",
+      issueId: "MERC-1135",
       status: "done",
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(String(url)).toBe("http://localhost:3100/api/issues/PAP-1135");
+    expect(String(url)).toBe("http://localhost:3100/api/issues/MERC-1135");
     expect(init.method).toBe("PATCH");
     expect((init.headers as Record<string, string>)["Authorization"]).toBe("Bearer token-123");
     expect((init.headers as Record<string, string>)["X-Mercury-Run-Id"]).toBe(
@@ -71,13 +71,13 @@ describe("mercury MCP tools", () => {
 
   it("uses default agent id for checkout requests", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      mockJsonResponse({ id: "PAP-1135", status: "in_progress" }),
+      mockJsonResponse({ id: "MERC-1135", status: "in_progress" }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
     const tool = getTool("mercuryCheckoutIssue");
     await tool.execute({
-      issueId: "PAP-1135",
+      issueId: "MERC-1135",
     });
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
@@ -95,7 +95,7 @@ describe("mercury MCP tools", () => {
 
     const tool = getTool("mercuryUpsertIssueDocument");
     await tool.execute({
-      issueId: "PAP-1135",
+      issueId: "MERC-1135",
       key: "plan",
       body: "# Updated",
     });
@@ -133,14 +133,14 @@ describe("mercury MCP tools", () => {
 
     const tool = getTool("mercuryControlIssueWorkspaceServices");
     await tool.execute({
-      issueId: "PAP-1135",
+      issueId: "MERC-1135",
       action: "restart",
       workspaceCommandId: "web",
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const [lookupUrl, lookupInit] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(String(lookupUrl)).toBe("http://localhost:3100/api/issues/PAP-1135/heartbeat-context");
+    expect(String(lookupUrl)).toBe("http://localhost:3100/api/issues/MERC-1135/heartbeat-context");
     expect(lookupInit.method).toBe("GET");
 
     const [controlUrl, controlInit] = fetchMock.mock.calls[1] as [string, RequestInit];
@@ -173,7 +173,7 @@ describe("mercury MCP tools", () => {
 
     const tool = getTool("mercuryWaitForIssueWorkspaceService");
     const response = await tool.execute({
-      issueId: "PAP-1135",
+      issueId: "MERC-1135",
       serviceName: "web",
       timeoutSeconds: 1,
     });
@@ -190,7 +190,7 @@ describe("mercury MCP tools", () => {
 
     const tool = getTool("mercurySuggestTasks");
     await tool.execute({
-      issueId: "PAP-1135",
+      issueId: "MERC-1135",
       idempotencyKey: "run-1:suggest",
       payload: {
         version: 1,
@@ -199,7 +199,7 @@ describe("mercury MCP tools", () => {
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(String(url)).toBe("http://localhost:3100/api/issues/PAP-1135/interactions");
+    expect(String(url)).toBe("http://localhost:3100/api/issues/MERC-1135/interactions");
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual({
       kind: "suggest_tasks",
@@ -220,8 +220,8 @@ describe("mercury MCP tools", () => {
 
     const tool = getTool("mercuryRequestConfirmation");
     await tool.execute({
-      issueId: "PAP-1135",
-      idempotencyKey: "confirmation:PAP-1135:plan:33333333-3333-4333-8333-333333333333",
+      issueId: "MERC-1135",
+      idempotencyKey: "confirmation:MERC-1135:plan:33333333-3333-4333-8333-333333333333",
       title: "Plan approval",
       payload: {
         version: 1,
@@ -241,12 +241,12 @@ describe("mercury MCP tools", () => {
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(String(url)).toBe("http://localhost:3100/api/issues/PAP-1135/interactions");
+    expect(String(url)).toBe("http://localhost:3100/api/issues/MERC-1135/interactions");
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual({
       kind: "request_confirmation",
       continuationPolicy: "none",
-      idempotencyKey: "confirmation:PAP-1135:plan:33333333-3333-4333-8333-333333333333",
+      idempotencyKey: "confirmation:MERC-1135:plan:33333333-3333-4333-8333-333333333333",
       title: "Plan approval",
       payload: {
         version: 1,
@@ -275,7 +275,7 @@ describe("mercury MCP tools", () => {
     const tool = getTool("mercuryCreateApproval");
     await tool.execute({
       type: "hire_agent",
-      payload: { branch: "pap-1167" },
+      payload: { branch: "merc-1167" },
       issueIds: ["44444444-4444-4444-4444-444444444444"],
     });
 
@@ -287,7 +287,7 @@ describe("mercury MCP tools", () => {
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual({
       type: "hire_agent",
-      payload: { branch: "pap-1167" },
+      payload: { branch: "merc-1167" },
       issueIds: ["44444444-4444-4444-4444-444444444444"],
     });
   });

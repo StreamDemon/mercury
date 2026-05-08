@@ -324,7 +324,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-447",
+        identifier: "MERC-447",
         title: "Add Worktree Support",
       },
       agent: {
@@ -336,7 +336,7 @@ describe("realizeExecutionWorkspace", () => {
 
     expect(first.strategy).toBe("git_worktree");
     expect(first.created).toBe(true);
-    expect(first.branchName).toBe("PAP-447-add-worktree-support");
+    expect(first.branchName).toBe("MERC-447-add-worktree-support");
     expect(first.cwd).toContain(path.join(".mercury", "worktrees"));
     await expect(fs.stat(path.join(first.cwd, ".git"))).resolves.toBeTruthy();
 
@@ -357,7 +357,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-447",
+        identifier: "MERC-447",
         title: "Add Worktree Support",
       },
       agent: {
@@ -374,7 +374,7 @@ describe("realizeExecutionWorkspace", () => {
 
   it("rejects reusing an empty directory that only looks like a worktree because it sits inside the repo", async () => {
     const repoRoot = await createTempRepo();
-    const branchName = "PAP-447-add-worktree-support";
+    const branchName = "MERC-447-add-worktree-support";
     const poisonedPath = path.join(repoRoot, ".mercury", "worktrees", branchName);
     await fs.mkdir(poisonedPath, { recursive: true });
 
@@ -396,7 +396,7 @@ describe("realizeExecutionWorkspace", () => {
         },
         issue: {
           id: "issue-1",
-          identifier: "PAP-447",
+          identifier: "MERC-447",
           title: "Add Worktree Support",
         },
         agent: {
@@ -410,7 +410,7 @@ describe("realizeExecutionWorkspace", () => {
 
   it("reuses the current linked worktree instead of nesting another worktree inside it", async () => {
     const repoRoot = await createTempRepo();
-    const branchName = "PAP-1355-worktree-reuse";
+    const branchName = "MERC-1355-worktree-reuse";
     const currentWorktree = path.join(repoRoot, ".mercury", "worktrees", branchName);
 
     await fs.mkdir(path.dirname(currentWorktree), { recursive: true });
@@ -433,7 +433,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-1355",
+        identifier: "MERC-1355",
         title: "worktree reuse",
       },
       agent: {
@@ -469,7 +469,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-447",
+        identifier: "MERC-447",
         title: "Add Worktree Support",
       },
       agent: {
@@ -499,7 +499,7 @@ describe("realizeExecutionWorkspace", () => {
         },
         issue: {
           id: "issue-1",
-          identifier: "PAP-447",
+          identifier: "MERC-447",
           title: "Add Worktree Support",
         },
         agent: {
@@ -508,12 +508,12 @@ describe("realizeExecutionWorkspace", () => {
           companyId: "company-1",
         },
       }),
-    ).rejects.toThrow(/not a reusable git worktree \(worktree HEAD is on "unexpected-branch" instead of "PAP-447-add-worktree-support"\)\./);
+    ).rejects.toThrow(/not a reusable git worktree \(worktree HEAD is on "unexpected-branch" instead of "MERC-447-add-worktree-support"\)\./);
   });
 
   it("reuses an already checked out branch from git worktree metadata even when the target path differs", async () => {
     const repoRoot = await createTempRepo();
-    const branchName = "PAP-1355-worktree-reuse";
+    const branchName = "MERC-1355-worktree-reuse";
     const existingWorktree = path.join(repoRoot, ".mercury", "worktrees", branchName);
     const { recorder, operations } = createWorkspaceOperationRecorderDouble();
 
@@ -538,7 +538,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-1355",
+        identifier: "MERC-1355",
         title: "worktree reuse",
       },
       agent: {
@@ -583,7 +583,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-unsafe",
-        identifier: "PAP-991",
+        identifier: "MERC-991",
         title: "there should be a setting for the allowance of thumbs up / thumbs down data; `rm -rf`",
       },
       agent: {
@@ -594,7 +594,7 @@ describe("realizeExecutionWorkspace", () => {
     });
 
     expect(realized.branchName).toBe(
-      "PAP-991-there-should-be-a-setting-for-the-allowance-of-thumbs-up-thumbs-down-data-rm-rf",
+      "MERC-991-there-should-be-a-setting-for-the-allowance-of-thumbs-up-thumbs-down-data-rm-rf",
     );
     expect(realized.branchName?.includes("/")).toBe(false);
     expect(path.basename(realized.cwd)).toBe(realized.branchName);
@@ -620,7 +620,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-template-safe",
-        identifier: "PAP-992",
+        identifier: "MERC-992",
         title: "Hotfix / April.1",
       },
       agent: {
@@ -630,8 +630,8 @@ describe("realizeExecutionWorkspace", () => {
       },
     });
 
-    expect(realized.branchName).toBe("release/PAP-992.hotfix-april-1");
-    expect(path.basename(realized.cwd)).toBe("PAP-992.hotfix-april-1");
+    expect(realized.branchName).toBe("release/MERC-992.hotfix-april-1");
+    expect(path.basename(realized.cwd)).toBe("MERC-992.hotfix-april-1");
   });
 
   it("runs a configured provision command inside the derived worktree", async () => {
@@ -669,7 +669,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-448",
+        identifier: "MERC-448",
         title: "Run provision command",
       },
       agent: {
@@ -680,7 +680,7 @@ describe("realizeExecutionWorkspace", () => {
     });
 
     await expect(fs.readFile(path.join(workspace.cwd, ".mercury-provision-branch"), "utf8")).resolves.toBe(
-      "PAP-448-run-provision-command\n",
+      "MERC-448-run-provision-command\n",
     );
     await expect(fs.readFile(path.join(workspace.cwd, ".mercury-provision-base"), "utf8")).resolves.toBe(
       `${repoRoot}\n`,
@@ -707,7 +707,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-448",
+        identifier: "MERC-448",
         title: "Run provision command",
       },
       agent: {
@@ -753,7 +753,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-449",
+        identifier: "MERC-449",
         title: "Reuse latest provision script",
       },
       agent: {
@@ -797,7 +797,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-449",
+        identifier: "MERC-449",
         title: "Reuse latest provision script",
       },
       agent: {
@@ -921,7 +921,7 @@ describe("realizeExecutionWorkspace", () => {
         },
         issue: {
           id: "issue-1",
-          identifier: "PAP-885",
+          identifier: "MERC-885",
           title: "Show worktree banner",
         },
         agent: {
@@ -937,7 +937,7 @@ describe("realizeExecutionWorkspace", () => {
       const envContents = await fs.readFile(envPath, "utf8");
       const configContents = JSON.parse(await fs.readFile(configPath, "utf8"));
       const configStats = await fs.lstat(configPath);
-      const expectedInstanceId = "pap-885-show-worktree-banner";
+      const expectedInstanceId = "merc-885-show-worktree-banner";
       const expectedInstanceRoot = path.join(
         isolatedWorktreeHome,
         "instances",
@@ -957,7 +957,7 @@ describe("realizeExecutionWorkspace", () => {
       expect(envVars.MERCURY_INSTANCE_ID).toBe(expectedInstanceId);
       expect(await fs.realpath(envVars.MERCURY_CONFIG!)).toBe(await fs.realpath(configPath));
       expect(envVars.MERCURY_IN_WORKTREE).toBe("true");
-      expect(envVars.MERCURY_WORKTREE_NAME).toBe("PAP-885-show-worktree-banner");
+      expect(envVars.MERCURY_WORKTREE_NAME).toBe("MERC-885-show-worktree-banner");
 
       process.chdir(workspace.cwd);
       expect(resolveMercuryConfigPath()).toBe(configPath);
@@ -1081,7 +1081,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-551",
+        identifier: "MERC-551",
         title: "Provision local workspace dependencies",
       },
       agent: {
@@ -1161,7 +1161,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-552",
+        identifier: "MERC-552",
         title: "Install without moved symlinks",
       },
       agent: {
@@ -1389,7 +1389,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-551",
+        identifier: "MERC-551",
         title: "Provision local workspace dependencies",
       },
       agent: {
@@ -1446,7 +1446,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-540",
+        identifier: "MERC-540",
         title: "Record workspace operations",
       },
       agent: {
@@ -1463,7 +1463,7 @@ describe("realizeExecutionWorkspace", () => {
     ]);
     expect(operations[0]?.command).toContain("git worktree add");
     expect(operations[0]?.metadata).toMatchObject({
-      branchName: "PAP-540-record-workspace-operations",
+      branchName: "MERC-540-record-workspace-operations",
       created: true,
     });
     expect(operations[1]?.command).toBe("bash ./scripts/provision.sh");
@@ -1500,7 +1500,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-1142",
+        identifier: "MERC-1142",
         title: "Limit noisy provision output",
       },
       agent: {
@@ -1522,7 +1522,7 @@ describe("realizeExecutionWorkspace", () => {
 
   it("reuses an existing branch without resetting it when recreating a missing worktree", async () => {
     const repoRoot = await createTempRepo();
-    const branchName = "PAP-450-recreate-missing-worktree";
+    const branchName = "MERC-450-recreate-missing-worktree";
 
     await runGit(repoRoot, ["checkout", "-b", branchName]);
     await fs.writeFile(path.join(repoRoot, "feature.txt"), "preserve me\n", "utf8");
@@ -1548,7 +1548,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-450",
+        identifier: "MERC-450",
         title: "Recreate missing worktree",
       },
       agent: {
@@ -1566,7 +1566,7 @@ describe("realizeExecutionWorkspace", () => {
 
   it("reattaches a missing persisted git worktree before manual control starts it", async () => {
     const repoRoot = await createTempRepo();
-    const branchName = "PAP-451-restore-persisted-worktree";
+    const branchName = "MERC-451-restore-persisted-worktree";
     await fs.mkdir(path.join(repoRoot, "scripts"), { recursive: true });
     await fs.writeFile(
       path.join(repoRoot, "scripts", "restore.sh"),
@@ -1606,7 +1606,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-451",
+        identifier: "MERC-451",
         title: "Restore persisted worktree",
       },
       agent: {
@@ -1643,7 +1643,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-451",
+        identifier: "MERC-451",
         title: "Restore persisted worktree",
       },
       agent: {
@@ -1695,7 +1695,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-452",
+        identifier: "MERC-452",
         title: "Reprovision persisted worktree",
       },
       agent: {
@@ -1732,7 +1732,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-452",
+        identifier: "MERC-452",
         title: "Reprovision persisted worktree",
       },
       agent: {
@@ -1778,7 +1778,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-460",
+        identifier: "MERC-460",
         title: "Auto detect default branch",
       },
       agent: {
@@ -1830,7 +1830,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-461",
+        identifier: "MERC-461",
         title: "Auto detect default branch via symref",
       },
       agent: {
@@ -1868,7 +1868,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-449",
+        identifier: "MERC-449",
         title: "Cleanup workspace",
       },
       agent: {
@@ -1930,7 +1930,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-451",
+        identifier: "MERC-451",
         title: "Keep unmerged branch",
       },
       agent: {
@@ -1997,7 +1997,7 @@ describe("realizeExecutionWorkspace", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-541",
+        identifier: "MERC-541",
         title: "Cleanup recorder",
       },
       agent: {
@@ -2178,7 +2178,7 @@ describe("ensureRuntimeServicesForRun", () => {
 
   it("does not reuse project-scoped shared services across different workspace launch contexts", async () => {
     const primaryWorkspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-runtime-primary-"));
-    const worktreeWorkspaceRoot = path.join(primaryWorkspaceRoot, ".mercury", "worktrees", "PAP-874-chat-speed-issues");
+    const worktreeWorkspaceRoot = path.join(primaryWorkspaceRoot, ".mercury", "worktrees", "MERC-874-chat-speed-issues");
     await fs.mkdir(worktreeWorkspaceRoot, { recursive: true });
 
     const primaryWorkspace = buildWorkspace(primaryWorkspaceRoot);
@@ -2187,7 +2187,7 @@ describe("ensureRuntimeServicesForRun", () => {
       source: "task_session",
       strategy: "git_worktree",
       cwd: worktreeWorkspaceRoot,
-      branchName: "PAP-874-chat-speed-issues",
+      branchName: "MERC-874-chat-speed-issues",
       worktreePath: worktreeWorkspaceRoot,
     };
     const serviceCommand =
@@ -3151,7 +3151,7 @@ describe("normalizeAdapterManagedRuntimeServices", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-447",
+        identifier: "MERC-447",
         title: "Worktree support",
       },
       workspace,
@@ -3176,7 +3176,7 @@ describe("normalizeAdapterManagedRuntimeServices", () => {
       },
       issue: {
         id: "issue-1",
-        identifier: "PAP-447",
+        identifier: "MERC-447",
         title: "Worktree support",
       },
       workspace,

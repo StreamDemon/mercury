@@ -159,7 +159,7 @@ describe("CompanyAccess", () => {
     listIssuesMock.mockResolvedValue([
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Assigned to removed user",
         status: "todo",
       },

@@ -9,60 +9,60 @@ import {
 
 describe("issue references", () => {
   it("normalizes identifiers to uppercase", () => {
-    expect(normalizeIssueIdentifier("pap-123")).toBe("PAP-123");
+    expect(normalizeIssueIdentifier("merc-123")).toBe("MERC-123");
     expect(normalizeIssueIdentifier("not-an-issue")).toBeNull();
   });
 
   it("parses relative and absolute issue hrefs", () => {
-    expect(parseIssueReferenceHref("/issues/PAP-123")).toEqual({ identifier: "PAP-123" });
-    expect(parseIssueReferenceHref("/PAP/issues/pap-456")).toEqual({ identifier: "PAP-456" });
-    expect(parseIssueReferenceHref("https://modernmethod.io/mercury/PAP/issues/pap-789#comment-1")).toEqual({
-      identifier: "PAP-789",
+    expect(parseIssueReferenceHref("/issues/MERC-123")).toEqual({ identifier: "MERC-123" });
+    expect(parseIssueReferenceHref("/PAP/issues/merc-456")).toEqual({ identifier: "MERC-456" });
+    expect(parseIssueReferenceHref("https://modernmethod.io/mercury/PAP/issues/merc-789#comment-1")).toEqual({
+      identifier: "MERC-789",
     });
-    expect(parseIssueReferenceHref("https://modernmethod.io/mercury/projects/PAP-789")).toBeNull();
+    expect(parseIssueReferenceHref("https://modernmethod.io/mercury/projects/MERC-789")).toBeNull();
   });
 
   it("builds canonical issue hrefs", () => {
-    expect(buildIssueReferenceHref("pap-123")).toBe("/issues/PAP-123");
+    expect(buildIssueReferenceHref("merc-123")).toBe("/issues/MERC-123");
   });
 
   it("finds identifiers and issue paths in plain text", () => {
-    expect(findIssueReferenceMatches("See PAP-1, /issues/PAP-2, and https://x.test/PAP/issues/pap-3.")).toEqual([
-      { index: 4, length: 5, identifier: "PAP-1", matchedText: "PAP-1" },
-      { index: 11, length: 13, identifier: "PAP-2", matchedText: "/issues/PAP-2" },
+    expect(findIssueReferenceMatches("See MERC-1, /issues/MERC-2, and https://x.test/PAP/issues/merc-3.")).toEqual([
+      { index: 4, length: 6, identifier: "MERC-1", matchedText: "MERC-1" },
+      { index: 12, length: 14, identifier: "MERC-2", matchedText: "/issues/MERC-2" },
       {
-        index: 30,
-        length: 31,
-        identifier: "PAP-3",
-        matchedText: "https://x.test/PAP/issues/pap-3",
+        index: 32,
+        length: 32,
+        identifier: "MERC-3",
+        matchedText: "https://x.test/PAP/issues/merc-3",
       },
     ]);
   });
 
   it("trims unmatched square brackets from issue path tokens", () => {
-    expect(findIssueReferenceMatches("See /issues/PAP-123] for context.")).toEqual([
-      { index: 4, length: 15, identifier: "PAP-123", matchedText: "/issues/PAP-123" },
+    expect(findIssueReferenceMatches("See /issues/MERC-123] for context.")).toEqual([
+      { index: 4, length: 16, identifier: "MERC-123", matchedText: "/issues/MERC-123" },
     ]);
   });
 
   it("extracts and dedupes references from markdown", () => {
-    expect(extractIssueReferenceIdentifiers("PAP-1 [again](/issues/pap-1) PAP-2")).toEqual(["PAP-1", "PAP-2"]);
+    expect(extractIssueReferenceIdentifiers("MERC-1 [again](/issues/merc-1) MERC-2")).toEqual(["MERC-1", "MERC-2"]);
   });
 
   it("ignores inline code and fenced code blocks", () => {
     const markdown = [
-      "Use PAP-1 here.",
+      "Use MERC-1 here.",
       "",
-      "`PAP-2` should not count.",
+      "`MERC-2` should not count.",
       "",
       "```md",
-      "PAP-3",
-      "/issues/PAP-4",
+      "MERC-3",
+      "/issues/MERC-4",
       "```",
       "",
-      "Final /issues/PAP-5 mention.",
+      "Final /issues/MERC-5 mention.",
     ].join("\n");
 
-    expect(extractIssueReferenceIdentifiers(markdown)).toEqual(["PAP-1", "PAP-5"]);
+    expect(extractIssueReferenceIdentifiers(markdown)).toEqual(["MERC-1", "MERC-5"]);
   });
 });

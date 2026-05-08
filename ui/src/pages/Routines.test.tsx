@@ -265,7 +265,7 @@ function createRoutine(overrides: Partial<RoutineListItem>): RoutineListItem {
 function createIssue(overrides: Partial<Issue> = {}): Issue {
   return {
     id: "issue-1",
-    identifier: "PAP-1000",
+    identifier: "MERC-1000",
     companyId: "company-1",
     projectId: "project-1",
     projectWorkspaceId: null,
@@ -426,7 +426,7 @@ describe("Routines page", () => {
     routinesListMock.mockResolvedValue([createRoutine({ id: "routine-1" })]);
     issuesListMock.mockResolvedValue([
       createIssue({ id: "issue-1", title: "Routine execution A" }),
-      createIssue({ id: "issue-2", title: "Routine execution B", identifier: "PAP-1001", issueNumber: 1001 }),
+      createIssue({ id: "issue-2", title: "Routine execution B", identifier: "MERC-1001", issueNumber: 1001 }),
     ]);
 
     const root = createRoot(container);

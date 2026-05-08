@@ -40,8 +40,8 @@ describe("workflowSort", () => {
     expect(orderedIds(out)).toEqual(["chain-start", "chain-end", "z"]);
   });
 
-  it("walks long linear chains all the way to the end (PAP-1953 shape)", () => {
-    // Chain shape taken from the plan on PAP-2189:
+  it("walks long linear chains all the way to the end (MERC-1953 shape)", () => {
+    // Chain shape taken from the plan on MERC-2189:
     //   roots standalone: 1954, 1955
     //   short chain: 1960 -> 1961
     //   long chain: 1962 -> 1963 -> 1964 -> 1965 -> 1966

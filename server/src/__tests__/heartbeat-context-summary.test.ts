@@ -9,7 +9,7 @@ describe("summarizeHeartbeatRunContextSnapshot", () => {
     const summarized = summarizeHeartbeatRunContextSnapshot({
       issueId: "issue-1",
       taskId: "task-1",
-      taskKey: "PAP-1",
+      taskKey: "MERC-1",
       commentId: "comment-1",
       wakeCommentId: "comment-2",
       wakeReason: "retry_failed_run",
@@ -30,7 +30,7 @@ describe("summarizeHeartbeatRunContextSnapshot", () => {
     expect(summarized).toEqual({
       issueId: "issue-1",
       taskId: "task-1",
-      taskKey: "PAP-1",
+      taskKey: "MERC-1",
       commentId: "comment-1",
       wakeCommentId: "comment-2",
       wakeReason: "retry_failed_run",

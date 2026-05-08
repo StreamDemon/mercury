@@ -96,11 +96,11 @@ describeEmbeddedPostgres("issueReferenceService", () => {
       {
         id: sourceIssueId,
         companyId,
-        title: "Coordinate PAP-2",
-        description: "Review /issues/pap-3 and ignore PAP-1 self references.",
+        title: "Coordinate MERC-2",
+        description: "Review /issues/merc-3 and ignore MERC-1 self references.",
         status: "todo",
         priority: "medium",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
       },
       {
         id: targetTwoId,
@@ -108,7 +108,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
         title: "Target two",
         status: "todo",
         priority: "medium",
-        identifier: "PAP-2",
+        identifier: "MERC-2",
       },
       {
         id: targetThreeId,
@@ -116,16 +116,16 @@ describeEmbeddedPostgres("issueReferenceService", () => {
         title: "Target three",
         status: "todo",
         priority: "medium",
-        identifier: "PAP-3",
+        identifier: "MERC-3",
       },
       {
         id: inboundIssueId,
         companyId,
         title: "Inbound reference",
-        description: "This one depends on PAP-1.",
+        description: "This one depends on MERC-1.",
         status: "in_progress",
         priority: "high",
-        identifier: "PAP-4",
+        identifier: "MERC-4",
       },
     ]);
 
@@ -136,7 +136,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
       id: commentId,
       companyId,
       issueId: sourceIssueId,
-      body: "Follow up in https://mercury.test/issues/pap-2 after the document lands.",
+      body: "Follow up in https://mercury.test/issues/merc-2 after the document lands.",
     });
     await refs.syncComment(commentId);
 
@@ -145,7 +145,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
       companyId,
       title: "Plan",
       format: "markdown",
-      latestBody: "Spec note: /PAP/issues/PAP-3",
+      latestBody: "Spec note: /PAP/issues/MERC-3",
       latestRevisionNumber: 1,
     });
     await db.insert(issueDocuments).values({
@@ -159,17 +159,17 @@ describeEmbeddedPostgres("issueReferenceService", () => {
 
     const summary = await refs.listIssueReferenceSummary(sourceIssueId);
 
-    expect(summary.outbound.map((item) => item.issue.identifier)).toEqual(["PAP-2", "PAP-3"]);
+    expect(summary.outbound.map((item) => item.issue.identifier)).toEqual(["MERC-2", "MERC-3"]);
     expect(summary.outbound[0]?.mentionCount).toBe(2);
     expect(summary.outbound[0]?.sources.map((source) => source.label)).toEqual(["title", "comment"]);
     expect(summary.outbound[1]?.mentionCount).toBe(2);
     expect(summary.outbound[1]?.sources.map((source) => source.label)).toEqual(["description", "plan"]);
-    expect(summary.inbound.map((item) => item.issue.identifier)).toEqual(["PAP-4"]);
+    expect(summary.inbound.map((item) => item.issue.identifier)).toEqual(["MERC-4"]);
 
     await refs.deleteDocumentSource(documentId);
 
     const withoutDocument = await refs.listIssueReferenceSummary(sourceIssueId);
-    const pap3 = withoutDocument.outbound.find((item) => item.issue.identifier === "PAP-3");
+    const pap3 = withoutDocument.outbound.find((item) => item.issue.identifier === "MERC-3");
 
     expect(pap3?.mentionCount).toBe(1);
     expect(pap3?.sources.map((source) => source.label)).toEqual(["description"]);
@@ -197,7 +197,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
         title: "Legacy issue",
         status: "todo",
         priority: "medium",
-        identifier: "PAP-10",
+        identifier: "MERC-10",
       },
       {
         id: targetIssueId,
@@ -205,7 +205,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
         title: "Referenced legacy issue",
         status: "todo",
         priority: "medium",
-        identifier: "PAP-20",
+        identifier: "MERC-20",
       },
     ]);
 
@@ -213,7 +213,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
       id: commentId,
       companyId,
       issueId: sourceIssueId,
-      body: "Legacy comment points at PAP-20.",
+      body: "Legacy comment points at MERC-20.",
     });
 
     await db.insert(documents).values({
@@ -221,7 +221,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
       companyId,
       title: "Legacy plan",
       format: "markdown",
-      latestBody: "Legacy plan also links /issues/PAP-20.",
+      latestBody: "Legacy plan also links /issues/MERC-20.",
       latestRevisionNumber: 1,
     });
     await db.insert(issueDocuments).values({
@@ -237,7 +237,7 @@ describeEmbeddedPostgres("issueReferenceService", () => {
     const summary = await refs.listIssueReferenceSummary(sourceIssueId);
 
     expect(summary.outbound).toHaveLength(1);
-    expect(summary.outbound[0]?.issue.identifier).toBe("PAP-20");
+    expect(summary.outbound[0]?.issue.identifier).toBe("MERC-20");
     expect(summary.outbound[0]?.mentionCount).toBe(2);
     expect(summary.outbound[0]?.sources.map((source) => source.label)).toEqual(["plan", "comment"]);
   });

@@ -16,7 +16,7 @@ describe("IssueRelatedWorkPanel", () => {
             {
               issue: {
                 id: "issue-2",
-                identifier: "PAP-22",
+                identifier: "MERC-22",
                 title: "Downstream task",
                 status: "todo",
                 priority: "medium",
@@ -25,8 +25,8 @@ describe("IssueRelatedWorkPanel", () => {
               },
               mentionCount: 2,
               sources: [
-                { kind: "title", sourceRecordId: null, label: "title", matchedText: "PAP-22" },
-                { kind: "document", sourceRecordId: "doc-1", label: "plan", matchedText: "/issues/PAP-22" },
+                { kind: "title", sourceRecordId: null, label: "title", matchedText: "MERC-22" },
+                { kind: "document", sourceRecordId: "doc-1", label: "plan", matchedText: "/issues/MERC-22" },
               ],
             },
           ],
@@ -34,7 +34,7 @@ describe("IssueRelatedWorkPanel", () => {
             {
               issue: {
                 id: "issue-3",
-                identifier: "PAP-33",
+                identifier: "MERC-33",
                 title: "Upstream task",
                 status: "in_progress",
                 priority: "high",
@@ -43,7 +43,7 @@ describe("IssueRelatedWorkPanel", () => {
               },
               mentionCount: 1,
               sources: [
-                { kind: "comment", sourceRecordId: "comment-1", label: "comment", matchedText: "PAP-1" },
+                { kind: "comment", sourceRecordId: "comment-1", label: "comment", matchedText: "MERC-1" },
               ],
             },
           ],
@@ -53,10 +53,10 @@ describe("IssueRelatedWorkPanel", () => {
 
     expect(html).toContain("References");
     expect(html).toContain("Referenced by");
-    expect(html).toContain("PAP-22");
-    expect(html).toContain("PAP-33");
-    expect(html).toContain('aria-label="Issue PAP-22: Downstream task"');
-    expect(html).toContain('aria-label="Issue PAP-33: Upstream task"');
+    expect(html).toContain("MERC-22");
+    expect(html).toContain("MERC-33");
+    expect(html).toContain('aria-label="Issue MERC-22: Downstream task"');
+    expect(html).toContain('aria-label="Issue MERC-33: Upstream task"');
     expect(html).toContain("plan");
     expect(html).toContain("comment");
   });
@@ -70,7 +70,7 @@ describe("IssueRelatedWorkPanel", () => {
             {
               issue: {
                 id: "issue-4",
-                identifier: "PAP-44",
+                identifier: "MERC-44",
                 title: "Chatty inbound",
                 status: "in_progress",
                 priority: "medium",
@@ -79,9 +79,9 @@ describe("IssueRelatedWorkPanel", () => {
               },
               mentionCount: 3,
               sources: [
-                { kind: "comment", sourceRecordId: "c1", label: "comment", matchedText: "PAP-44 first" },
-                { kind: "comment", sourceRecordId: "c2", label: "comment", matchedText: "PAP-44 second" },
-                { kind: "comment", sourceRecordId: "c3", label: "comment", matchedText: "PAP-44 third" },
+                { kind: "comment", sourceRecordId: "c1", label: "comment", matchedText: "MERC-44 first" },
+                { kind: "comment", sourceRecordId: "c2", label: "comment", matchedText: "MERC-44 second" },
+                { kind: "comment", sourceRecordId: "c3", label: "comment", matchedText: "MERC-44 third" },
               ],
             },
           ],

@@ -190,7 +190,7 @@ function makeIssue(id: string, isUnreadForMe: boolean): Issue {
     createdByAgentId: null,
     createdByUserId: null,
     issueNumber: 1,
-    identifier: `PAP-${id}`,
+    identifier: `MERC-${id}`,
     requestDepth: 0,
     billingCode: null,
     assigneeAdapterOverrides: null,
@@ -251,12 +251,12 @@ function makeExecutionWorkspace(overrides: Partial<ExecutionWorkspace> = {}): Ex
     sourceIssueId: "issue-1",
     mode: "isolated_workspace",
     strategyType: "git_worktree",
-    name: "PAP-1 branch",
+    name: "MERC-1 branch",
     status: "active",
     cwd: "/tmp/project/worktree",
     repoUrl: null,
     baseRef: null,
-    branchName: "pap-1",
+    branchName: "merc-1",
     providerType: "git_worktree",
     providerRef: null,
     derivedFromExecutionWorkspaceId: null,
@@ -1099,7 +1099,7 @@ describe("inbox helpers", () => {
         ]),
         defaultProjectWorkspaceIdByProjectId: new Map([[issue.projectId!, defaultWorkspace.id]]),
       }),
-    ).toBe("PAP-1 branch");
+    ).toBe("MERC-1 branch");
 
     issue.executionWorkspaceId = null;
     expect(
@@ -1145,7 +1145,7 @@ describe("inbox helpers", () => {
             mode: "shared_workspace",
             strategyType: "project_primary",
             projectWorkspaceId: defaultWorkspace.id,
-            name: "PAP-1067",
+            name: "MERC-1067",
           }),
         ]]),
         projectWorkspaceById: new Map([

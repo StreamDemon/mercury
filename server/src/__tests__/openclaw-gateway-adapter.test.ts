@@ -423,9 +423,9 @@ describe("openclaw gateway adapter execute", () => {
               wakeReason: "issue_assigned",
               issueIds: ["issue-123"],
               mercuryWorkspace: {
-                cwd: "/tmp/worktrees/pap-123",
+                cwd: "/tmp/worktrees/merc-123",
                 strategy: "git_worktree",
-                branchName: "pap-123-test",
+                branchName: "merc-123-test",
               },
               mercuryWorkspaces: [
                 {
@@ -443,7 +443,7 @@ describe("openclaw gateway adapter execute", () => {
                 reason: "issue_commented",
                 issue: {
                   id: "issue-123",
-                  identifier: "PAP-874",
+                  identifier: "MERC-874",
                   title: "chat-speed issues",
                   status: "in_progress",
                   priority: "medium",

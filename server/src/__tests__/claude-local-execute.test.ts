@@ -488,7 +488,7 @@ describe("claude execute", () => {
             reason: "issue_commented",
             issue: {
               id: "issue-1",
-              identifier: "PAP-874",
+              identifier: "MERC-874",
               title: "chat-speed issues",
               status: "in_progress",
               priority: "medium",

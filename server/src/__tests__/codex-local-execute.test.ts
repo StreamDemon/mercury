@@ -314,7 +314,7 @@ describe("codex execute", () => {
             reason: "issue_commented",
             issue: {
               id: "issue-1",
-              identifier: "PAP-874",
+              identifier: "MERC-874",
               title: "chat-speed issues",
               status: "in_progress",
               priority: "medium",
@@ -609,8 +609,8 @@ describe("codex execute", () => {
             reason: "execution_review_requested",
             issue: {
               id: "issue-1",
-              identifier: "PAP-1207",
-              title: "implement the plan of PAP-1200",
+              identifier: "MERC-1207",
+              title: "implement the plan of MERC-1200",
               status: "in_review",
               priority: "medium",
             },
@@ -678,8 +678,8 @@ describe("codex execute", () => {
             reason: "execution_changes_requested",
             issue: {
               id: "issue-1",
-              identifier: "PAP-1207",
-              title: "implement the plan of PAP-1200",
+              identifier: "MERC-1207",
+              title: "implement the plan of MERC-1200",
               status: "in_progress",
               priority: "medium",
             },
@@ -763,7 +763,7 @@ describe("codex execute", () => {
             reason: "issue_assigned",
             issue: {
               id: "issue-1",
-              identifier: "PAP-1201",
+              identifier: "MERC-1201",
               title: "Fix gallery opening for inline images",
               status: "in_progress",
               priority: "medium",
@@ -794,7 +794,7 @@ describe("codex execute", () => {
       expect(JSON.parse(capture.mercuryWakePayloadJson ?? "{}")).toMatchObject({
         reason: "issue_assigned",
         issue: {
-          identifier: "PAP-1201",
+          identifier: "MERC-1201",
           title: "Fix gallery opening for inline images",
           status: "in_progress",
           priority: "medium",
@@ -804,7 +804,7 @@ describe("codex execute", () => {
       });
       expect(capture.prompt).toContain("## Mercury Wake Payload");
       expect(capture.prompt).toContain("Do not switch to another issue until you have handled this wake.");
-      expect(capture.prompt).toContain("- issue: PAP-1201 Fix gallery opening for inline images");
+      expect(capture.prompt).toContain("- issue: MERC-1201 Fix gallery opening for inline images");
       expect(capture.prompt).toContain("- pending comments: 0/0");
       expect(capture.prompt).toContain("- issue status: in_progress");
       expect(capture.prompt).toContain("- checkout: already claimed by the harness for this run");
@@ -869,7 +869,7 @@ describe("codex execute", () => {
             reason: "issue_commented",
             issue: {
               id: "issue-1",
-              identifier: "PAP-874",
+              identifier: "MERC-874",
               title: "chat-speed issues",
               status: "in_progress",
               priority: "medium",

@@ -16,15 +16,15 @@ describe("StatusIcon", () => {
           coveredBlockerCount: 1,
           stalledBlockerCount: 0,
           attentionBlockerCount: 0,
-          sampleBlockerIdentifier: "PAP-2",
+          sampleBlockerIdentifier: "MERC-2",
           sampleStalledBlockerIdentifier: null,
         }}
       />,
     );
 
     expect(html).toContain('data-blocker-attention-state="covered"');
-    expect(html).toContain('aria-label="Blocked · waiting on active sub-issue PAP-2"');
-    expect(html).toContain('title="Blocked · waiting on active sub-issue PAP-2"');
+    expect(html).toContain('aria-label="Blocked · waiting on active sub-issue MERC-2"');
+    expect(html).toContain('title="Blocked · waiting on active sub-issue MERC-2"');
     expect(html).toContain("border-cyan-600");
     expect(html).not.toContain("border-red-600");
     expect(html).not.toContain("border-dashed");
@@ -64,7 +64,7 @@ describe("StatusIcon", () => {
           coveredBlockerCount: 0,
           stalledBlockerCount: 0,
           attentionBlockerCount: 1,
-          sampleBlockerIdentifier: "PAP-2",
+          sampleBlockerIdentifier: "MERC-2",
           sampleStalledBlockerIdentifier: null,
         }}
       />,
@@ -87,14 +87,14 @@ describe("StatusIcon", () => {
           coveredBlockerCount: 0,
           stalledBlockerCount: 1,
           attentionBlockerCount: 0,
-          sampleBlockerIdentifier: "PAP-2279",
-          sampleStalledBlockerIdentifier: "PAP-2279",
+          sampleBlockerIdentifier: "MERC-2279",
+          sampleStalledBlockerIdentifier: "MERC-2279",
         }}
       />,
     );
 
     expect(html).toContain('data-blocker-attention-state="stalled"');
-    expect(html).toContain('aria-label="Blocked · review stalled on PAP-2279"');
+    expect(html).toContain('aria-label="Blocked · review stalled on MERC-2279"');
     expect(html).toContain("border-amber-600");
     expect(html).not.toContain("border-cyan-600");
     expect(html).not.toContain("border-red-600");

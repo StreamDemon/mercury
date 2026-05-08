@@ -182,7 +182,7 @@ function StorybookProviders({
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <MemoryRouter initialEntries={["/PAP/storybook"]}>
+        <MemoryRouter initialEntries={["/MERC/storybook"]}>
           <CompanyProvider>
             <EditorAutocompleteProvider>
               <ToastProvider>

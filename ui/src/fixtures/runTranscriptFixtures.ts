@@ -16,7 +16,7 @@ export const runTranscriptFixtureMeta: RunTranscriptFixtureMeta = {
   fixtureLabel: "Sanitized development fixture",
   agentName: "CodexCoder",
   agentId: "codexcoder-fixture",
-  issueIdentifier: "PAP-473",
+  issueIdentifier: "MERC-473",
   issueTitle: "Humanize run transcripts across run detail and live surfaces",
   startedAt: "2026-03-11T15:21:05.948Z",
   finishedAt: null,
@@ -28,7 +28,7 @@ export const runTranscriptFixtureEntries: TranscriptEntry[] = [
   {
     kind: "stderr",
     ts: "2026-03-11T15:21:05.594Z",
-    text: "[mercury] Skipping saved session resume for task \"PAP-473\" because wake reason is issue_assigned.",
+    text: "[mercury] Skipping saved session resume for task \"MERC-473\" because wake reason is issue_assigned.",
   },
   {
     kind: "init",

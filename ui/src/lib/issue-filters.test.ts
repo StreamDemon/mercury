@@ -31,7 +31,7 @@ function makeIssue(overrides: Partial<Issue> = {}): Issue {
     createdByAgentId: null,
     createdByUserId: null,
     issueNumber: 1,
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     requestDepth: 0,
     billingCode: null,
     assigneeAdapterOverrides: null,

@@ -110,10 +110,10 @@ vi.mock("../api/instanceSettings", () => ({
 
 vi.mock("@/lib/router", () => ({
   Link: ({ children, to }: { children?: ReactNode; to: string }) => <a href={to}>{children}</a>,
-  useLocation: () => ({ pathname: "/issues/PAP-1", search: "", hash: "", state: null }),
+  useLocation: () => ({ pathname: "/issues/MERC-1", search: "", hash: "", state: null }),
   useNavigate: () => mockNavigate,
   useNavigationType: () => "PUSH",
-  useParams: () => ({ issueId: "PAP-1" }),
+  useParams: () => ({ issueId: "MERC-1" }),
 }));
 
 vi.mock("../context/CompanyContext", () => ({
@@ -348,7 +348,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
     currentExecutionWorkspace: null,
     createdByAgentId: null,
     createdByUserId: null,
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     issueNumber: 1,
     originKind: "manual",
     originId: null,
@@ -432,7 +432,7 @@ function createPauseHold(overrides: Partial<IssueTreeHold> = {}): IssueTreeHold 
         issueId: "issue-1",
         parentIssueId: null,
         depth: 0,
-        issueIdentifier: "PAP-1",
+        issueIdentifier: "MERC-1",
         issueTitle: "Issue detail smoke",
         issueStatus: "todo",
         assigneeAgentId: null,
@@ -450,7 +450,7 @@ function createPauseHold(overrides: Partial<IssueTreeHold> = {}): IssueTreeHold 
         issueId: "child-1",
         parentIssueId: "issue-1",
         depth: 1,
-        issueIdentifier: "PAP-2",
+        issueIdentifier: "MERC-2",
         issueTitle: "Held child",
         issueStatus: "todo",
         assigneeAgentId: null,
@@ -485,7 +485,7 @@ function createResumePreview(): IssueTreeControlPreview {
     issues: [
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Issue detail smoke",
         status: "todo",
         parentId: null,
@@ -500,7 +500,7 @@ function createResumePreview(): IssueTreeControlPreview {
       },
       {
         id: "child-1",
-        identifier: "PAP-2",
+        identifier: "MERC-2",
         title: "Held child",
         status: "todo",
         parentId: "issue-1",
@@ -540,7 +540,7 @@ function createPausePreview(): IssueTreeControlPreview {
     issues: [
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Issue detail smoke",
         status: "todo",
         parentId: null,
@@ -555,7 +555,7 @@ function createPausePreview(): IssueTreeControlPreview {
       },
       {
         id: "child-1",
-        identifier: "PAP-2",
+        identifier: "MERC-2",
         title: "Paused child",
         status: "in_review",
         parentId: "issue-1",
@@ -570,7 +570,7 @@ function createPausePreview(): IssueTreeControlPreview {
       },
       {
         id: "child-2",
-        identifier: "PAP-3",
+        identifier: "MERC-3",
         title: "Completed child",
         status: "done",
         parentId: "issue-1",
@@ -587,7 +587,7 @@ function createPausePreview(): IssueTreeControlPreview {
     skippedIssues: [
       {
         id: "child-2",
-        identifier: "PAP-3",
+        identifier: "MERC-3",
         title: "Completed child",
         status: "done",
         parentId: "issue-1",
@@ -626,7 +626,7 @@ function createRestorePreview(): IssueTreeControlPreview {
     issues: [
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Issue detail smoke",
         status: "todo",
         parentId: null,
@@ -641,7 +641,7 @@ function createRestorePreview(): IssueTreeControlPreview {
       },
       {
         id: "child-1",
-        identifier: "PAP-2",
+        identifier: "MERC-2",
         title: "Cancelled child",
         status: "cancelled",
         parentId: "issue-1",
@@ -658,7 +658,7 @@ function createRestorePreview(): IssueTreeControlPreview {
     skippedIssues: [
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Issue detail smoke",
         status: "todo",
         parentId: null,
@@ -681,7 +681,7 @@ function createRestorePreview(): IssueTreeControlPreview {
 function createCancelPreview(issueCount = 8): IssueTreeControlPreview {
   const issues = Array.from({ length: issueCount }, (_, index) => ({
     id: index === 0 ? "issue-1" : `child-${index}`,
-    identifier: index === 0 ? "PAP-1" : `PAP-${index + 1}`,
+    identifier: index === 0 ? "MERC-1" : `MERC-${index + 1}`,
     title: index === 0 ? "Issue detail smoke" : `Cancellable child ${index}`,
     status: "todo" as const,
     parentId: index === 0 ? null : "issue-1",
@@ -829,7 +829,7 @@ describe("IssueDetail", () => {
         coveredBlockerCount: 1,
         stalledBlockerCount: 0,
         attentionBlockerCount: 0,
-        sampleBlockerIdentifier: "PAP-2",
+        sampleBlockerIdentifier: "MERC-2",
         sampleStalledBlockerIdentifier: null,
       },
     }));
@@ -850,7 +850,7 @@ describe("IssueDetail", () => {
     const childIssue = createIssue({
       id: "child-1",
       parentId: "issue-1",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       issueNumber: 2,
       title: "Held child",
     });
@@ -937,7 +937,7 @@ describe("IssueDetail", () => {
     await flushReact();
     await flushReact();
 
-    expect(mockIssuesApi.releaseTreeHold).toHaveBeenCalledWith("PAP-1", "hold-1", {
+    expect(mockIssuesApi.releaseTreeHold).toHaveBeenCalledWith("MERC-1", "hold-1", {
       reason: null,
       metadata: { wakeAgents: true },
     });
@@ -956,7 +956,7 @@ describe("IssueDetail", () => {
     const childIssue = createIssue({
       id: "child-1",
       parentId: "issue-1",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       issueNumber: 2,
       title: "Paused child",
     });
@@ -1008,7 +1008,7 @@ describe("IssueDetail", () => {
     await flushReact();
     await flushReact();
 
-    expect(mockIssuesApi.previewTreeControl).toHaveBeenCalledWith("PAP-1", {
+    expect(mockIssuesApi.previewTreeControl).toHaveBeenCalledWith("MERC-1", {
       mode: "pause",
       releasePolicy: { strategy: "manual" },
     });
@@ -1029,7 +1029,7 @@ describe("IssueDetail", () => {
     });
     await flushReact();
 
-    expect(mockIssuesApi.createTreeHold).toHaveBeenCalledWith("PAP-1", {
+    expect(mockIssuesApi.createTreeHold).toHaveBeenCalledWith("MERC-1", {
       mode: "pause",
       reason: null,
       releasePolicy: { strategy: "manual", note: "full_pause" },
@@ -1040,7 +1040,7 @@ describe("IssueDetail", () => {
     const childIssue = createIssue({
       id: "child-1",
       parentId: "issue-1",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       issueNumber: 2,
       title: "Cancelled child",
       status: "cancelled",
@@ -1105,7 +1105,7 @@ describe("IssueDetail", () => {
     await flushReact();
     await flushReact();
 
-    expect(mockIssuesApi.previewTreeControl).toHaveBeenCalledWith("PAP-1", {
+    expect(mockIssuesApi.previewTreeControl).toHaveBeenCalledWith("MERC-1", {
       mode: "restore",
       releasePolicy: { strategy: "manual" },
     });
@@ -1121,7 +1121,7 @@ describe("IssueDetail", () => {
     });
     await flushReact();
 
-    expect(mockIssuesApi.createTreeHold).toHaveBeenCalledWith("PAP-1", {
+    expect(mockIssuesApi.createTreeHold).toHaveBeenCalledWith("MERC-1", {
       mode: "restore",
       reason: null,
       releasePolicy: { strategy: "manual" },
@@ -1133,7 +1133,7 @@ describe("IssueDetail", () => {
     const childIssue = createIssue({
       id: "child-1",
       parentId: "issue-1",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       issueNumber: 2,
       title: "Cancellable child",
     });
@@ -1168,7 +1168,7 @@ describe("IssueDetail", () => {
     await flushReact();
     await flushReact();
 
-    expect(mockIssuesApi.previewTreeControl).toHaveBeenCalledWith("PAP-1", {
+    expect(mockIssuesApi.previewTreeControl).toHaveBeenCalledWith("MERC-1", {
       mode: "cancel",
       releasePolicy: { strategy: "manual" },
     });

@@ -273,7 +273,7 @@ describe("renderMercuryWakePrompt", () => {
       reason: "issue_assigned",
       issue: {
         id: "issue-1",
-        identifier: "PAP-1580",
+        identifier: "MERC-1580",
         title: "Update prompts",
         status: "in_progress",
       },
@@ -297,7 +297,7 @@ describe("renderMercuryWakePrompt", () => {
       reason: "issue_commented",
       issue: {
         id: "issue-1",
-        identifier: "PAP-1703",
+        identifier: "MERC-1703",
         title: "Blocked parent",
         status: "todo",
       },
@@ -306,7 +306,7 @@ describe("renderMercuryWakePrompt", () => {
       unresolvedBlockerSummaries: [
         {
           id: "blocker-1",
-          identifier: "PAP-1723",
+          identifier: "MERC-1723",
           title: "Finish blocker",
           status: "todo",
           priority: "medium",
@@ -325,7 +325,7 @@ describe("renderMercuryWakePrompt", () => {
 
     expect(prompt).toContain("dependency-blocked interaction: yes");
     expect(prompt).toContain("respond or triage the human comment");
-    expect(prompt).toContain("PAP-1723 Finish blocker (todo)");
+    expect(prompt).toContain("MERC-1723 Finish blocker (todo)");
   });
 
   it("renders loose review request instructions for execution handoffs", () => {
@@ -333,7 +333,7 @@ describe("renderMercuryWakePrompt", () => {
       reason: "execution_review_requested",
       issue: {
         id: "issue-1",
-        identifier: "PAP-2011",
+        identifier: "MERC-2011",
         title: "Review request handoff",
         status: "in_review",
       },
@@ -361,7 +361,7 @@ describe("renderMercuryWakePrompt", () => {
       reason: "issue_children_completed",
       issue: {
         id: "parent-1",
-        identifier: "PAP-100",
+        identifier: "MERC-100",
         title: "Integrate child work",
         status: "in_progress",
         priority: "medium",
@@ -383,7 +383,7 @@ describe("renderMercuryWakePrompt", () => {
       childIssueSummaries: [
         {
           id: "child-1",
-          identifier: "PAP-101",
+          identifier: "MERC-101",
           title: "Implement helper",
           status: "done",
           priority: "medium",
@@ -405,7 +405,7 @@ describe("renderMercuryWakePrompt", () => {
       },
       childIssueSummaries: [
         {
-          identifier: "PAP-101",
+          identifier: "MERC-101",
           summary: "Added the helper route and tests.",
         },
       ],
@@ -421,7 +421,7 @@ describe("renderMercuryWakePrompt", () => {
     expect(prompt).toContain("- reason: Run described future work without concrete action evidence");
     expect(prompt).toContain("- instruction: Take the first concrete action now.");
     expect(prompt).toContain("Direct child issue summaries:");
-    expect(prompt).toContain("PAP-101 Implement helper (done)");
+    expect(prompt).toContain("MERC-101 Implement helper (done)");
     expect(prompt).toContain("Added the helper route and tests.");
   });
 });

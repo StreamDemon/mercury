@@ -385,7 +385,7 @@ describe("optimistic issue comments", () => {
         createdByAgentId: null,
         createdByUserId: "board-1",
         issueNumber: 1,
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         originKind: "manual",
         originId: null,
         originRunId: null,
@@ -428,7 +428,7 @@ describe("optimistic issue comments", () => {
         ancestors: [
           {
             id: "issue-9",
-            identifier: "PAP-9",
+            identifier: "MERC-9",
             title: "Old parent",
             description: null,
             status: "todo",
@@ -454,7 +454,7 @@ describe("optimistic issue comments", () => {
         createdByAgentId: null,
         createdByUserId: "board-1",
         issueNumber: 1,
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         originKind: "manual",
         originId: null,
         originRunId: null,
@@ -490,7 +490,7 @@ describe("optimistic issue comments", () => {
         blockedBy: [
           {
             id: "issue-2",
-            identifier: "PAP-2",
+            identifier: "MERC-2",
             title: "First blocker",
             status: "todo",
             priority: "medium",
@@ -499,7 +499,7 @@ describe("optimistic issue comments", () => {
           },
           {
             id: "issue-3",
-            identifier: "PAP-3",
+            identifier: "MERC-3",
             title: "Second blocker",
             status: "todo",
             priority: "medium",
@@ -599,9 +599,9 @@ describe("optimistic issue comments", () => {
   });
 
   it("matches issues by either uuid or identifier reference", () => {
-    expect(matchesIssueRef({ id: "issue-1", identifier: "PAP-1" } as const, ["issue-1"])).toBe(true);
-    expect(matchesIssueRef({ id: "issue-1", identifier: "PAP-1" } as const, ["PAP-1"])).toBe(true);
-    expect(matchesIssueRef({ id: "issue-1", identifier: "PAP-1" } as const, ["issue-2", "PAP-2"])).toBe(false);
+    expect(matchesIssueRef({ id: "issue-1", identifier: "MERC-1" } as const, ["issue-1"])).toBe(true);
+    expect(matchesIssueRef({ id: "issue-1", identifier: "MERC-1" } as const, ["MERC-1"])).toBe(true);
+    expect(matchesIssueRef({ id: "issue-1", identifier: "MERC-1" } as const, ["issue-2", "MERC-2"])).toBe(false);
   });
 
   it("applies optimistic field updates across cached issue collections", () => {
@@ -626,7 +626,7 @@ describe("optimistic issue comments", () => {
         createdByAgentId: null,
         createdByUserId: "board-1",
         issueNumber: 1,
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         originKind: "manual",
         originId: null,
         originRunId: null,
@@ -667,7 +667,7 @@ describe("optimistic issue comments", () => {
         createdByAgentId: null,
         createdByUserId: "board-1",
         issueNumber: 2,
-        identifier: "PAP-2",
+        identifier: "MERC-2",
         originKind: "manual",
         originId: null,
         originRunId: null,
@@ -690,7 +690,7 @@ describe("optimistic issue comments", () => {
       },
     ];
 
-    const next = applyOptimisticIssueFieldUpdateToCollection(issues, ["PAP-1"], { assigneeAgentId: "agent-9" });
+    const next = applyOptimisticIssueFieldUpdateToCollection(issues, ["MERC-1"], { assigneeAgentId: "agent-9" });
 
     expect(next?.[0]?.assigneeAgentId).toBe("agent-9");
     expect(next?.[1]?.assigneeAgentId).toBe("agent-2");

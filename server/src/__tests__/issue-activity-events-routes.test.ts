@@ -139,7 +139,7 @@ function makeIssue() {
     assigneeAgentId: "22222222-2222-4222-8222-222222222222",
     assigneeUserId: null,
     createdByUserId: "local-board",
-    identifier: "PAP-580",
+    identifier: "MERC-580",
     title: "Activity event issue",
     executionPolicy: null,
     executionState: null,
@@ -198,7 +198,7 @@ describe("issue activity event routes", () => {
       blockedBy: [
         {
           id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-          identifier: "PAP-10",
+          identifier: "MERC-10",
           title: "Old blocker",
           status: "todo",
           priority: "medium",
@@ -212,7 +212,7 @@ describe("issue activity event routes", () => {
       blockedBy: [
         {
           id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-          identifier: "PAP-11",
+          identifier: "MERC-11",
           title: "New blocker",
           status: "todo",
           priority: "medium",
@@ -249,14 +249,14 @@ describe("issue activity event routes", () => {
             addedBlockedByIssues: [
               {
                 id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-                identifier: "PAP-11",
+                identifier: "MERC-11",
                 title: "New blocker",
               },
             ],
             removedBlockedByIssues: [
               {
                 id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-                identifier: "PAP-10",
+                identifier: "MERC-10",
                 title: "Old blocker",
               },
             ],

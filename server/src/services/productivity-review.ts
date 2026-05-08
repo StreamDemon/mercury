@@ -175,7 +175,7 @@ export function productivityReviewService(db: Db, deps?: { enqueueWakeup?: Enque
       .select({ issuePrefix: companies.issuePrefix })
       .from(companies)
       .where(eq(companies.id, companyId))
-      .then((rows) => rows[0]?.issuePrefix ?? "PAP");
+      .then((rows) => rows[0]?.issuePrefix ?? "MERC");
   }
 
   async function getAgent(agentId: string) {
