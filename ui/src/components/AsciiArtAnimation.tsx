@@ -4,30 +4,53 @@ const CHARS = [" ", ".", "·", "▪", "▫", "○"] as const;
 const TARGET_FPS = 24;
 const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
 
-const PAPERCLIP_SPRITES = [
+const MERCURY_SPRITES = [
   [
-    "  ╭────╮ ",
-    " ╭╯╭──╮│ ",
-    " │ │  ││ ",
-    " │ │  ││ ",
-    " │ │  ││ ",
-    " │ │  ││ ",
-    " │ ╰──╯│ ",
-    " ╰─────╯ ",
+    "    ·    ",
+    "  ╭───╮  ",
+    " ·     · ",
+    " │  ●  │ ",
+    " ·     · ",
+    "  ╰───╯  ",
+    "    ·    ",
+    "         ",
   ],
   [
-    " ╭─────╮ ",
-    " │╭──╮╰╮ ",
-    " ││  │ │ ",
-    " ││  │ │ ",
-    " ││  │ │ ",
-    " ││  │ │ ",
-    " │╰──╯ │ ",
-    " ╰────╯  ",
+    "   ·     ",
+    "  ╭───╮  ",
+    "·      · ",
+    " │  ●  │ ",
+    " ·      ·",
+    "  ╰───╯  ",
+    "     ·   ",
+    "         ",
   ],
 ] as const;
 
-type PaperclipSprite = (typeof PAPERCLIP_SPRITES)[number];
+type MercurySprite = (typeof MERCURY_SPRITES)[number];
+
+const CENTERPIECE_ART = [
+  "                                                   $$$$@$   ",
+  "                                              &$$&          ",
+  "         $$$$$$$$                 $$$$$$0 a$$$ r|           ",
+  "        h$8     @$              $*$    @$a fu               ",
+  "        $$ $   $  $$         $$8 $  $$@ 1u                  ",
+  "       $$  $@  $   $        $@U   $$ -nv rj                 ",
+  "       $   $$8$ @ %@$     $@ % $$$ un   >u                  ",
+  "      $$  $$ M$  B $ $  $$ @$d$  nv cu  u<                  ",
+  "      $w  $  p$B$@& B $@ $ *8 un ru{v   n                   ",
+  "    ? $  $o  $$$kd$@ $ $ B8  u un   n  nv                   ",
+  "   r B$  $  h$  $L $$B$B% lv unju  f   n                    ",
+  " (}@ $  a$  $  $$$ u $$$   vn  n)  u  nj                    ",
+  "<ro $b  $   $$$ vv u:v   ux   xn  v   n                     ",
+  "n B B    B$$ ln- u u(  un     n   u  \\u                     ",
+  "n< $$$@p  1n> r\\ xX nun      ln  n   n                      ",
+  " unnnnnu{ O$jv nn   )        n\\nl   un                      ",
+  "  $$$$$$$$$                  nnnnnnnnr                      ",
+] as const;
+
+const CENTERPIECE_HEIGHT = CENTERPIECE_ART.length;
+const CENTERPIECE_WIDTH = Math.max(...CENTERPIECE_ART.map((r) => r.length));
 
 interface Clip {
   x: number;
@@ -37,7 +60,7 @@ interface Clip {
   life: number;
   maxLife: number;
   drift: number;
-  sprite: PaperclipSprite;
+  sprite: MercurySprite;
   width: number;
   height: number;
 }
@@ -53,7 +76,7 @@ function measureChar(container: HTMLElement): { w: number; h: number } {
   return { w: rect.width, h: rect.height };
 }
 
-function spriteSize(sprite: PaperclipSprite): { width: number; height: number } {
+function spriteSize(sprite: MercurySprite): { width: number; height: number } {
   let width = 0;
   for (const row of sprite) width = Math.max(width, row.length);
   return { width, height: sprite.length };
@@ -125,23 +148,18 @@ export function AsciiArtAnimation() {
         }
       }
 
-      const gapX = 18;
-      const gapY = 13;
-      for (let baseRow = 1; baseRow < rows - 9; baseRow += gapY) {
-        const startX = Math.floor(baseRow / gapY) % 2 === 0 ? 2 : 10;
-        for (let baseCol = startX; baseCol < cols - 10; baseCol += gapX) {
-          const sprite = PAPERCLIP_SPRITES[(baseCol + baseRow) % PAPERCLIP_SPRITES.length]!;
-          for (let sr = 0; sr < sprite.length; sr++) {
-            const line = sprite[sr]!;
-            for (let sc = 0; sc < line.length; sc++) {
-              const ch = line[sc] ?? " ";
-              if (ch === " ") continue;
-              const row = baseRow + sr;
-              const col = baseCol + sc;
-              if (row < 0 || row >= rows || col < 0 || col >= cols) continue;
-              grid[row]![col] = ch;
-            }
-          }
+      const baseRow = Math.floor((rows - CENTERPIECE_HEIGHT) / 2);
+      const baseCol = Math.floor((cols - CENTERPIECE_WIDTH) / 2);
+      for (let sr = 0; sr < CENTERPIECE_ART.length; sr++) {
+        const line = CENTERPIECE_ART[sr]!;
+        const row = baseRow + sr;
+        if (row < 0 || row >= rows) continue;
+        for (let sc = 0; sc < line.length; sc++) {
+          const ch = line[sc] ?? " ";
+          if (ch === " ") continue;
+          const col = baseCol + sc;
+          if (col < 0 || col >= cols) continue;
+          grid[row]![col] = ch;
         }
       }
 
@@ -150,8 +168,25 @@ export function AsciiArtAnimation() {
       lastOutput = output;
     }
 
+    function stampCenterpiece() {
+      const baseRow = Math.floor((rows - CENTERPIECE_HEIGHT) / 2);
+      const baseCol = Math.floor((cols - CENTERPIECE_WIDTH) / 2);
+      for (let sr = 0; sr < CENTERPIECE_ART.length; sr++) {
+        const line = CENTERPIECE_ART[sr]!;
+        const row = baseRow + sr;
+        if (row < 0 || row >= rows) continue;
+        for (let sc = 0; sc < line.length; sc++) {
+          const ch = line[sc] ?? " ";
+          if (ch === " ") continue;
+          const col = baseCol + sc;
+          if (col < 0 || col >= cols) continue;
+          clipMask[row * cols + col] = ch.charCodeAt(0);
+        }
+      }
+    }
+
     function spawnClip() {
-      const sprite = PAPERCLIP_SPRITES[Math.floor(Math.random() * PAPERCLIP_SPRITES.length)]!;
+      const sprite = MERCURY_SPRITES[Math.floor(Math.random() * MERCURY_SPRITES.length)]!;
       const size = spriteSize(sprite);
       const edge = Math.random();
       let x = 0;
@@ -198,7 +233,11 @@ export function AsciiArtAnimation() {
           const col = baseCol + sc;
           if (col < 0 || col >= cols) continue;
           const idx = row * cols + col;
-          const stroke = ch === "│" || ch === "─" ? 0.8 : 0.92;
+          const stroke =
+            ch === "●" ? 1.0 :
+            ch === "·" ? 0.55 :
+            ch === "│" || ch === "─" || ch === "╭" || ch === "╮" || ch === "╰" || ch === "╯" ? 0.8 :
+            0.92;
           trail[idx] = Math.max(trail[idx] ?? 0, alpha * stroke);
           clipMask[idx] = ch.charCodeAt(0);
         }
@@ -220,6 +259,7 @@ export function AsciiArtAnimation() {
 
       for (let i = 0; i < trail.length; i++) trail[i] *= 0.92;
       clipMask.fill(0);
+      stampCenterpiece();
 
       for (let i = clips.length - 1; i >= 0; i--) {
         const clip = clips[i]!;
