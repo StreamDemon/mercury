@@ -97,6 +97,16 @@ services:
         condition: service_healthy
 
   storybook:
+    # Mirror the dev service's build config so `docker compose up storybook`
+    # works standalone (without a prior `up dev` or `build` step). Both
+    # services tag the image as `mercury-dev:latest`, so compose builds it
+    # once and reuses across services.
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+      args:
+        USER_UID: "${USER_UID:-1000}"
+        USER_GID: "${USER_GID:-1000}"
     image: mercury-dev:latest
     init: true
     tty: true

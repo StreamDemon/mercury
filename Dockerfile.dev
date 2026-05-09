@@ -45,11 +45,30 @@ RUN npm install --global \
 # Run as root → installs `hermes` to /usr/local/bin/hermes (system-wide).
 # Fresh install, never copied from WSL — preserves option to diverge as the
 # Mercury x Hermes integration deepens (see project_hermes_integration memory).
+#
+# Supply-chain hardening: download the installer first, verify its SHA256,
+# then run it. This catches the most realistic attack vector (compromised
+# install.sh) without abandoning the canonical install method. Note that
+# the installer itself fetches more code from NousResearch/hermes-agent@main
+# at install time (uv-managed Python deps, bundled skills, etc.), so this
+# pin is partial — a fully air-tight setup would also vendor the agent
+# source. Acceptable trade-off for a dev image; bump HERMES_INSTALL_SHA256
+# whenever the installer is updated upstream.
+#
+# To compute a new hash:
+#   curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+#     | sha256sum
+#
 # `hermes --version` at build time would fail because the installer writes to
 # shell rc files (~/.bashrc, etc.) that are not sourced inside a Dockerfile RUN.
 # PATH gets repaired in interactive shells started from the running container;
 # verify with `hermes --version` after `pnpm dev:docker` if needed.
-RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+ARG HERMES_INSTALL_SHA256=e805c9dfc33165d77ac73e64196a00761aa9b849693aa5d230f460165d5cba84
+RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+      -o /tmp/hermes-install.sh \
+  && echo "${HERMES_INSTALL_SHA256}  /tmp/hermes-install.sh" | sha256sum -c - \
+  && bash /tmp/hermes-install.sh \
+  && rm /tmp/hermes-install.sh
 
 # Install pnpm system-wide via npm to bypass corepack's per-user cache.
 # `corepack enable` (above) created /usr/local/bin/pnpm as a shim that downloads
