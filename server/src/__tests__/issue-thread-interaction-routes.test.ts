@@ -108,7 +108,7 @@ function createIssue(overrides: Record<string, unknown> = {}) {
     assigneeAgentId: ASSIGNEE_AGENT_ID,
     assigneeUserId: null,
     createdByUserId: "local-board",
-    identifier: "PAP-1714",
+    identifier: "MERC-1714",
     title: "Persist interactions",
     executionPolicy: null,
     executionState: null,

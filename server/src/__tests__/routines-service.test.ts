@@ -743,7 +743,7 @@ describeEmbeddedPostgres("routine service live-execution coalescing", () => {
       name: "Routine worktree",
       status: "active",
       providerType: "git_worktree",
-      branchName: "pap-1634-routine-branch",
+      branchName: "merc-1634-routine-branch",
     });
 
     const branchRoutine = await svc.create(
@@ -784,11 +784,11 @@ describeEmbeddedPostgres("routine service live-execution coalescing", () => {
       .where(eq(routineRuns.id, run.id))
       .then((rows) => rows[0] ?? null);
 
-    expect(storedIssue?.title).toBe("Review pap-1634-routine-branch");
-    expect(storedIssue?.description).toBe("Use branch pap-1634-routine-branch");
+    expect(storedIssue?.title).toBe("Review merc-1634-routine-branch");
+    expect(storedIssue?.description).toBe("Use branch merc-1634-routine-branch");
     expect(storedRun?.triggerPayload).toEqual({
       variables: {
-        workspaceBranch: "pap-1634-routine-branch",
+        workspaceBranch: "merc-1634-routine-branch",
       },
     });
   });

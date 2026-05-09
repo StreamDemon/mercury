@@ -117,7 +117,7 @@ function FoundationsMatrix() {
               </Badge>
             ))}
             <Badge variant="outline" className="font-mono">
-              PAP-1641
+              MERC-1641
             </Badge>
             <Badge variant="secondary">
               <ArrowRight />

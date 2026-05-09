@@ -40,7 +40,7 @@ function makeIssue(overrides: Partial<Issue> = {}): Issue {
     createdByAgentId: null,
     createdByUserId: null,
     issueNumber: 1442,
-    identifier: "PAP-1442",
+    identifier: "MERC-1442",
     requestDepth: 0,
     billingCode: null,
     assigneeAdapterOverrides: null,
@@ -101,14 +101,14 @@ describe("getIssueDetailQueryOptions", () => {
     const fullIssue = makeIssue({ description: "GitHub Security Advisory body" });
 
     queryClient.setQueryData(queryKeys.issues.detail("issue-1"), partialIssue);
-    queryClient.setQueryData(queryKeys.issues.detail("PAP-1442"), partialIssue);
+    queryClient.setQueryData(queryKeys.issues.detail("MERC-1442"), partialIssue);
     vi.mocked(issuesApi.get).mockResolvedValue(fullIssue);
 
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetailQueryHarness
-            issueRef="PAP-1442"
+            issueRef="MERC-1442"
             placeholderIssue={{ id: partialIssue.id, identifier: partialIssue.identifier }}
           />
         </QueryClientProvider>,
@@ -117,7 +117,7 @@ describe("getIssueDetailQueryOptions", () => {
 
     await flush();
 
-    expect(issuesApi.get).toHaveBeenCalledWith("PAP-1442");
+    expect(issuesApi.get).toHaveBeenCalledWith("MERC-1442");
     expect(container.textContent).toContain("GitHub Security Advisory body");
 
     await act(async () => {

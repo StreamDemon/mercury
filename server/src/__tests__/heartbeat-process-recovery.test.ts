@@ -1012,7 +1012,7 @@ describeEmbeddedPostgres("heartbeat orphaned process recovery", () => {
     await db
       .update(issues)
       .set({
-        title: "Recover stalled issue PAP-1",
+        title: "Recover stalled issue MERC-1",
         originKind: "stranded_issue_recovery",
         originId: sourceIssueId,
       })
@@ -1922,7 +1922,7 @@ describeEmbeddedPostgres("heartbeat orphaned process recovery", () => {
     await db
       .update(issues)
       .set({
-        title: "Recover stalled issue PAP-1",
+        title: "Recover stalled issue MERC-1",
         originKind: "stranded_issue_recovery",
         originId: sourceIssueId,
       })
@@ -1994,7 +1994,7 @@ describeEmbeddedPostgres("heartbeat orphaned process recovery", () => {
     await db
       .update(issues)
       .set({
-        title: "Recover stalled issue PAP-1",
+        title: "Recover stalled issue MERC-1",
         originKind: "stranded_issue_recovery",
         originId: sourceIssueId,
       })

@@ -170,7 +170,7 @@ const kanbanIssues: Issue[] = [
   ...storybookIssues,
   createIssue({
     id: "issue-kanban-backlog",
-    identifier: "PAP-1701",
+    identifier: "MERC-1701",
     issueNumber: 1701,
     title: "Sketch company analytics dashboard",
     status: "backlog",
@@ -179,7 +179,7 @@ const kanbanIssues: Issue[] = [
   }),
   createIssue({
     id: "issue-kanban-cancelled",
-    identifier: "PAP-1702",
+    identifier: "MERC-1702",
     issueNumber: 1702,
     title: "Remove obsolete color token migration",
     status: "cancelled",
@@ -193,8 +193,8 @@ const packageFiles: Record<string, string> = {
   "agents/codexcoder/AGENTS.md": "---\nname: CodexCoder\nskills:\n  - frontend-design\n  - mercury\n---\nShips product UI and verifies changes.",
   "agents/qachecker/AGENTS.md": "---\nname: QAChecker\nskills:\n  - web-design-guidelines\n---\nReviews browser behavior and acceptance criteria.",
   "projects/board-ui/PROJECT.md": "---\ntitle: Board UI\nstatus: in_progress\n---\nStorybook and operator control-plane surfaces.",
-  "tasks/PAP-1641.md": "---\ntitle: Create super-detailed storybooks\npriority: high\n---\nParent issue for Storybook coverage.",
-  "tasks/PAP-1677.md": "---\ntitle: Data Visualization & Misc stories\npriority: medium\n---\nFixture task for this story file.",
+  "tasks/MERC-1641.md": "---\ntitle: Create super-detailed storybooks\npriority: high\n---\nParent issue for Storybook coverage.",
+  "tasks/MERC-1677.md": "---\ntitle: Data Visualization & Misc stories\npriority: medium\n---\nFixture task for this story file.",
   "skills/frontend-design/SKILL.md": "---\nname: frontend-design\n---\nDesign quality guidance.",
 };
 
@@ -202,7 +202,7 @@ const actionMap = new Map([
   ["COMPANY.md", "replace"],
   ["agents/codexcoder/AGENTS.md", "update"],
   ["agents/qachecker/AGENTS.md", "create"],
-  ["tasks/PAP-1677.md", "create"],
+  ["tasks/MERC-1677.md", "create"],
 ]);
 
 function ActivityChartsMatrix({ empty = false }: { empty?: boolean }) {
@@ -346,12 +346,12 @@ function PackageFileTreeDemo({ empty = false }: { empty?: boolean }) {
   const allFilePaths = useMemo(() => collectAllPaths(nodes, "file"), [nodes]);
   const [expandedDirs, setExpandedDirs] = useState(() => collectAllPaths(nodes, "dir"));
   const [checkedFiles, setCheckedFiles] = useState(() => allFilePaths);
-  const [selectedFile, setSelectedFile] = useState<string | null>(empty ? null : "tasks/PAP-1677.md");
+  const [selectedFile, setSelectedFile] = useState<string | null>(empty ? null : "tasks/MERC-1677.md");
 
   useEffect(() => {
     setExpandedDirs(collectAllPaths(nodes, "dir"));
     setCheckedFiles(allFilePaths);
-    setSelectedFile(empty ? null : "tasks/PAP-1677.md");
+    setSelectedFile(empty ? null : "tasks/MERC-1677.md");
   }, [allFilePaths, empty, nodes]);
 
   const selectedContent = selectedFile ? packageFiles[selectedFile] ?? "" : "";
@@ -469,7 +469,7 @@ function EntityRowsDemo({ empty = false }: { empty?: boolean }) {
         {
           id: "issue",
           leading: <FolderKanban className="h-4 w-4 text-emerald-600" />,
-          identifier: "PAP-1677",
+          identifier: "MERC-1677",
           title: "Storybook: Data Visualization & Misc stories",
           subtitle: "Medium priority · Board UI project",
           trailing: <Badge variant="secondary">UI</Badge>,
@@ -497,7 +497,7 @@ function EntityRowsDemo({ empty = false }: { empty?: boolean }) {
               subtitle={row.subtitle}
               trailing={row.trailing}
               selected={row.selected}
-              to={row.id === "issue" ? "/PAP/issues/PAP-1677" : undefined}
+              to={row.id === "issue" ? "/PAP/issues/MERC-1677" : undefined}
             />
           ))}
           {rows.length === 0 && (
@@ -532,7 +532,7 @@ function SwipeToArchiveDemo({ disabled = false }: { disabled?: boolean }) {
             >
               <EntityRow
                 leading={<Play className="h-4 w-4 text-cyan-600" />}
-                identifier="PAP-1677"
+                identifier="MERC-1677"
                 title="Storybook: Data Visualization & Misc stories"
                 subtitle={disabled ? "Gesture disabled while review is locked" : "Swipe left on touch devices to archive"}
                 trailing={<Badge variant="outline">mobile</Badge>}

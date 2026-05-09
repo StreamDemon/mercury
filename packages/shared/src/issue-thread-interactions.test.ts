@@ -50,7 +50,7 @@ describe("issue thread interaction schemas", () => {
           revisionId: "33333333-3333-4333-8333-333333333333",
           revisionNumber: 2,
           label: "Plan v2",
-          href: "/issues/PAP-123#document-plan",
+          href: "/issues/MERC-123#document-plan",
         },
       },
     });
@@ -62,7 +62,7 @@ describe("issue thread interaction schemas", () => {
       key: "plan",
       revisionNumber: 2,
       label: "Plan v2",
-      href: "/issues/PAP-123#document-plan",
+      href: "/issues/MERC-123#document-plan",
     });
   });
 

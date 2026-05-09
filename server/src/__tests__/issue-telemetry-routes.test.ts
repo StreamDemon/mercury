@@ -76,7 +76,7 @@ function makeIssue(status: "todo" | "done") {
     assigneeAgentId: "agent-1",
     assigneeUserId: null,
     createdByUserId: "local-board",
-    identifier: "PAP-1018",
+    identifier: "MERC-1018",
     title: "Telemetry test",
   };
 }

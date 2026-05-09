@@ -66,7 +66,10 @@ function Section({
 
 function hydrateStorybookQueries(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.setQueryData(queryKeys.auth.session, storybookAuthSession);
-  queryClient.setQueryData(queryKeys.companies.all, storybookCompanies);
+  queryClient.setQueryData(queryKeys.companies.all, {
+    companies: storybookCompanies,
+    unauthorized: false,
+  });
   queryClient.setQueryData(queryKeys.agents.list(COMPANY_ID), storybookAgents);
   queryClient.setQueryData(queryKeys.projects.list(COMPANY_ID), storybookProjects);
   queryClient.setQueryData(queryKeys.projects.detail(boardProject.id), boardProject);
@@ -414,7 +417,7 @@ function setWorktreeMeta(name: string, content: string) {
 
 function WorktreeBannerMatrix() {
   setWorktreeMeta("mercury-worktree-enabled", "true");
-  setWorktreeMeta("mercury-worktree-name", "PAP-1675-projects-goals-workspaces");
+  setWorktreeMeta("mercury-worktree-name", "MERC-1675-projects-goals-workspaces");
   setWorktreeMeta("mercury-worktree-color", "#0f766e");
   setWorktreeMeta("mercury-worktree-text-color", "#ecfeff");
 
@@ -425,7 +428,7 @@ function WorktreeBannerMatrix() {
       </div>
       <div className="grid gap-3 md:grid-cols-3">
         {[
-          { label: "Branch", value: "PAP-1675-projects-goals-workspaces", icon: GitBranch },
+          { label: "Branch", value: "MERC-1675-projects-goals-workspaces", icon: GitBranch },
           { label: "Workspace", value: "Project Storybook worktree", icon: FolderGit2 },
           { label: "Context", value: "visible before layout chrome", icon: Boxes },
         ].map((item) => {

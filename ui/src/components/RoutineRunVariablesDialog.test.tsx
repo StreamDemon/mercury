@@ -188,7 +188,7 @@ describe("RoutineRunVariablesDialog", () => {
       executionWorkspacePreference: "reuse_existing",
       executionWorkspaceSettings: { mode: "isolated_workspace" },
     };
-    issueWorkspaceBranchName = "pap-1634-routine-branch";
+    issueWorkspaceBranchName = "merc-1634-routine-branch";
     const onSubmit = vi.fn();
     const root = createRoot(container);
     const queryClient = new QueryClient({
@@ -237,7 +237,7 @@ describe("RoutineRunVariablesDialog", () => {
     }
 
     const branchInput = Array.from(document.querySelectorAll("input"))
-      .find((input) => input.value === "pap-1634-routine-branch");
+      .find((input) => input.value === "merc-1634-routine-branch");
     expect(branchInput?.disabled).toBe(true);
     expect(document.body.textContent).not.toContain("Missing: workspaceBranch");
 
@@ -251,7 +251,7 @@ describe("RoutineRunVariablesDialog", () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       variables: {
-        workspaceBranch: "pap-1634-routine-branch",
+        workspaceBranch: "merc-1634-routine-branch",
       },
       assigneeAgentId: "agent-1",
       projectId: "project-1",

@@ -120,7 +120,7 @@ describe("issue dependency wakeups in issue routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: "issue-1",
       companyId: "company-1",
-      identifier: "PAP-100",
+      identifier: "MERC-100",
       title: "Finish blocker",
       description: null,
       status: "blocked",
@@ -137,7 +137,7 @@ describe("issue dependency wakeups in issue routes", () => {
     mockIssueService.update.mockResolvedValue({
       id: "issue-1",
       companyId: "company-1",
-      identifier: "PAP-100",
+      identifier: "MERC-100",
       title: "Finish blocker",
       description: null,
       status: "done",
@@ -179,7 +179,7 @@ describe("issue dependency wakeups in issue routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: "child-1",
       companyId: "company-1",
-      identifier: "PAP-101",
+      identifier: "MERC-101",
       title: "Last child",
       description: null,
       status: "in_progress",
@@ -196,7 +196,7 @@ describe("issue dependency wakeups in issue routes", () => {
     mockIssueService.update.mockResolvedValue({
       id: "child-1",
       companyId: "company-1",
-      identifier: "PAP-101",
+      identifier: "MERC-101",
       title: "Last child",
       description: null,
       status: "done",
@@ -217,7 +217,7 @@ describe("issue dependency wakeups in issue routes", () => {
       childIssueSummaries: [
         {
           id: "child-0",
-          identifier: "PAP-100",
+          identifier: "MERC-100",
           title: "First child",
           status: "done",
           priority: "medium",
@@ -228,7 +228,7 @@ describe("issue dependency wakeups in issue routes", () => {
         },
         {
           id: "child-1",
-          identifier: "PAP-101",
+          identifier: "MERC-101",
           title: "Last child",
           status: "done",
           priority: "medium",
@@ -252,12 +252,12 @@ describe("issue dependency wakeups in issue routes", () => {
             issueId: "parent-1",
             completedChildIssueId: "child-1",
             childIssueSummaries: expect.arrayContaining([
-              expect.objectContaining({ identifier: "PAP-101", summary: "Last child finished." }),
+              expect.objectContaining({ identifier: "MERC-101", summary: "Last child finished." }),
             ]),
           }),
           contextSnapshot: expect.objectContaining({
             childIssueSummaries: expect.arrayContaining([
-              expect.objectContaining({ identifier: "PAP-100", summary: "First child finished." }),
+              expect.objectContaining({ identifier: "MERC-100", summary: "First child finished." }),
             ]),
           }),
         }),

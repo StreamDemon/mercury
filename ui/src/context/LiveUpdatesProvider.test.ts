@@ -181,10 +181,10 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         invalidations.push(input);
       },
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
@@ -202,12 +202,12 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         actorType: "system",
         actorId: "heartbeat",
         details: {
-          identifier: "PAP-759",
+          identifier: "MERC-759",
           source: "deferred_comment_wake",
         },
       },
       { userId: null, agentId: null },
-      { pathname: "/PAP/issues/PAP-759", isForegrounded: true },
+      { pathname: "/PAP/issues/MERC-759", isForegrounded: true },
     );
 
     expect(invalidations).toContainEqual({
@@ -227,10 +227,10 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         invalidations.push(input);
       },
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
@@ -248,12 +248,12 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         actorType: "user",
         actorId: "user-2",
         details: {
-          identifier: "PAP-759",
+          identifier: "MERC-759",
           status: "in_progress",
         },
       },
       { userId: "user-1", agentId: null },
-      { pathname: "/PAP/issues/PAP-759", isForegrounded: true },
+      { pathname: "/PAP/issues/MERC-759", isForegrounded: true },
     );
 
     expect(invalidations).toContainEqual({
@@ -275,10 +275,10 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         invalidations.push(input);
       },
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
@@ -296,13 +296,13 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         actorType: "agent",
         actorId: "agent-1",
         details: {
-          identifier: "PAP-759",
+          identifier: "MERC-759",
           commentId: "comment-1",
           bodySnippet: "New agent comment",
         },
       },
       { userId: null, agentId: null },
-      { pathname: "/PAP/issues/PAP-759", isForegrounded: true },
+      { pathname: "/PAP/issues/MERC-759", isForegrounded: true },
     );
 
     expect(invalidations).toContainEqual({
@@ -322,19 +322,19 @@ describe("LiveUpdatesProvider issue invalidation", () => {
   it("refreshes visible issue run queries when the displayed run changes status", () => {
     const invalidations: unknown[] = [];
     const cache = new Map<string, unknown>([
-      [JSON.stringify(queryKeys.issues.detail("PAP-759")), {
+      [JSON.stringify(queryKeys.issues.detail("MERC-759")), {
         id: "issue-1",
-        identifier: "PAP-759",
+        identifier: "MERC-759",
         assigneeAgentId: "agent-1",
         executionRunId: "run-1",
         executionAgentNameKey: "codexcoder",
         executionLockedAt: new Date("2026-04-08T21:00:00.000Z"),
       }],
-      [JSON.stringify(queryKeys.issues.activeRun("PAP-759")), {
+      [JSON.stringify(queryKeys.issues.activeRun("MERC-759")), {
         id: "run-1",
       }],
-      [JSON.stringify(queryKeys.issues.liveRuns("PAP-759")), [{ id: "run-1" }]],
-      [JSON.stringify(queryKeys.issues.runs("PAP-759")), [{ runId: "run-1" }]],
+      [JSON.stringify(queryKeys.issues.liveRuns("MERC-759")), [{ id: "run-1" }]],
+      [JSON.stringify(queryKeys.issues.runs("MERC-759")), [{ runId: "run-1" }]],
     ]);
     const queryClient = {
       invalidateQueries: (input: unknown) => {
@@ -352,7 +352,7 @@ describe("LiveUpdatesProvider issue invalidation", () => {
 
     const invalidated = __liveUpdatesTestUtils.invalidateVisibleIssueRunQueries(
       queryClient as never,
-      "/PAP/issues/PAP-759",
+      "/PAP/issues/MERC-759",
       {
         runId: "run-1",
         agentId: "agent-1",
@@ -363,23 +363,23 @@ describe("LiveUpdatesProvider issue invalidation", () => {
 
     expect(invalidated).toBe(true);
     expect(invalidations).toContainEqual({
-      queryKey: queryKeys.issues.detail("PAP-759"),
+      queryKey: queryKeys.issues.detail("MERC-759"),
     });
     expect(invalidations).toContainEqual({
-      queryKey: queryKeys.issues.activity("PAP-759"),
+      queryKey: queryKeys.issues.activity("MERC-759"),
     });
     expect(invalidations).toContainEqual({
-      queryKey: queryKeys.issues.runs("PAP-759"),
+      queryKey: queryKeys.issues.runs("MERC-759"),
     });
     expect(invalidations).toContainEqual({
-      queryKey: queryKeys.issues.liveRuns("PAP-759"),
+      queryKey: queryKeys.issues.liveRuns("MERC-759"),
     });
     expect(invalidations).toContainEqual({
-      queryKey: queryKeys.issues.activeRun("PAP-759"),
+      queryKey: queryKeys.issues.activeRun("MERC-759"),
     });
-    expect(cache.get(JSON.stringify(queryKeys.issues.activeRun("PAP-759")))).toBeNull();
-    expect(cache.get(JSON.stringify(queryKeys.issues.liveRuns("PAP-759")))).toEqual([]);
-    expect(cache.get(JSON.stringify(queryKeys.issues.detail("PAP-759")))).toMatchObject({
+    expect(cache.get(JSON.stringify(queryKeys.issues.activeRun("MERC-759")))).toBeNull();
+    expect(cache.get(JSON.stringify(queryKeys.issues.liveRuns("MERC-759")))).toEqual([]);
+    expect(cache.get(JSON.stringify(queryKeys.issues.detail("MERC-759")))).toMatchObject({
       executionRunId: null,
       executionAgentNameKey: null,
       executionLockedAt: null,
@@ -393,22 +393,22 @@ describe("LiveUpdatesProvider issue invalidation", () => {
         invalidations.push(input);
       },
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.activeRun("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.activeRun("MERC-759"))) {
           return {
             id: "run-1",
           };
         }
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.liveRuns("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.liveRuns("MERC-759"))) {
           return [{ id: "run-1" }];
         }
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.runs("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.runs("MERC-759"))) {
           return [{ runId: "run-1" }];
         }
         return undefined;
@@ -418,7 +418,7 @@ describe("LiveUpdatesProvider issue invalidation", () => {
 
     const invalidated = __liveUpdatesTestUtils.invalidateVisibleIssueRunQueries(
       queryClient as never,
-      "/PAP/issues/PAP-759",
+      "/PAP/issues/MERC-759",
       {
         runId: "run-2",
         agentId: "agent-2",
@@ -448,14 +448,14 @@ describe("LiveUpdatesProvider visible issue comment hydration", () => {
     const setCalls: Array<{ key: unknown; value: unknown }> = [];
     const queryClient = {
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.comments("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.comments("MERC-759"))) {
           return {
             pages: [[{
               id: "comment-1",
@@ -481,22 +481,22 @@ describe("LiveUpdatesProvider visible issue comment hydration", () => {
 
     await __liveUpdatesTestUtils.hydrateVisibleIssueComment(
       queryClient as never,
-      "/PAP/issues/PAP-759",
+      "/PAP/issues/MERC-759",
       {
         entityType: "issue",
         entityId: "issue-1",
         action: "issue.comment_added",
         details: {
-          identifier: "PAP-759",
+          identifier: "MERC-759",
           commentId: "comment-2",
         },
       },
       { isForegrounded: true },
     );
 
-    expect(getCommentMock).toHaveBeenCalledWith("PAP-759", "comment-2");
+    expect(getCommentMock).toHaveBeenCalledWith("MERC-759", "comment-2");
     expect(setCalls).toHaveLength(1);
-    expect(setCalls[0]?.key).toEqual(queryKeys.issues.comments("PAP-759"));
+    expect(setCalls[0]?.key).toEqual(queryKeys.issues.comments("MERC-759"));
     expect(setCalls[0]?.value).toEqual({
       pages: [[
         {
@@ -529,10 +529,10 @@ describe("LiveUpdatesProvider visible issue toast suppression", () => {
   it("suppresses activity toasts for the issue page currently in view", () => {
     const queryClient = {
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
@@ -543,11 +543,11 @@ describe("LiveUpdatesProvider visible issue toast suppression", () => {
     expect(
       __liveUpdatesTestUtils.shouldSuppressActivityToastForVisibleIssue(
         queryClient as never,
-        "/PAP/issues/PAP-759",
+        "/PAP/issues/MERC-759",
         {
           entityType: "issue",
           entityId: "issue-1",
-          details: { identifier: "PAP-759" },
+          details: { identifier: "MERC-759" },
         },
         { isForegrounded: true },
       ),
@@ -556,11 +556,11 @@ describe("LiveUpdatesProvider visible issue toast suppression", () => {
     expect(
       __liveUpdatesTestUtils.shouldSuppressActivityToastForVisibleIssue(
         queryClient as never,
-        "/PAP/issues/PAP-759",
+        "/PAP/issues/MERC-759",
         {
           entityType: "issue",
           entityId: "issue-2",
-          details: { identifier: "PAP-760" },
+          details: { identifier: "MERC-760" },
         },
         { isForegrounded: true },
       ),
@@ -570,10 +570,10 @@ describe("LiveUpdatesProvider visible issue toast suppression", () => {
   it("suppresses run and agent status toasts for the assignee of the visible issue", () => {
     const queryClient = {
       getQueryData: (key: unknown) => {
-        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("PAP-759"))) {
+        if (JSON.stringify(key) === JSON.stringify(queryKeys.issues.detail("MERC-759"))) {
           return {
             id: "issue-1",
-            identifier: "PAP-759",
+            identifier: "MERC-759",
             assigneeAgentId: "agent-1",
           };
         }
@@ -584,7 +584,7 @@ describe("LiveUpdatesProvider visible issue toast suppression", () => {
     expect(
       __liveUpdatesTestUtils.shouldSuppressRunStatusToastForVisibleIssue(
         queryClient as never,
-        "/PAP/issues/PAP-759",
+        "/PAP/issues/MERC-759",
         {
           runId: "run-1",
           agentId: "agent-1",
@@ -596,7 +596,7 @@ describe("LiveUpdatesProvider visible issue toast suppression", () => {
     expect(
       __liveUpdatesTestUtils.shouldSuppressAgentStatusToastForVisibleIssue(
         queryClient as never,
-        "/PAP/issues/PAP-759",
+        "/PAP/issues/MERC-759",
         {
           agentId: "agent-1",
           status: "running",

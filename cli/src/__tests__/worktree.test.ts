@@ -1,4 +1,4 @@
-﻿import fs from "node:fs";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -516,7 +516,7 @@ describe("worktree helpers", () => {
     "seeds authenticated users into minimally cloned worktree instances",
     async () => {
       const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "mercury-worktree-auth-seed-"));
-      const worktreeRoot = path.join(tempRoot, "PAP-999-auth-seed");
+      const worktreeRoot = path.join(tempRoot, "MERC-999-auth-seed");
       const sourceHome = path.join(tempRoot, "source-home");
       const sourceConfigDir = path.join(sourceHome, "instances", "source");
       const sourceConfigPath = path.join(sourceConfigDir, "config.json");
@@ -563,7 +563,7 @@ describe("worktree helpers", () => {
 
         process.chdir(worktreeRoot);
         await worktreeInitCommand({
-          name: "PAP-999-auth-seed",
+          name: "MERC-999-auth-seed",
           home: worktreeHome,
           fromConfig: sourceConfigPath,
           force: true,
@@ -765,7 +765,7 @@ describe("worktree helpers", () => {
         envPath,
         [
           "MERCURY_HOME=/tmp/mercury-worktrees",
-          "MERCURY_INSTANCE_ID=pap-1132-chat",
+          "MERCURY_INSTANCE_ID=merc-1132-chat",
         ].join("\n"),
         "utf8",
       );
@@ -777,7 +777,7 @@ describe("worktree helpers", () => {
       ).toMatchObject({
         cwd: worktreeRoot,
         homeDir: "/tmp/mercury-worktrees",
-        instanceId: "pap-1132-chat",
+        instanceId: "merc-1132-chat",
       });
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });

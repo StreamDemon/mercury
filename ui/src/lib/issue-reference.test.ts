@@ -3,14 +3,14 @@ import { parseIssuePathIdFromPath, parseIssueReferenceFromHref } from "./issue-r
 
 describe("issue-reference", () => {
   it("extracts issue ids from company-scoped issue paths", () => {
-    expect(parseIssuePathIdFromPath("/PAP/issues/PAP-1271")).toBe("PAP-1271");
-    expect(parseIssuePathIdFromPath("/PAP/issues/pap-1272")).toBe("PAP-1272");
-    expect(parseIssuePathIdFromPath("/issues/PAP-1179")).toBe("PAP-1179");
+    expect(parseIssuePathIdFromPath("/PAP/issues/MERC-1271")).toBe("MERC-1271");
+    expect(parseIssuePathIdFromPath("/PAP/issues/merc-1272")).toBe("MERC-1272");
+    expect(parseIssuePathIdFromPath("/issues/MERC-1179")).toBe("MERC-1179");
     expect(parseIssuePathIdFromPath("/issues/:id")).toBeNull();
   });
 
   it("does not treat full issue URLs as internal issue paths", () => {
-    expect(parseIssuePathIdFromPath("http://localhost:3100/PAP/issues/PAP-1179")).toBeNull();
+    expect(parseIssuePathIdFromPath("http://localhost:3100/PAP/issues/MERC-1179")).toBeNull();
     expect(parseIssuePathIdFromPath("http://remote.example.test:3103/PAPA/issues/PAPA-115#comment-850083f3-24de-43e7-a8cd-bc01f7cc9f0d")).toBeNull();
   });
 
@@ -26,33 +26,33 @@ describe("issue-reference", () => {
   });
 
   it("normalizes bare identifiers, relative issue paths, and issue scheme links into internal links", () => {
-    expect(parseIssueReferenceFromHref("pap-1271")).toEqual({
-      issuePathId: "PAP-1271",
-      href: "/issues/PAP-1271",
+    expect(parseIssueReferenceFromHref("merc-1271")).toEqual({
+      issuePathId: "MERC-1271",
+      href: "/issues/MERC-1271",
     });
-    expect(parseIssueReferenceFromHref("/PAP/issues/pap-1180")).toEqual({
-      issuePathId: "PAP-1180",
-      href: "/issues/PAP-1180",
+    expect(parseIssueReferenceFromHref("/PAP/issues/merc-1180")).toEqual({
+      issuePathId: "MERC-1180",
+      href: "/issues/MERC-1180",
     });
-    expect(parseIssueReferenceFromHref("issue://PAP-1310")).toEqual({
-      issuePathId: "PAP-1310",
-      href: "/issues/PAP-1310",
+    expect(parseIssueReferenceFromHref("issue://MERC-1310")).toEqual({
+      issuePathId: "MERC-1310",
+      href: "/issues/MERC-1310",
     });
-    expect(parseIssueReferenceFromHref("issue://:PAP-1311")).toEqual({
-      issuePathId: "PAP-1311",
-      href: "/issues/PAP-1311",
+    expect(parseIssueReferenceFromHref("issue://:MERC-1311")).toEqual({
+      issuePathId: "MERC-1311",
+      href: "/issues/MERC-1311",
     });
   });
 
   it("normalizes exact inline-code-like issue identifiers", () => {
-    expect(parseIssueReferenceFromHref("PAP-1271")).toEqual({
-      issuePathId: "PAP-1271",
-      href: "/issues/PAP-1271",
+    expect(parseIssueReferenceFromHref("MERC-1271")).toEqual({
+      issuePathId: "MERC-1271",
+      href: "/issues/MERC-1271",
     });
   });
 
   it("preserves absolute Mercury issue URLs so origin, port, and hash are not lost", () => {
-    expect(parseIssueReferenceFromHref("http://localhost:3100/PAP/issues/PAP-1179")).toBeNull();
+    expect(parseIssueReferenceFromHref("http://localhost:3100/PAP/issues/MERC-1179")).toBeNull();
     expect(parseIssueReferenceFromHref("http://remote.example.test:3103/PAPA/issues/PAPA-115#comment-850083f3-24de-43e7-a8cd-bc01f7cc9f0d")).toBeNull();
   });
 

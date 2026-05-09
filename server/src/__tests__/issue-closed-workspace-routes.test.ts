@@ -157,7 +157,7 @@ function makeIssue() {
     assigneeAgentId: agentId,
     assigneeUserId: null,
     createdByUserId: "local-board",
-    identifier: "PAP-1085",
+    identifier: "MERC-1085",
     title: "Closed worktree issue",
     projectId: null,
     executionRunId: null,
@@ -169,7 +169,7 @@ function makeIssue() {
 function makeClosedWorkspace() {
   return {
     id: closedWorkspaceId,
-    name: "PAP-1085-fix-worktree-guard",
+    name: "MERC-1085-fix-worktree-guard",
     mode: "isolated_workspace",
     status: "archived",
     closedAt: new Date("2026-04-04T17:00:00.000Z"),

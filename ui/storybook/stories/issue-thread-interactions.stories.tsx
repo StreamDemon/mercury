@@ -674,7 +674,7 @@ export const ReviewSurface: Story = {
     docs: {
       description: {
         story:
-          "Covers the prototype states called out in [PAP-1709](/PAP/issues/PAP-1709): suggested-task previews, collapsed descendants, rejection reasons, request confirmations, multi-question answers, and a mixed issue thread.",
+          "Covers the prototype states called out in [MERC-1709](/PAP/issues/MERC-1709): suggested-task previews, collapsed descendants, rejection reasons, request confirmations, multi-question answers, and a mixed issue thread.",
       },
     },
   },

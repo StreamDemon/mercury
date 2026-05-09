@@ -84,7 +84,7 @@ function buildLegacyConfig(sharedRoot: string, publicBaseUrl = "http://127.0.0.1
 describe("worktree config repair", () => {
   it("repairs legacy repo-local worktree config and env files into an isolated instance", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-worktree-repair-"));
-    const worktreeRoot = path.join(tempRoot, "PAP-884-ai-commits-component");
+    const worktreeRoot = path.join(tempRoot, "MERC-884-ai-commits-component");
     const mercuryDir = path.join(worktreeRoot, ".mercury");
     const configPath = path.join(mercuryDir, "config.json");
     const envPath = path.join(mercuryDir, ".env");
@@ -98,7 +98,7 @@ describe("worktree config repair", () => {
       [
         "# Mercury environment variables",
         "MERCURY_IN_WORKTREE=true",
-        "MERCURY_WORKTREE_NAME=PAP-884-ai-commits-component",
+        "MERCURY_WORKTREE_NAME=MERC-884-ai-commits-component",
         "MERCURY_AGENT_JWT_SECRET=shared-secret",
         "",
       ].join("\n"),
@@ -107,7 +107,7 @@ describe("worktree config repair", () => {
 
     process.chdir(worktreeRoot);
     process.env.MERCURY_IN_WORKTREE = "true";
-    process.env.MERCURY_WORKTREE_NAME = "PAP-884-ai-commits-component";
+    process.env.MERCURY_WORKTREE_NAME = "MERC-884-ai-commits-component";
     process.env.MERCURY_WORKTREES_DIR = isolatedHome;
     delete process.env.MERCURY_HOME;
     delete process.env.MERCURY_INSTANCE_ID;
@@ -123,7 +123,7 @@ describe("worktree config repair", () => {
 
     const repairedConfig = JSON.parse(await fs.readFile(configPath, "utf8"));
     const repairedEnv = await fs.readFile(envPath, "utf8");
-    const instanceRoot = path.join(isolatedHome, "instances", "pap-884-ai-commits-component");
+    const instanceRoot = path.join(isolatedHome, "instances", "merc-884-ai-commits-component");
 
     expect(repairedConfig.database.embeddedPostgresDataDir).toBe(path.join(instanceRoot, "db"));
     expect(repairedConfig.database.backup.dir).toBe(path.join(instanceRoot, "data", "backups"));
@@ -131,23 +131,23 @@ describe("worktree config repair", () => {
     expect(repairedConfig.storage.localDisk.baseDir).toBe(path.join(instanceRoot, "data", "storage"));
     expect(repairedConfig.secrets.localEncrypted.keyFilePath).toBe(path.join(instanceRoot, "secrets", "master.key"));
     expect(repairedEnv).toContain(`MERCURY_HOME=${JSON.stringify(isolatedHome)}`);
-    expect(repairedEnv).toContain('MERCURY_INSTANCE_ID="pap-884-ai-commits-component"');
+    expect(repairedEnv).toContain('MERCURY_INSTANCE_ID="merc-884-ai-commits-component"');
     expect(repairedEnv).toContain(`MERCURY_CONFIG=${JSON.stringify(await fs.realpath(configPath))}`);
     expect(repairedEnv).toContain(`MERCURY_CONTEXT=${JSON.stringify(path.join(isolatedHome, "context.json"))}`);
     expect(repairedEnv).toContain('MERCURY_AGENT_JWT_SECRET="shared-secret"');
     expect(process.env.MERCURY_HOME).toBe(isolatedHome);
-    expect(process.env.MERCURY_INSTANCE_ID).toBe("pap-884-ai-commits-component");
+    expect(process.env.MERCURY_INSTANCE_ID).toBe("merc-884-ai-commits-component");
   });
 
   it("avoids sibling worktree ports when repairing legacy configs", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-worktree-repair-ports-"));
-    const worktreeRoot = path.join(tempRoot, "PAP-880-thumbs-capture-for-evals-feature");
+    const worktreeRoot = path.join(tempRoot, "MERC-880-thumbs-capture-for-evals-feature");
     const mercuryDir = path.join(worktreeRoot, ".mercury");
     const configPath = path.join(mercuryDir, "config.json");
     const envPath = path.join(mercuryDir, ".env");
     const sharedRoot = path.join(tempRoot, ".mercury", "instances", "default");
     const isolatedHome = path.join(tempRoot, ".mercury-worktrees");
-    const siblingInstanceRoot = path.join(isolatedHome, "instances", "pap-878-create-a-mine-tab-in-inbox");
+    const siblingInstanceRoot = path.join(isolatedHome, "instances", "merc-878-create-a-mine-tab-in-inbox");
 
     await fs.mkdir(mercuryDir, { recursive: true });
     await fs.mkdir(siblingInstanceRoot, { recursive: true });
@@ -157,7 +157,7 @@ describe("worktree config repair", () => {
       [
         "# Mercury environment variables",
         "MERCURY_IN_WORKTREE=true",
-        "MERCURY_WORKTREE_NAME=PAP-880-thumbs-capture-for-evals-feature",
+        "MERCURY_WORKTREE_NAME=MERC-880-thumbs-capture-for-evals-feature",
         "",
       ].join("\n"),
       "utf8",
@@ -195,7 +195,7 @@ describe("worktree config repair", () => {
 
     process.chdir(worktreeRoot);
     process.env.MERCURY_IN_WORKTREE = "true";
-    process.env.MERCURY_WORKTREE_NAME = "PAP-880-thumbs-capture-for-evals-feature";
+    process.env.MERCURY_WORKTREE_NAME = "MERC-880-thumbs-capture-for-evals-feature";
     process.env.MERCURY_WORKTREES_DIR = isolatedHome;
     delete process.env.MERCURY_HOME;
     delete process.env.MERCURY_INSTANCE_ID;
@@ -214,11 +214,11 @@ describe("worktree config repair", () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-worktree-runtime-override-"));
     const isolatedHome = path.join(tempRoot, ".mercury-worktrees");
     const transientHome = path.join(tempRoot, "tests", "e2e", ".tmp", "multiuser-authenticated");
-    const worktreeRoot = path.join(tempRoot, "PAP-989-multi-user-implementation-using-plan-from-pap-958");
+    const worktreeRoot = path.join(tempRoot, "MERC-989-multi-user-implementation-using-plan-from-merc-958");
     const mercuryDir = path.join(worktreeRoot, ".mercury");
     const configPath = path.join(mercuryDir, "config.json");
     const envPath = path.join(mercuryDir, ".env");
-    const instanceId = "pap-989-multi-user-implementation-using-plan-from-pap-958";
+    const instanceId = "merc-989-multi-user-implementation-using-plan-from-merc-958";
     const stableInstanceRoot = path.join(isolatedHome, "instances", instanceId);
 
     await fs.mkdir(mercuryDir, { recursive: true });
@@ -284,7 +284,7 @@ describe("worktree config repair", () => {
         `MERCURY_CONFIG=${JSON.stringify(configPath)}`,
         `MERCURY_CONTEXT=${JSON.stringify(path.join(isolatedHome, "context.json"))}`,
         'MERCURY_IN_WORKTREE="true"',
-        'MERCURY_WORKTREE_NAME="PAP-989-multi-user-implementation-using-plan-from-pap-958"',
+        'MERCURY_WORKTREE_NAME="MERC-989-multi-user-implementation-using-plan-from-merc-958"',
         "",
       ].join("\n"),
       "utf8",
@@ -292,7 +292,7 @@ describe("worktree config repair", () => {
 
     process.chdir(worktreeRoot);
     process.env.MERCURY_IN_WORKTREE = "true";
-    process.env.MERCURY_WORKTREE_NAME = "PAP-989-multi-user-implementation-using-plan-from-pap-958";
+    process.env.MERCURY_WORKTREE_NAME = "MERC-989-multi-user-implementation-using-plan-from-merc-958";
     process.env.MERCURY_HOME = transientHome;
     process.env.MERCURY_INSTANCE_ID = instanceId;
     process.env.MERCURY_CONFIG = configPath;
@@ -321,13 +321,13 @@ describe("worktree config repair", () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-worktree-rebalance-"));
     const isolatedHome = path.join(tempRoot, ".mercury-worktrees");
     const repoWorktreesRoot = path.join(tempRoot, "repo", ".mercury", "worktrees");
-    const siblingWorktreeRoot = path.join(repoWorktreesRoot, "PAP-878-create-a-mine-tab-in-inbox");
-    const siblingInstanceRoot = path.join(isolatedHome, "instances", "pap-878-create-a-mine-tab-in-inbox");
-    const currentWorktreeRoot = path.join(repoWorktreesRoot, "PAP-884-ai-commits-component");
+    const siblingWorktreeRoot = path.join(repoWorktreesRoot, "MERC-878-create-a-mine-tab-in-inbox");
+    const siblingInstanceRoot = path.join(isolatedHome, "instances", "merc-878-create-a-mine-tab-in-inbox");
+    const currentWorktreeRoot = path.join(repoWorktreesRoot, "MERC-884-ai-commits-component");
     const mercuryDir = path.join(currentWorktreeRoot, ".mercury");
     const configPath = path.join(mercuryDir, "config.json");
     const envPath = path.join(mercuryDir, ".env");
-    const currentInstanceRoot = path.join(isolatedHome, "instances", "pap-884-ai-commits-component");
+    const currentInstanceRoot = path.join(isolatedHome, "instances", "merc-884-ai-commits-component");
     const siblingConfigPath = path.join(siblingWorktreeRoot, ".mercury", "config.json");
 
     await fs.mkdir(mercuryDir, { recursive: true });
@@ -390,7 +390,7 @@ describe("worktree config repair", () => {
       [
         "# Mercury environment variables",
         "MERCURY_IN_WORKTREE=true",
-        "MERCURY_WORKTREE_NAME=PAP-884-ai-commits-component",
+        "MERCURY_WORKTREE_NAME=MERC-884-ai-commits-component",
         "",
       ].join("\n"),
       "utf8",
@@ -428,7 +428,7 @@ describe("worktree config repair", () => {
 
     process.chdir(currentWorktreeRoot);
     process.env.MERCURY_IN_WORKTREE = "true";
-    process.env.MERCURY_WORKTREE_NAME = "PAP-884-ai-commits-component";
+    process.env.MERCURY_WORKTREE_NAME = "MERC-884-ai-commits-component";
     process.env.MERCURY_WORKTREES_DIR = isolatedHome;
 
     const result = maybeRepairLegacyWorktreeConfigAndEnvFiles();
@@ -441,11 +441,11 @@ describe("worktree config repair", () => {
 
   it("persists runtime-selected worktree ports back into explicit-port auth URLs", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-worktree-ports-"));
-    const worktreeRoot = path.join(tempRoot, "PAP-878-create-a-mine-tab-in-inbox");
+    const worktreeRoot = path.join(tempRoot, "MERC-878-create-a-mine-tab-in-inbox");
     const mercuryDir = path.join(worktreeRoot, ".mercury");
     const configPath = path.join(mercuryDir, "config.json");
     const isolatedHome = path.join(tempRoot, ".mercury-worktrees");
-    const instanceRoot = path.join(isolatedHome, "instances", "pap-878-create-a-mine-tab-in-inbox");
+    const instanceRoot = path.join(isolatedHome, "instances", "merc-878-create-a-mine-tab-in-inbox");
 
     await fs.mkdir(mercuryDir, { recursive: true });
     await fs.writeFile(
@@ -504,9 +504,9 @@ describe("worktree config repair", () => {
 
     process.chdir(worktreeRoot);
     process.env.MERCURY_IN_WORKTREE = "true";
-    process.env.MERCURY_WORKTREE_NAME = "PAP-878-create-a-mine-tab-in-inbox";
+    process.env.MERCURY_WORKTREE_NAME = "MERC-878-create-a-mine-tab-in-inbox";
     process.env.MERCURY_HOME = isolatedHome;
-    process.env.MERCURY_INSTANCE_ID = "pap-878-create-a-mine-tab-in-inbox";
+    process.env.MERCURY_INSTANCE_ID = "merc-878-create-a-mine-tab-in-inbox";
     process.env.MERCURY_CONFIG = configPath;
 
     maybePersistWorktreeRuntimePorts({
@@ -523,11 +523,11 @@ describe("worktree config repair", () => {
 
   it("does not rewrite no-port public auth URLs when persisting runtime-selected ports", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-worktree-public-ports-"));
-    const worktreeRoot = path.join(tempRoot, "PAP-125-public-base-url");
+    const worktreeRoot = path.join(tempRoot, "MERC-125-public-base-url");
     const mercuryDir = path.join(worktreeRoot, ".mercury");
     const configPath = path.join(mercuryDir, "config.json");
     const isolatedHome = path.join(tempRoot, ".mercury-worktrees");
-    const instanceRoot = path.join(isolatedHome, "instances", "pap-125-public-base-url");
+    const instanceRoot = path.join(isolatedHome, "instances", "merc-125-public-base-url");
 
     await fs.mkdir(mercuryDir, { recursive: true });
     await fs.writeFile(
@@ -586,9 +586,9 @@ describe("worktree config repair", () => {
 
     process.chdir(worktreeRoot);
     process.env.MERCURY_IN_WORKTREE = "true";
-    process.env.MERCURY_WORKTREE_NAME = "PAP-125-public-base-url";
+    process.env.MERCURY_WORKTREE_NAME = "MERC-125-public-base-url";
     process.env.MERCURY_HOME = isolatedHome;
-    process.env.MERCURY_INSTANCE_ID = "pap-125-public-base-url";
+    process.env.MERCURY_INSTANCE_ID = "merc-125-public-base-url";
     process.env.MERCURY_CONFIG = configPath;
 
     maybePersistWorktreeRuntimePorts({

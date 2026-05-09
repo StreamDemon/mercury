@@ -472,7 +472,7 @@ describe("IssueChatThread", () => {
 
     act(() => {
       root.render(
-        <MemoryRouter initialEntries={[`/issues/PAP-1#comment-${targetComment!.id}`]}>
+        <MemoryRouter initialEntries={[`/issues/MERC-1#comment-${targetComment!.id}`]}>
           <IssueChatThread
             comments={issueChatLongThreadComments}
             linkedRuns={issueChatLongThreadLinkedRuns}
@@ -539,7 +539,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  // Regression for PAP-2660: on the real issue page the chat thread is wrapped
+  // Regression for MERC-2660: on the real issue page the chat thread is wrapped
   // in `<main id="main-content" overflow-auto>`, so the virtualizer must bind
   // to that ancestor's scroll instead of `window` (which never moves on
   // desktop). When mounted inside an overflow-auto ancestor the jump-to-latest
@@ -601,15 +601,15 @@ describe("IssueChatThread", () => {
     scrollHost.remove();
   });
 
-  // Regression for PAP-2672: when the merged feed ends with a non-comment row
+  // Regression for MERC-2672: when the merged feed ends with a non-comment row
   // (run/timeline/embedded output) we still want Jump to latest to land on the
   // last comment, not whichever activity row sorts last.
-  it("targets the latest comment row when trailing rows are non-comments (PAP-2672)", () => {
+  it("targets the latest comment row when trailing rows are non-comments (MERC-2672)", () => {
     const lastComment = issueChatLongThreadComments.at(-1);
     expect(lastComment).toBeDefined();
     const trailingRunStart = new Date(new Date(lastComment!.createdAt).getTime() + 60_000);
     const trailingRun: IssueChatLinkedRun = {
-      runId: "trailing-run-pap-2672",
+      runId: "trailing-run-merc-2672",
       status: "failed",
       agentId: "agent-perf-codex",
       agentName: "TrailingRunner",
@@ -714,7 +714,7 @@ describe("IssueChatThread", () => {
     scrollHost.remove();
   });
 
-  // Regression for PAP-2672 follow-up: clicking Jump to latest must refresh
+  // Regression for MERC-2672 follow-up: clicking Jump to latest must refresh
   // the comments page so a comment that arrived after the initial load is
   // present before we scroll. Otherwise the user lands on the latest *loaded*
   // comment but not the absolute newest.
@@ -757,7 +757,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("findLatestCommentMessageIndex prefers the last comment-anchored row (PAP-2672)", () => {
+  it("findLatestCommentMessageIndex prefers the last comment-anchored row (MERC-2672)", () => {
     const messages = [
       { metadata: { custom: { anchorId: "comment-a" } } },
       { metadata: { custom: { anchorId: "run-1" } } },
@@ -1043,7 +1043,7 @@ describe("IssueChatThread", () => {
             blockedBy={[
               {
                 id: "blocker-1",
-                identifier: "PAP-1723",
+                identifier: "MERC-1723",
                 title: "QA the install flow",
                 status: "blocked",
                 priority: "medium",
@@ -1060,9 +1060,9 @@ describe("IssueChatThread", () => {
 
     expect(container.textContent).toContain("Work on this issue is blocked by the linked issue");
     expect(container.textContent).toContain("Comments still wake the assignee for questions or triage");
-    expect(container.textContent).toContain("PAP-1723");
+    expect(container.textContent).toContain("MERC-1723");
     expect(container.textContent).toContain("QA the install flow");
-    expect(container.querySelector('[data-issue-path-id="PAP-1723"]')).not.toBeNull();
+    expect(container.querySelector('[data-issue-path-id="MERC-1723"]')).not.toBeNull();
 
     act(() => {
       root.unmount();
@@ -1084,7 +1084,7 @@ describe("IssueChatThread", () => {
             blockedBy={[
               {
                 id: "blocker-1",
-                identifier: "PAP-2167",
+                identifier: "MERC-2167",
                 title: "Phase 7 review",
                 status: "blocked",
                 priority: "medium",
@@ -1093,7 +1093,7 @@ describe("IssueChatThread", () => {
                 terminalBlockers: [
                   {
                     id: "terminal-1",
-                    identifier: "PAP-2201",
+                    identifier: "MERC-2201",
                     title: "Security sign-off",
                     status: "todo",
                     priority: "high",
@@ -1110,12 +1110,12 @@ describe("IssueChatThread", () => {
       );
     });
 
-    expect(container.textContent).toContain("PAP-2167");
+    expect(container.textContent).toContain("MERC-2167");
     expect(container.textContent).toContain("Phase 7 review");
     expect(container.textContent).toContain("Ultimately waiting on");
-    expect(container.textContent).toContain("PAP-2201");
+    expect(container.textContent).toContain("MERC-2201");
     expect(container.textContent).toContain("Security sign-off");
-    expect(container.querySelector('[data-issue-path-id="PAP-2201"]')).not.toBeNull();
+    expect(container.querySelector('[data-issue-path-id="MERC-2201"]')).not.toBeNull();
 
     act(() => {
       root.unmount();

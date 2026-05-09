@@ -1,4 +1,4 @@
-﻿import os from "node:os";
+import os from "node:os";
 import path from "node:path";
 import { mkdtemp, readFile } from "node:fs/promises";
 import { Command } from "commander";
@@ -20,7 +20,7 @@ function makeTrace(overrides: Partial<FeedbackTrace> = {}): FeedbackTrace {
     feedbackVoteId: "vote-12345678",
     issueId: "issue-123",
     projectId: "project-123",
-    issueIdentifier: "PAP-123",
+    issueIdentifier: "MERC-123",
     issueTitle: "Fix the feedback command",
     authorUserId: "user-123",
     targetType: "issue_comment",
@@ -135,7 +135,7 @@ describe("writeFeedbackExportBundle", () => {
       makeTrace({
         id: "trace-abcdef12",
         feedbackVoteId: "vote-abcdef12",
-        issueIdentifier: "PAP-124",
+        issueIdentifier: "MERC-124",
         issueId: "issue-124",
         vote: "up",
         status: "local_only",

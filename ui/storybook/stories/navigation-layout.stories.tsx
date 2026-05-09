@@ -286,7 +286,7 @@ function NavigationLayoutStories() {
               breadcrumbs={[
                 { label: "Projects", href: "/projects" },
                 { label: "Board UI", href: "/projects/board-ui/issues" },
-                { label: "PAP-1641" },
+                { label: "MERC-1641" },
               ]}
             />
             <BreadcrumbSnapshot

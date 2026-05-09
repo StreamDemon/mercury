@@ -16,7 +16,7 @@ function makeExecutionWorkspace(overrides: Partial<ExecutionWorkspace> = {}): Ex
     cwd: "/tmp/workspace-1",
     repoUrl: null,
     baseRef: null,
-    branchName: "feature/pap-1",
+    branchName: "feature/merc-1",
     providerType: "git_worktree",
     providerRef: null,
     derivedFromExecutionWorkspaceId: null,
@@ -36,7 +36,7 @@ function makeExecutionWorkspace(overrides: Partial<ExecutionWorkspace> = {}): Ex
 function makeIssue(overrides: Partial<Issue> = {}): Issue {
   return {
     id: "issue-1",
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     companyId: "company-1",
     projectId: "project-1",
     projectWorkspaceId: "project-workspace-1",
@@ -84,7 +84,7 @@ describe("buildSubIssueDefaults", () => {
 
     expect(defaults).toEqual({
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       projectId: "project-1",
       projectWorkspaceId: "project-workspace-1",
@@ -105,7 +105,7 @@ describe("buildSubIssueDefaults", () => {
 
     expect(defaults).toEqual({
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       projectId: "project-1",
       projectWorkspaceId: "project-workspace-1",
@@ -125,7 +125,7 @@ describe("buildSubIssueDefaults", () => {
 
     expect(defaults).toEqual({
       parentId: "issue-1",
-      parentIdentifier: "PAP-1",
+      parentIdentifier: "MERC-1",
       parentTitle: "Parent issue",
       projectId: "project-1",
       projectWorkspaceId: "project-workspace-1",

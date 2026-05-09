@@ -17,7 +17,7 @@ afterEach(() => {
 describe("Better Auth cookie scoping", () => {
   it("derives an instance-scoped cookie prefix", () => {
     expect(deriveAuthCookiePrefix("default")).toBe("mercury-default");
-    expect(deriveAuthCookiePrefix("PAP-1601-worktree")).toBe("mercury-PAP-1601-worktree");
+    expect(deriveAuthCookiePrefix("MERC-1601-worktree")).toBe("mercury-MERC-1601-worktree");
   });
 
   it("uses MERCURY_INSTANCE_ID for the Better Auth cookie prefix", () => {
@@ -34,10 +34,10 @@ describe("Better Auth cookie scoping", () => {
   });
 
   it("keeps local http auth cookies non-secure while preserving the scoped prefix", () => {
-    process.env.MERCURY_INSTANCE_ID = "pap-worktree";
+    process.env.MERCURY_INSTANCE_ID = "merc-worktree";
 
     expect(buildBetterAuthAdvancedOptions({ disableSecureCookies: true })).toEqual({
-      cookiePrefix: "mercury-pap-worktree",
+      cookiePrefix: "mercury-merc-worktree",
       useSecureCookies: false,
     });
   });

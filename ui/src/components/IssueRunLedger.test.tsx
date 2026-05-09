@@ -83,7 +83,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
     createdByAgentId: null,
     createdByUserId: null,
     issueNumber: null,
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     requestDepth: 0,
     billingCode: null,
     assigneeAdapterOverrides: null,
@@ -123,7 +123,7 @@ function createActiveRun(overrides: Partial<ActiveRunForIssue> = {}): ActiveRunF
       criticalThresholdMs: 30 * 60 * 1000,
       snoozedUntil: null,
       evaluationIssueId: "issue-eval-1",
-      evaluationIssueIdentifier: "PAP-404",
+      evaluationIssueIdentifier: "MERC-404",
       evaluationIssueAssigneeAgentId: "agent-owner",
     },
     ...overrides,
@@ -290,21 +290,21 @@ describe("IssueRunLedger", () => {
   it("surfaces active and completed child issue summaries", () => {
     renderLedger({
       childIssues: [
-        createIssue({ id: "child-1", identifier: "PAP-2", title: "Implement worker handoff", status: "in_progress" }),
-        createIssue({ id: "child-2", identifier: "PAP-3", title: "Verify final report", status: "done" }),
-        createIssue({ id: "child-3", identifier: "PAP-4", title: "Cancelled experiment", status: "cancelled" }),
+        createIssue({ id: "child-1", identifier: "MERC-2", title: "Implement worker handoff", status: "in_progress" }),
+        createIssue({ id: "child-2", identifier: "MERC-3", title: "Verify final report", status: "done" }),
+        createIssue({ id: "child-3", identifier: "MERC-4", title: "Cancelled experiment", status: "cancelled" }),
       ],
     });
 
     expect(container.textContent).toContain("Child work");
     expect(container.textContent).toContain("1 active, 1 done, 1 cancelled");
-    expect(container.textContent).toContain("PAP-2");
+    expect(container.textContent).toContain("MERC-2");
     expect(container.textContent).toContain("Implement worker handoff");
 
     renderLedger({
       childIssues: [
-        createIssue({ id: "child-2", identifier: "PAP-3", title: "Verify final report", status: "done" }),
-        createIssue({ id: "child-3", identifier: "PAP-4", title: "Cancelled experiment", status: "cancelled" }),
+        createIssue({ id: "child-2", identifier: "MERC-3", title: "Verify final report", status: "done" }),
+        createIssue({ id: "child-3", identifier: "MERC-4", title: "Cancelled experiment", status: "cancelled" }),
       ],
     });
 
@@ -348,7 +348,7 @@ describe("IssueRunLedger", () => {
     });
 
     expect(container.textContent).toContain("Stale-run watchdog alert");
-    expect(container.textContent).toContain("PAP-404");
+    expect(container.textContent).toContain("MERC-404");
     expect(container.textContent).toContain("Stale run");
     const watchdogBanner = Array.from(container.querySelectorAll("p"))
       .find((node) => node.textContent?.includes("Stale-run watchdog alert"))
@@ -380,7 +380,7 @@ describe("IssueRunLedger", () => {
     });
 
     expect(container.textContent).toContain("Stale-run watchdog alert");
-    expect(container.textContent).toContain("PAP-404");
+    expect(container.textContent).toContain("MERC-404");
     expect(container.textContent).not.toContain("Continue monitoring");
     expect(container.textContent).not.toContain("Snooze 1h");
     expect(container.textContent).not.toContain("Mark false positive");

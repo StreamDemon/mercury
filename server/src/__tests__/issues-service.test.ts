@@ -280,7 +280,7 @@ describeEmbeddedPostgres("issueService.list participantAgentId", () => {
         id: exactIdentifierId,
         companyId,
         issueNumber: 42,
-        identifier: "PAP-42",
+        identifier: "MERC-42",
         title: "Completely unrelated",
         status: "todo",
         priority: "medium",
@@ -474,19 +474,19 @@ describeEmbeddedPostgres("issueService.list participantAgentId", () => {
       id: issueId,
       companyId,
       issueNumber: 1064,
-      identifier: "PAP-1064",
+      identifier: "MERC-1064",
       title: "Feedback votes error",
       status: "todo",
       priority: "medium",
       createdByUserId: "user-1",
     });
 
-    const issue = await svc.getById("PAP-1064");
+    const issue = await svc.getById("MERC-1064");
 
     expect(issue).toEqual(
       expect.objectContaining({
         id: issueId,
-        identifier: "PAP-1064",
+        identifier: "MERC-1064",
       }),
     );
   });
@@ -1586,10 +1586,10 @@ describeEmbeddedPostgres("issueService blockers and dependency wake readiness", 
     const issueC = randomUUID();
     const issueD = randomUUID();
     await db.insert(issues).values([
-      { id: issueA, companyId, identifier: "PAP-1", title: "Issue A", status: "blocked", priority: "medium" },
-      { id: issueB, companyId, identifier: "PAP-2", title: "Issue B", status: "blocked", priority: "medium" },
-      { id: issueC, companyId, identifier: "PAP-3", title: "Issue C", status: "blocked", priority: "medium" },
-      { id: issueD, companyId, identifier: "PAP-4", title: "Issue D", status: "todo", priority: "high" },
+      { id: issueA, companyId, identifier: "MERC-1", title: "Issue A", status: "blocked", priority: "medium" },
+      { id: issueB, companyId, identifier: "MERC-2", title: "Issue B", status: "blocked", priority: "medium" },
+      { id: issueC, companyId, identifier: "MERC-3", title: "Issue C", status: "blocked", priority: "medium" },
+      { id: issueD, companyId, identifier: "MERC-4", title: "Issue D", status: "todo", priority: "high" },
     ]);
 
     await svc.update(issueC, { blockedByIssueIds: [issueD] });
@@ -1601,12 +1601,12 @@ describeEmbeddedPostgres("issueService blockers and dependency wake readiness", 
     expect(relations.blockedBy).toHaveLength(1);
     expect(relations.blockedBy[0]).toMatchObject({
       id: issueB,
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       title: "Issue B",
       terminalBlockers: [
         expect.objectContaining({
           id: issueD,
-          identifier: "PAP-4",
+          identifier: "MERC-4",
           title: "Issue D",
           status: "todo",
           priority: "high",

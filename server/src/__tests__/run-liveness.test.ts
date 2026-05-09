@@ -133,17 +133,17 @@ describe("run liveness classifier", () => {
     expect(classification.actionability).toBe("blocked_external");
   });
 
-  it("treats PAP-2000-style validation output as runnable follow-up, not an external blocker", () => {
+  it("treats MERC-2000-style validation output as runnable follow-up, not an external blocker", () => {
     const classification = classifyRunLiveness({
       ...baseInput,
       resultJson: {
-        summary: "PAP-1949 remains blocked until PAP-2000 is resolved.",
+        summary: "MERC-1949 remains blocked until MERC-2000 is resolved.",
       },
       issueCommentBodies: [
         [
           "Validation is ready for the next pass.",
           "",
-          "- Blocked chain context: PAP-1949 -> PAP-1999 -> PAP-2000",
+          "- Blocked chain context: MERC-1949 -> MERC-1999 -> MERC-2000",
           "- Next action: run npm test and report the row counts.",
         ].join("\n"),
       ],

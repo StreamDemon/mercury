@@ -622,7 +622,7 @@ export function ExecutionWorkspaceDetail() {
                         className="font-mono"
                         value={form.branchName}
                         onChange={(event) => setForm((current) => current ? { ...current, branchName: event.target.value } : current)}
-                        placeholder="PAP-946-workspace"
+                        placeholder="MERC-946-workspace"
                       />
                     </Field>
 

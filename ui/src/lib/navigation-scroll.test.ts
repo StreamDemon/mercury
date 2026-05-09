@@ -42,8 +42,8 @@ describe("navigation-scroll", () => {
   it("resets scroll when navigating directly between issue detail routes", () => {
     expect(
       shouldResetScrollOnNavigation({
-        previousPathname: "/issues/PAP-1389",
-        pathname: "/issues/PAP-1346",
+        previousPathname: "/issues/MERC-1389",
+        pathname: "/issues/MERC-1346",
         navigationType: "PUSH",
         state: null,
       }),
@@ -51,8 +51,8 @@ describe("navigation-scroll", () => {
 
     expect(
       shouldResetScrollOnNavigation({
-        previousPathname: "/PAP/issues/PAP-1389",
-        pathname: "/PAP/issues/PAP-1346",
+        previousPathname: "/PAP/issues/MERC-1389",
+        pathname: "/PAP/issues/MERC-1346",
         navigationType: "REPLACE",
         state: null,
       }),
@@ -63,7 +63,7 @@ describe("navigation-scroll", () => {
     expect(
       shouldResetScrollOnNavigation({
         previousPathname: "/projects/project-1/issues/all",
-        pathname: "/issues/PAP-1346",
+        pathname: "/issues/MERC-1346",
         navigationType: "PUSH",
         state: null,
       }),
@@ -71,7 +71,7 @@ describe("navigation-scroll", () => {
 
     expect(
       shouldResetScrollOnNavigation({
-        previousPathname: "/issues/PAP-1389",
+        previousPathname: "/issues/MERC-1389",
         pathname: "/projects/project-1/issues/all",
         navigationType: "PUSH",
         state: null,

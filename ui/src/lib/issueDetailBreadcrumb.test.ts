@@ -53,7 +53,7 @@ describe("issueDetailBreadcrumb", () => {
       createdByAgentId: null,
       createdByUserId: null,
       issueNumber: 42,
-      identifier: "PAP-42",
+      identifier: "MERC-42",
       originKind: "manual",
       originId: null,
       originRunId: null,
@@ -118,20 +118,20 @@ describe("issueDetailBreadcrumb", () => {
   }
 
   it("returns clean issue detail paths", () => {
-    expect(createIssueDetailPath("PAP-465")).toBe("/issues/PAP-465");
+    expect(createIssueDetailPath("MERC-465")).toBe("/issues/MERC-465");
   });
 
   it("prefers the full breadcrumb from route state", () => {
     const state = createIssueDetailLocationState("Inbox", "/inbox/mine", "inbox");
 
-    expect(readIssueDetailBreadcrumb("PAP-465", state, "?from=issues")).toEqual({
+    expect(readIssueDetailBreadcrumb("MERC-465", state, "?from=issues")).toEqual({
       label: "Inbox",
       href: "/inbox/mine",
     });
   });
 
   it("falls back to the source query param when route state is unavailable", () => {
-    expect(readIssueDetailBreadcrumb("PAP-465", null, "?from=inbox")).toEqual({
+    expect(readIssueDetailBreadcrumb("MERC-465", null, "?from=inbox")).toEqual({
       label: "Inbox",
       href: "/inbox",
     });
@@ -144,7 +144,7 @@ describe("issueDetailBreadcrumb", () => {
 
   it("restores the exact breadcrumb href from the query fallback", () => {
     expect(
-      readIssueDetailBreadcrumb("PAP-465", null, "?from=inbox&fromHref=%2FPAP%2Finbox%2Funread"),
+      readIssueDetailBreadcrumb("MERC-465", null, "?from=inbox&fromHref=%2FPAP%2Finbox%2Funread"),
     ).toEqual({
       label: "Inbox",
       href: "/PAP/inbox/unread",
@@ -154,10 +154,10 @@ describe("issueDetailBreadcrumb", () => {
   it("reads hidden breadcrumb context from session storage when route state is unavailable", () => {
     const state = createIssueDetailLocationState("Inbox", "/inbox/mine", "inbox");
     sessionStorageMock.clear();
-    rememberIssueDetailLocationState("PAP-465", state);
+    rememberIssueDetailLocationState("MERC-465", state);
 
     expect(
-      readIssueDetailLocationState("PAP-465", null),
+      readIssueDetailLocationState("MERC-465", null),
     ).toEqual({
       issueDetailBreadcrumb: { label: "Inbox", href: "/inbox/mine" },
       issueDetailSource: "inbox",
@@ -173,7 +173,7 @@ describe("issueDetailBreadcrumb", () => {
 
     expect(readIssueDetailHeaderSeed(seededState)).toEqual({
       id: "11111111-1111-4111-8111-111111111111",
-      identifier: "PAP-42",
+      identifier: "MERC-42",
       title: "Prefilled issue title",
       status: "todo",
       priority: "medium",
@@ -191,12 +191,12 @@ describe("issueDetailBreadcrumb", () => {
     );
 
     sessionStorageMock.clear();
-    rememberIssueDetailLocationState("PAP-42", seededState);
+    rememberIssueDetailLocationState("MERC-42", seededState);
 
-    const restoredState = readIssueDetailLocationState("PAP-42", null);
+    const restoredState = readIssueDetailLocationState("MERC-42", null);
     expect(readIssueDetailHeaderSeed(restoredState)).toEqual({
       id: "11111111-1111-4111-8111-111111111111",
-      identifier: "PAP-42",
+      identifier: "MERC-42",
       title: "Prefilled issue title",
       status: "todo",
       priority: "medium",

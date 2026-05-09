@@ -47,13 +47,13 @@ describe("BreadcrumbContext", () => {
     expect(renderCounts).toHaveLength(1);
 
     act(() => {
-      updateBreadcrumbs?.([{ label: "Issues", href: "/issues" }, { label: "PAP-1488" }]);
+      updateBreadcrumbs?.([{ label: "Issues", href: "/issues" }, { label: "MERC-1488" }]);
     });
 
     expect(renderCounts).toHaveLength(2);
 
     act(() => {
-      updateBreadcrumbs?.([{ label: "Issues", href: "/issues" }, { label: "PAP-1488" }]);
+      updateBreadcrumbs?.([{ label: "Issues", href: "/issues" }, { label: "MERC-1488" }]);
     });
 
     expect(renderCounts).toHaveLength(2);

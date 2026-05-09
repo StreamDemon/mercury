@@ -143,7 +143,7 @@ function makeIssue() {
     assigneeAgentId: "22222222-2222-4222-8222-222222222222",
     assigneeUserId: null,
     executionRunId: "run-1",
-    identifier: "PAP-1353",
+    identifier: "MERC-1353",
     title: "Queued cancel",
   };
 }

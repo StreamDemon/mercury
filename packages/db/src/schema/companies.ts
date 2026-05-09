@@ -9,7 +9,7 @@ export const companies = pgTable(
     status: text("status").notNull().default("active"),
     pauseReason: text("pause_reason"),
     pausedAt: timestamp("paused_at", { withTimezone: true }),
-    issuePrefix: text("issue_prefix").notNull().default("PAP"),
+    issuePrefix: text("issue_prefix").notNull().default("MERC"),
     issueCounter: integer("issue_counter").notNull().default(0),
     budgetMonthlyCents: integer("budget_monthly_cents").notNull().default(0),
     spentMonthlyCents: integer("spent_monthly_cents").notNull().default(0),

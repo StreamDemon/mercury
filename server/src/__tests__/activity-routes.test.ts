@@ -141,10 +141,10 @@ describe.sequential("activity routes", () => {
     ]);
 
     const app = await createApp();
-    const res = await requestApp(app, (baseUrl) => request(baseUrl).get("/api/issues/PAP-475/runs"));
+    const res = await requestApp(app, (baseUrl) => request(baseUrl).get("/api/issues/MERC-475/runs"));
 
     expect(res.status).toBe(200);
-    expect(mockIssueService.getByIdentifier).toHaveBeenCalledWith("PAP-475");
+    expect(mockIssueService.getByIdentifier).toHaveBeenCalledWith("MERC-475");
     expect(mockIssueService.getById).not.toHaveBeenCalled();
     expect(mockActivityService.runsForIssue).toHaveBeenCalledWith("company-1", "issue-uuid-1");
     expect(res.body).toEqual([{ runId: "run-1", adapterType: "codex_local" }]);

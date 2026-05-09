@@ -83,7 +83,10 @@ function Section({
 }
 
 function hydrateStorybookQueries(queryClient: ReturnType<typeof useQueryClient>) {
-  queryClient.setQueryData(queryKeys.companies.all, storybookCompanies);
+  queryClient.setQueryData(queryKeys.companies.all, {
+    companies: storybookCompanies,
+    unauthorized: false,
+  });
   queryClient.setQueryData(queryKeys.auth.session, storybookAuthSession);
   queryClient.setQueryData(queryKeys.agents.list(companyId), storybookAgents);
   queryClient.setQueryData(queryKeys.projects.list(companyId), storybookProjects);

@@ -165,7 +165,7 @@ function formatIssueLinksForComment(relations: Array<{ identifier?: string | nul
   return identifiers
     .slice(0, 5)
     .map((identifier) => {
-      const prefix = identifier.split("-")[0] || "PAP";
+      const prefix = identifier.split("-")[0] || "MERC";
       return `[${identifier}](/${prefix}/issues/${identifier})`;
     })
     .join(", ");
@@ -564,7 +564,7 @@ export function recoveryService(db: Db, deps: { enqueueWakeup: RecoveryWakeup })
       .select({ issuePrefix: companies.issuePrefix })
       .from(companies)
       .where(eq(companies.id, companyId))
-      .then((rows) => rows[0]?.issuePrefix ?? "PAP");
+      .then((rows) => rows[0]?.issuePrefix ?? "MERC");
   }
 
   function staleActiveRunOriginFingerprint(companyId: string, runId: string) {

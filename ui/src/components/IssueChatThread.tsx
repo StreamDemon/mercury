@@ -2301,7 +2301,7 @@ function useIssueThreadVirtualizer({
 // is overflow-visible) and in the auth-free perf fixture. Walk the DOM to find
 // the actual scroll container so the virtualizer binds to the right offset
 // source — otherwise it stays anchored at offset 0 forever and the visible
-// chat area renders blank past the first viewport (PAP-2660).
+// chat area renders blank past the first viewport (MERC-2660).
 function findScrollContainer(el: HTMLElement | null): HTMLElement | null {
   if (!el || typeof window === "undefined") return null;
   let current: HTMLElement | null = el.parentElement;
@@ -3362,7 +3362,7 @@ export function IssueChatThread({
   // so the first scroll often lands above the actual bottom and the user
   // ends up clicking Jump to latest repeatedly to converge. Re-issuing the
   // scroll after measurements catch up lets one click reach the actual
-  // latest comment (PAP-2672 follow-up).
+  // latest comment (MERC-2672 follow-up).
   function scrollToLatestCommentWithSettle() {
     const latestCommentIndex = findLatestCommentMessageIndex(messages);
     if (latestCommentIndex < 0) {
@@ -3407,7 +3407,7 @@ export function IssueChatThread({
       // Refetching from page 0 (newest first) brings any comments that
       // arrived after the initial load into the cache before we scroll —
       // otherwise we'd land on the latest *loaded* row rather than the
-      // absolute newest, which is what PAP-2672 reopened on.
+      // absolute newest, which is what MERC-2672 reopened on.
       const refreshed = onRefreshLatestComments();
       if (refreshed && typeof (refreshed as Promise<unknown>).then === "function") {
         (refreshed as Promise<unknown>).then(

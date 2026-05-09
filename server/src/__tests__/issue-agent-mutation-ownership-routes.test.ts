@@ -160,7 +160,7 @@ function makeIssue(overrides: Record<string, unknown> = {}) {
     assigneeAgentId: ownerAgentId,
     assigneeUserId: null,
     createdByUserId: "board-user",
-    identifier: "PAP-1649",
+    identifier: "MERC-1649",
     title: "Owned active issue",
     executionPolicy: null,
     executionState: null,

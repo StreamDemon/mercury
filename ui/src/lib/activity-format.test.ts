@@ -11,13 +11,13 @@ describe("activity formatting", () => {
   it("formats blocker activity using linked issue identifiers", () => {
     const details = {
       addedBlockedByIssues: [
-        { id: "issue-2", identifier: "PAP-22", title: "Blocked task" },
+        { id: "issue-2", identifier: "MERC-22", title: "Blocked task" },
       ],
       removedBlockedByIssues: [],
     };
 
-    expect(formatActivityVerb("issue.blockers_updated", details)).toBe("added blocker PAP-22 to");
-    expect(formatIssueActivityAction("issue.blockers_updated", details)).toBe("added blocker PAP-22");
+    expect(formatActivityVerb("issue.blockers_updated", details)).toBe("added blocker MERC-22 to");
+    expect(formatIssueActivityAction("issue.blockers_updated", details)).toBe("added blocker MERC-22");
   });
 
   it("formats reviewer activity using agent names", () => {

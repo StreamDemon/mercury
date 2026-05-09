@@ -176,7 +176,7 @@ function makeIssue(overrides: Record<string, unknown> = {}) {
     assigneeAgentId: null,
     assigneeUserId: "local-board",
     createdByUserId: "local-board",
-    identifier: "PAP-999",
+    identifier: "MERC-999",
     title: "Wake test",
     executionPolicy: null,
     executionState: null,

@@ -138,7 +138,7 @@ function createApp() {
 const legacyProjectLinkedIssue = {
   id: "11111111-1111-4111-8111-111111111111",
   companyId: "company-1",
-  identifier: "PAP-581",
+  identifier: "MERC-581",
   title: "Legacy onboarding task",
   description: "Seed the first CEO task",
   status: "todo",
@@ -291,7 +291,7 @@ describe.sequential("issue goal context routes", () => {
       blockedBy: [
         {
           id: "55555555-5555-4555-8555-555555555555",
-          identifier: "PAP-580",
+          identifier: "MERC-580",
           title: "Finish wakeup plumbing",
           status: "done",
           priority: "medium",
@@ -310,7 +310,7 @@ describe.sequential("issue goal context routes", () => {
     expect(res.body.issue.blockedBy).toEqual([
       expect.objectContaining({
         id: "55555555-5555-4555-8555-555555555555",
-        identifier: "PAP-580",
+        identifier: "MERC-580",
       }),
     ]);
   });
@@ -322,10 +322,10 @@ describe.sequential("issue goal context routes", () => {
     });
     mockExecutionWorkspaceService.getById.mockResolvedValue({
       id: "55555555-5555-4555-8555-555555555555",
-      name: "PAP-581 workspace",
+      name: "MERC-581 workspace",
       mode: "isolated_workspace",
       status: "active",
-      cwd: "/tmp/pap-581",
+      cwd: "/tmp/merc-581",
       runtimeServices: [
         {
           id: "service-1",

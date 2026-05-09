@@ -8,7 +8,7 @@ describe("resolveServerDevWatchIgnorePaths", () => {
   it("includes both the worktree UI paths and their real shared targets", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "mercury-dev-watch-"));
     const sharedUiRoot = path.join(tempRoot, "shared-ui");
-    const worktreeRoot = path.join(tempRoot, "repo", ".mercury", "worktrees", "PAP-884");
+    const worktreeRoot = path.join(tempRoot, "repo", ".mercury", "worktrees", "MERC-884");
     const serverRoot = path.join(worktreeRoot, "server");
     const worktreeUiRoot = path.join(worktreeRoot, "ui");
 

@@ -175,7 +175,7 @@ describe("issue feedback trace routes", () => {
     mockIssueService.getById.mockResolvedValue({
       id: "issue-1",
       companyId: "company-1",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
     });
     mockFeedbackService.saveIssueVote.mockResolvedValue({
       vote: {

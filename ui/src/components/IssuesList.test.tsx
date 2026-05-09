@@ -141,7 +141,7 @@ vi.mock("./KanbanBoard", () => ({
 function createIssue(overrides: Partial<Issue> = {}): Issue {
   return {
     id: "issue-1",
-    identifier: "PAP-1",
+    identifier: "MERC-1",
     companyId: "company-1",
     projectId: null,
     projectWorkspaceId: null,
@@ -293,8 +293,8 @@ describe("IssuesList", () => {
   });
 
   it("renders server search results instead of filtering the full issue list locally", async () => {
-    const localIssue = createIssue({ id: "issue-local", identifier: "PAP-1", title: "Local issue" });
-    const serverIssue = createIssue({ id: "issue-server", identifier: "PAP-2", title: "Server result" });
+    const localIssue = createIssue({ id: "issue-local", identifier: "MERC-1", title: "Local issue" });
+    const serverIssue = createIssue({ id: "issue-server", identifier: "MERC-2", title: "Server result" });
 
     mockIssuesApi.list.mockResolvedValue([serverIssue]);
 
@@ -326,8 +326,8 @@ describe("IssuesList", () => {
   });
 
   it("keeps server-side search scoped to the provided parent issue filters", async () => {
-    const localIssue = createIssue({ id: "issue-local", identifier: "PAP-1", title: "Local issue" });
-    const serverIssue = createIssue({ id: "issue-server", identifier: "PAP-2", title: "Server result" });
+    const localIssue = createIssue({ id: "issue-local", identifier: "MERC-1", title: "Local issue" });
+    const serverIssue = createIssue({ id: "issue-server", identifier: "MERC-2", title: "Server result" });
 
     mockIssuesApi.list.mockResolvedValue([serverIssue]);
 
@@ -402,20 +402,20 @@ describe("IssuesList", () => {
   it("renders the opt-in sub-issue progress summary with workflow next-up linking", async () => {
     const doneIssue = createIssue({
       id: "issue-done",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
       title: "Completed setup",
       status: "done",
       createdAt: new Date("2026-04-01T00:00:00.000Z"),
     });
     const nextIssue = createIssue({
       id: "issue-next",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       title: "Implement next slice",
       status: "todo",
       createdAt: new Date("2026-04-02T00:00:00.000Z"),
       blockedBy: [{
         id: "issue-done",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Completed setup",
         status: "done",
         priority: "medium",
@@ -425,14 +425,14 @@ describe("IssuesList", () => {
     });
     const blockedIssue = createIssue({
       id: "issue-blocked",
-      identifier: "PAP-3",
+      identifier: "MERC-3",
       title: "Blocked follow-up",
       status: "blocked",
       createdAt: new Date("2026-04-03T00:00:00.000Z"),
     });
     const cancelledIssue = createIssue({
       id: "issue-cancelled",
-      identifier: "PAP-4",
+      identifier: "MERC-4",
       title: "Cancelled follow-up",
       status: "cancelled",
       createdAt: new Date("2026-04-04T00:00:00.000Z"),
@@ -460,7 +460,7 @@ describe("IssuesList", () => {
       expect(container.textContent).toContain("1 blocked");
       expect(container.textContent).not.toContain("Done 1");
       expect(container.textContent).toContain("Next up");
-      const link = container.querySelector('a[href="/issues/PAP-2"]');
+      const link = container.querySelector('a[href="/issues/MERC-2"]');
       expect(link?.textContent).toContain("Implement next slice");
       expect(container.querySelector('[title="Cancelled: 1"]')).toBeNull();
     });
@@ -473,22 +473,22 @@ describe("IssuesList", () => {
   it("adds checklist affordances for workflow-sorted sub-issue lists", async () => {
     const issueDone = createIssue({
       id: "issue-done",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
       title: "Done first",
       status: "done",
       createdAt: new Date("2026-04-01T00:00:00.000Z"),
     });
     const issueBlocked = createIssue({
       id: "issue-blocked",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       title: "Blocked issue",
       status: "blocked",
-      blockedBy: [{ id: "issue-active", identifier: "PAP-3", title: "Active blocker", status: "todo", priority: "medium", assigneeAgentId: null, assigneeUserId: null }],
+      blockedBy: [{ id: "issue-active", identifier: "MERC-3", title: "Active blocker", status: "todo", priority: "medium", assigneeAgentId: null, assigneeUserId: null }],
       createdAt: new Date("2026-04-02T00:00:00.000Z"),
     });
     const issueActive = createIssue({
       id: "issue-active",
-      identifier: "PAP-3",
+      identifier: "MERC-3",
       title: "Active blocker",
       status: "todo",
       createdAt: new Date("2026-04-03T00:00:00.000Z"),
@@ -510,12 +510,12 @@ describe("IssuesList", () => {
       const rows = Array.from(container.querySelectorAll('[data-testid="issue-row"]'));
       expect(rows).toHaveLength(3);
       expect(rows.map((row) => row.getAttribute("data-step"))).toEqual(["1", "2", "3"]);
-      expect(container.textContent?.replace(/\s+/g, "")).toContain("1.PAP-1");
-      expect(container.textContent?.replace(/\s+/g, "")).toContain("2.PAP-3");
+      expect(container.textContent?.replace(/\s+/g, "")).toContain("1.MERC-1");
+      expect(container.textContent?.replace(/\s+/g, "")).toContain("2.MERC-3");
       expect(rows.filter((row) => row.getAttribute("data-current-step") === "true")).toHaveLength(1);
       expect(rows.find((row) => row.textContent?.includes("Active blocker"))?.getAttribute("data-current-step")).toBe("true");
       expect(rows.find((row) => row.textContent?.includes("Done first"))?.getAttribute("data-title-class")).toContain("text-muted-foreground");
-      expect(container.textContent).toContain("blocked by PAP-3 · step 2");
+      expect(container.textContent).toContain("blocked by MERC-3 · step 2");
     });
 
     act(() => {
@@ -526,28 +526,28 @@ describe("IssuesList", () => {
   it("uses hierarchical checklist step numbers when nested rows render inline", async () => {
     const firstRoot = createIssue({
       id: "issue-first-root",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
       title: "First root",
       status: "done",
       createdAt: new Date("2026-04-01T00:00:00.000Z"),
     });
     const parent = createIssue({
       id: "issue-parent",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       title: "Parent slice",
       status: "todo",
       createdAt: new Date("2026-04-02T00:00:00.000Z"),
     });
     const nextRoot = createIssue({
       id: "issue-next-root",
-      identifier: "PAP-3",
+      identifier: "MERC-3",
       title: "Next root",
       status: "todo",
       createdAt: new Date("2026-04-03T00:00:00.000Z"),
     });
     const grandchild = createIssue({
       id: "issue-grandchild",
-      identifier: "PAP-4",
+      identifier: "MERC-4",
       title: "Nested cancelled cleanup",
       status: "cancelled",
       parentId: "issue-parent",
@@ -611,14 +611,14 @@ describe("IssuesList", () => {
         issues={[
           createIssue({
             id: "issue-done",
-            identifier: "PAP-1",
+            identifier: "MERC-1",
             title: "Completed setup",
             status: "done",
             createdAt: new Date("2026-04-01T00:00:00.000Z"),
           }),
           createIssue({
             id: "issue-blocked",
-            identifier: "PAP-2",
+            identifier: "MERC-2",
             title: "Blocked follow-up",
             status: "blocked",
             createdAt: new Date("2026-04-02T00:00:00.000Z"),
@@ -635,7 +635,7 @@ describe("IssuesList", () => {
 
     await waitForAssertion(() => {
       expect(container.textContent).toContain("Waiting on blockers");
-      const link = container.querySelector('a[href="/issues/PAP-2"]');
+      const link = container.querySelector('a[href="/issues/MERC-2"]');
       expect(link?.textContent).toContain("Blocked follow-up");
     });
 
@@ -648,7 +648,7 @@ describe("IssuesList", () => {
     vi.useFakeTimers();
 
     const onSearchChange = vi.fn();
-    const localIssue = createIssue({ id: "issue-local", identifier: "PAP-1", title: "Local issue" });
+    const localIssue = createIssue({ id: "issue-local", identifier: "MERC-1", title: "Local issue" });
 
     const { root } = renderWithQueryClient(
       <IssuesList
@@ -700,7 +700,7 @@ describe("IssuesList", () => {
     const serverIssues = Array.from({ length: 200 }, (_, index) =>
       createIssue({
         id: `issue-${index + 1}`,
-        identifier: `PAP-${index + 1}`,
+        identifier: `MERC-${index + 1}`,
         title: `Server result ${index + 1}`,
       }),
     );
@@ -808,7 +808,7 @@ describe("IssuesList", () => {
     const cappedBacklogIssues = Array.from({ length: 200 }, (_, index) =>
       createIssue({
         id: `issue-backlog-${index + 1}`,
-        identifier: `PAP-${index + 1}`,
+        identifier: `MERC-${index + 1}`,
         title: `Backlog issue ${index + 1}`,
         status: "backlog",
       }),
@@ -843,7 +843,7 @@ describe("IssuesList", () => {
     const manyIssues = Array.from({ length: 220 }, (_, index) =>
       createIssue({
         id: `issue-${index + 1}`,
-        identifier: `PAP-${index + 1}`,
+        identifier: `MERC-${index + 1}`,
         title: `Issue ${index + 1}`,
       }),
     );
@@ -873,7 +873,7 @@ describe("IssuesList", () => {
     const manyIssues = Array.from({ length: 420 }, (_, index) =>
       createIssue({
         id: `issue-${index + 1}`,
-        identifier: `PAP-${index + 1}`,
+        identifier: `MERC-${index + 1}`,
         title: `Issue ${index + 1}`,
       }),
     );
@@ -912,7 +912,7 @@ describe("IssuesList", () => {
     const manyIssues = Array.from({ length: 420 }, (_, index) =>
       createIssue({
         id: `issue-${index + 1}`,
-        identifier: `PAP-${index + 1}`,
+        identifier: `MERC-${index + 1}`,
         title: `Issue ${index + 1}`,
       }),
     );
@@ -963,7 +963,7 @@ describe("IssuesList", () => {
     const visibleIssues = Array.from({ length: 100 }, (_, index) =>
       createIssue({
         id: `issue-${index + 1}`,
-        identifier: `PAP-${index + 1}`,
+        identifier: `MERC-${index + 1}`,
         title: `Issue ${index + 1}`,
       }),
     );
@@ -1008,12 +1008,12 @@ describe("IssuesList", () => {
   it("skips deferred row sizing for expanded parent rows with visible children", async () => {
     const parentIssue = createIssue({
       id: "issue-parent",
-      identifier: "PAP-1",
+      identifier: "MERC-1",
       title: "Parent issue",
     });
     const childIssue = createIssue({
       id: "issue-child",
-      identifier: "PAP-2",
+      identifier: "MERC-2",
       title: "Child issue",
       parentId: "issue-parent",
     });
@@ -1051,7 +1051,7 @@ describe("IssuesList", () => {
 
     const assignedIssue = createIssue({
       id: "issue-assigned",
-      identifier: "PAP-9",
+      identifier: "MERC-9",
       title: "Assigned issue",
       assigneeAgentId: "agent-1",
     });
@@ -1072,7 +1072,7 @@ describe("IssuesList", () => {
         (button) => button.getAttribute("title") === "Columns",
       );
       expect(columnsButton).not.toBeUndefined();
-      expect(container.textContent).toContain("PAP-9");
+      expect(container.textContent).toContain("MERC-9");
       expect(container.textContent).toContain("Agent One");
       expect(container.textContent).not.toContain("Updated");
     });
@@ -1101,7 +1101,7 @@ describe("IssuesList", () => {
 
     const assignedIssue = createIssue({
       id: "issue-human",
-      identifier: "PAP-12",
+      identifier: "MERC-12",
       title: "Human assigned issue",
       assigneeUserId: "user-2",
     });
@@ -1181,13 +1181,13 @@ describe("IssuesList", () => {
 
     const alphaIssue = createIssue({
       id: "issue-alpha",
-      identifier: "PAP-20",
+      identifier: "MERC-20",
       title: "Alpha issue",
       executionWorkspaceId: "workspace-alpha",
     });
     const betaIssue = createIssue({
       id: "issue-beta",
-      identifier: "PAP-21",
+      identifier: "MERC-21",
       title: "Beta issue",
       executionWorkspaceId: "workspace-beta",
     });
@@ -1233,13 +1233,13 @@ describe("IssuesList", () => {
   it("applies an initial workspace filter from the issues URL state", async () => {
     const alphaIssue = createIssue({
       id: "issue-alpha",
-      identifier: "PAP-30",
+      identifier: "MERC-30",
       title: "Alpha issue",
       executionWorkspaceId: "workspace-alpha",
     });
     const betaIssue = createIssue({
       id: "issue-beta",
-      identifier: "PAP-31",
+      identifier: "MERC-31",
       title: "Beta issue",
       executionWorkspaceId: "workspace-beta",
     });
@@ -1269,13 +1269,13 @@ describe("IssuesList", () => {
   it("shows routine-backed issues by default and hides them when the routine filter is toggled off", async () => {
     const manualIssue = createIssue({
       id: "issue-manual",
-      identifier: "PAP-10",
+      identifier: "MERC-10",
       title: "Manual issue",
       originKind: "manual",
     });
     const routineIssue = createIssue({
       id: "issue-routine",
-      identifier: "PAP-11",
+      identifier: "MERC-11",
       title: "Routine issue",
       originKind: "routine_execution",
     });

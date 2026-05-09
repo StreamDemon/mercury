@@ -749,7 +749,7 @@ describe("company portability", () => {
     issueSvc.list.mockResolvedValue([
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Write launch task",
         description: "Task body",
         projectId: "project-1",
@@ -848,7 +848,7 @@ describe("company portability", () => {
     issueSvc.list.mockResolvedValue([
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Write launch task",
         description: "Task body",
         projectId: "project-1",
@@ -1023,7 +1023,7 @@ describe("company portability", () => {
     issueSvc.list.mockResolvedValue([
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Task one",
         description: "Task body",
         projectId: "project-1",
@@ -1097,7 +1097,7 @@ describe("company portability", () => {
     issueSvc.list.mockResolvedValue([
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Task one",
         description: null,
         projectId: "project-1",
@@ -1112,7 +1112,7 @@ describe("company portability", () => {
       },
       {
         id: "issue-2",
-        identifier: "PAP-2",
+        identifier: "MERC-2",
         title: "Task two",
         description: null,
         projectId: "project-1",
@@ -1127,7 +1127,7 @@ describe("company portability", () => {
       },
       {
         id: "issue-3",
-        identifier: "PAP-3",
+        identifier: "MERC-3",
         title: "Task three",
         description: null,
         projectId: "project-1",
@@ -1152,7 +1152,7 @@ describe("company portability", () => {
     });
 
     expect(exported.warnings).toContain("Project launch workspace Local Scratch was omitted from export because it does not have a portable repoUrl.");
-    expect(exported.warnings).toContain("Tasks pap-1, pap-2, pap-3 reference workspace workspace-1, but that workspace could not be exported portably.");
+    expect(exported.warnings).toContain("Tasks merc-1, merc-2, merc-3 reference workspace workspace-1, but that workspace could not be exported portably.");
     expect(exported.warnings.filter((warning) => warning.includes("workspace reference workspace-1 was omitted from export"))).toHaveLength(0);
     expect(exported.warnings.filter((warning) => warning.includes("could not be exported portably"))).toHaveLength(1);
   });
@@ -2353,7 +2353,7 @@ describe("company portability", () => {
     issueSvc.list.mockResolvedValue([
       {
         id: "issue-1",
-        identifier: "PAP-1",
+        identifier: "MERC-1",
         title: "Labelled task",
         description: "Has labels",
         projectId: "project-1",
@@ -2716,7 +2716,7 @@ describe("company portability", () => {
       executionWorkspacePolicy: null, archivedAt: null, workspaces: [],
     }]);
     issueSvc.list.mockResolvedValue([{
-      id: "issue-1", companyId: "company-1", title: "Test task", identifier: "PAP-1",
+      id: "issue-1", companyId: "company-1", title: "Test task", identifier: "MERC-1",
       description: "A test task", status: "todo", priority: "medium",
       assigneeAgentId: "agent-1", projectId: "project-1", projectWorkspaceId: null,
       goalId: null, parentId: null, billingCode: null, labelIds: [],
@@ -2736,7 +2736,7 @@ describe("company portability", () => {
     projectSvc.list.mockResolvedValue([]);
     issueSvc.list.mockResolvedValue([]);
     projectSvc.create.mockResolvedValue({ id: "project-new", companyId: "company-1", urlKey: "testproject" });
-    issueSvc.create.mockResolvedValue({ id: "issue-new", identifier: "PAP-100" });
+    issueSvc.create.mockResolvedValue({ id: "issue-new", identifier: "MERC-100" });
 
     const result = await portability.importBundle({
       source: { type: "inline", rootPath: exported.rootPath, files: exported.files },

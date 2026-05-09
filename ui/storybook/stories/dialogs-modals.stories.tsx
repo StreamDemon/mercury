@@ -145,14 +145,14 @@ const closeReadinessReady: ExecutionWorkspaceCloseReadiness = {
   linkedIssues: [
     {
       id: "issue-storybook-1",
-      identifier: "PAP-1641",
+      identifier: "MERC-1641",
       title: "Create super-detailed storybooks for the project",
       status: "done",
       isTerminal: true,
     },
     {
       id: "issue-storybook-6",
-      identifier: "PAP-1670",
+      identifier: "MERC-1670",
       title: "Publish static Storybook preview",
       status: "todo",
       isTerminal: false,
@@ -169,7 +169,7 @@ const closeReadinessReady: ExecutionWorkspaceCloseReadiness = {
       kind: "git_worktree_remove",
       label: "Remove git worktree",
       description: "Removes the issue worktree from the local worktree parent directory.",
-      command: "git worktree remove .mercury/worktrees/PAP-1641-create-super-detailed-storybooks-for-our-project",
+      command: "git worktree remove .mercury/worktrees/MERC-1641-create-super-detailed-storybooks-for-our-project",
     },
     {
       kind: "archive_record",
@@ -183,8 +183,8 @@ const closeReadinessReady: ExecutionWorkspaceCloseReadiness = {
   isProjectPrimaryWorkspace: false,
   git: {
     repoRoot: "/Users/dotta/mercury",
-    workspacePath: "/Users/dotta/mercury/.mercury/worktrees/PAP-1641-create-super-detailed-storybooks-for-our-project",
-    branchName: "PAP-1641-create-super-detailed-storybooks-for-our-project",
+    workspacePath: "/Users/dotta/mercury/.mercury/worktrees/MERC-1641-create-super-detailed-storybooks-for-our-project",
+    branchName: "MERC-1641-create-super-detailed-storybooks-for-our-project",
     baseRef: "master",
     hasDirtyTrackedFiles: true,
     hasUntrackedFiles: false,
@@ -202,7 +202,7 @@ const closeReadinessBlocked: ExecutionWorkspaceCloseReadiness = {
   ...closeReadinessReady,
   state: "blocked",
   blockingReasons: [
-    "PAP-1670 is still open and references this execution workspace.",
+    "MERC-1670 is still open and references this execution workspace.",
     "The worktree has dirty tracked files that have not been committed.",
   ],
   warnings: [],
@@ -328,7 +328,10 @@ function DialogBackdropFrame({
 }
 
 function hydrateDialogQueries(queryClient: ReturnType<typeof useQueryClient>) {
-  queryClient.setQueryData(queryKeys.companies.all, storybookCompanies);
+  queryClient.setQueryData(queryKeys.companies.all, {
+    companies: storybookCompanies,
+    unauthorized: false,
+  });
   queryClient.setQueryData(queryKeys.auth.session, storybookAuthSession);
   queryClient.setQueryData(queryKeys.agents.list(COMPANY_ID), storybookAgents);
   queryClient.setQueryData(queryKeys.projects.list(COMPANY_ID), storybookProjects);
@@ -614,7 +617,7 @@ function ExecutionWorkspaceDialogStory({ blocked }: { blocked?: boolean }) {
     >
       <ExecutionWorkspaceCloseDialog
         workspaceId={blocked ? "execution-workspace-blocked" : workspace.id}
-        workspaceName={blocked ? "PAP-1670 publish preview worktree" : workspace.name}
+        workspaceName={blocked ? "MERC-1670 publish preview worktree" : workspace.name}
         currentStatus={workspace.status}
         open
         onOpenChange={() => undefined}

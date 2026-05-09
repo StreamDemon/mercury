@@ -164,27 +164,27 @@ describe("MarkdownBody", () => {
   });
 
   it("linkifies bare issue identifiers in markdown text", () => {
-    const html = renderMarkdown("Depends on PAP-1271 for the hover state.", [
-      { identifier: "PAP-1271", status: "done" },
+    const html = renderMarkdown("Depends on MERC-1271 for the hover state.", [
+      { identifier: "MERC-1271", status: "done" },
     ]);
 
-    expect(html).toContain('href="/issues/PAP-1271"');
+    expect(html).toContain('href="/issues/MERC-1271"');
     expect(html).toContain("text-green-600");
-    expect(html).toContain(">PAP-1271<");
+    expect(html).toContain(">MERC-1271<");
     expect(html).toContain('data-mention-kind="issue"');
     expect(html).toContain("mercury-markdown-issue-ref");
     expect(html).not.toContain("mercury-mention-chip--issue");
   });
 
   it("uses concise issue aria labels until a distinct title is available", () => {
-    const html = renderMarkdown("Depends on PAP-1271 and PAP-1272.", [
-      { identifier: "PAP-1271", status: "done" },
-      { identifier: "PAP-1272", status: "blocked", title: "Fix hover state" },
+    const html = renderMarkdown("Depends on MERC-1271 and MERC-1272.", [
+      { identifier: "MERC-1271", status: "done" },
+      { identifier: "MERC-1272", status: "blocked", title: "Fix hover state" },
     ]);
 
-    expect(html).toContain('aria-label="Issue PAP-1271"');
-    expect(html).toContain('aria-label="Issue PAP-1272: Fix hover state"');
-    expect(html).not.toContain('aria-label="Issue PAP-1271: PAP-1271"');
+    expect(html).toContain('aria-label="Issue MERC-1271"');
+    expect(html).toContain('aria-label="Issue MERC-1272: Fix hover state"');
+    expect(html).not.toContain('aria-label="Issue MERC-1271: MERC-1271"');
   });
 
   it("preserves absolute issue URLs as external links", () => {
@@ -201,66 +201,66 @@ describe("MarkdownBody", () => {
   });
 
   it("linkifies plain internal issue paths in markdown text", () => {
-    const html = renderMarkdown("See /issues/PAP-1179 and /PAP/issues/pap-1180 for context.", [
-      { identifier: "PAP-1179", status: "blocked" },
-      { identifier: "PAP-1180", status: "done" },
+    const html = renderMarkdown("See /issues/MERC-1179 and /PAP/issues/merc-1180 for context.", [
+      { identifier: "MERC-1179", status: "blocked" },
+      { identifier: "MERC-1180", status: "done" },
     ]);
 
-    expect(html).toContain('href="/issues/PAP-1179"');
-    expect(html).toContain('href="/issues/PAP-1180"');
-    expect(html).toContain(">/issues/PAP-1179<");
-    expect(html).toContain(">/PAP/issues/pap-1180<");
+    expect(html).toContain('href="/issues/MERC-1179"');
+    expect(html).toContain('href="/issues/MERC-1180"');
+    expect(html).toContain(">/issues/MERC-1179<");
+    expect(html).toContain(">/PAP/issues/merc-1180<");
     expect(html).toContain("text-red-600");
     expect(html).toContain("text-green-600");
   });
 
   it("does not auto-link non-issue internal route paths", () => {
-    const html = renderMarkdown("Use /issues/new for the creation form, /issues/PAP-42extra as text, and /api/issues for data.");
+    const html = renderMarkdown("Use /issues/new for the creation form, /issues/MERC-42extra as text, and /api/issues for data.");
 
-    expect(html).toContain("Use /issues/new for the creation form, /issues/PAP-42extra as text, and /api/issues for data.");
+    expect(html).toContain("Use /issues/new for the creation form, /issues/MERC-42extra as text, and /api/issues for data.");
     expect(html).not.toContain('href="/issues/new"');
-    expect(html).not.toContain('href="/issues/PAP-42"');
+    expect(html).not.toContain('href="/issues/MERC-42"');
     expect(html).not.toContain('data-mention-kind="issue"');
   });
 
   it("rewrites issue scheme links to internal issue links", () => {
-    const html = renderMarkdown("See issue://PAP-1310 and issue://:PAP-1311.", [
-      { identifier: "PAP-1310", status: "done" },
-      { identifier: "PAP-1311", status: "blocked" },
+    const html = renderMarkdown("See issue://MERC-1310 and issue://:MERC-1311.", [
+      { identifier: "MERC-1310", status: "done" },
+      { identifier: "MERC-1311", status: "blocked" },
     ]);
 
-    expect(html).toContain('href="/issues/PAP-1310"');
-    expect(html).toContain('href="/issues/PAP-1311"');
-    expect(html).toContain(">issue://PAP-1310<");
-    expect(html).toContain(">issue://:PAP-1311<");
+    expect(html).toContain('href="/issues/MERC-1310"');
+    expect(html).toContain('href="/issues/MERC-1311"');
+    expect(html).toContain(">issue://MERC-1310<");
+    expect(html).toContain(">issue://:MERC-1311<");
     expect(html).toContain("text-green-600");
     expect(html).toContain("text-red-600");
   });
 
   it("linkifies issue identifiers inside inline code spans", () => {
-    const html = renderMarkdown("Reference `PAP-1271` here.", [
-      { identifier: "PAP-1271", status: "done" },
+    const html = renderMarkdown("Reference `MERC-1271` here.", [
+      { identifier: "MERC-1271", status: "done" },
     ]);
 
-    expect(html).toContain('href="/issues/PAP-1271"');
-    expect(html).toContain('<code style="overflow-wrap:anywhere;word-break:break-word">PAP-1271</code>');
+    expect(html).toContain('href="/issues/MERC-1271"');
+    expect(html).toContain('<code style="overflow-wrap:anywhere;word-break:break-word">MERC-1271</code>');
     expect(html).toContain("text-green-600");
     expect(html).toContain("mercury-markdown-issue-ref");
   });
 
   it("keeps trailing punctuation outside auto-linked issue references", () => {
-    const html = renderMarkdown("See PAP-1271: /issues/PAP-1272] and issue://PAP-1273.", [
-      { identifier: "PAP-1271", status: "done" },
-      { identifier: "PAP-1272", status: "blocked" },
-      { identifier: "PAP-1273", status: "todo" },
+    const html = renderMarkdown("See MERC-1271: /issues/MERC-1272] and issue://MERC-1273.", [
+      { identifier: "MERC-1271", status: "done" },
+      { identifier: "MERC-1272", status: "blocked" },
+      { identifier: "MERC-1273", status: "todo" },
     ]);
 
-    expect(html).toContain('<a href="/issues/PAP-1271"');
-    expect(html).toContain('>PAP-1271</a>:');
-    expect(html).toContain('<a href="/issues/PAP-1272"');
-    expect(html).toContain('>/issues/PAP-1272</a>]');
-    expect(html).toContain('<a href="/issues/PAP-1273"');
-    expect(html).toContain('>issue://PAP-1273</a>.');
+    expect(html).toContain('<a href="/issues/MERC-1271"');
+    expect(html).toContain('>MERC-1271</a>:');
+    expect(html).toContain('<a href="/issues/MERC-1272"');
+    expect(html).toContain('>/issues/MERC-1272</a>]');
+    expect(html).toContain('<a href="/issues/MERC-1273"');
+    expect(html).toContain('>issue://MERC-1273</a>.');
   });
 
   it("can opt out of issue reference linkification for offline previews", () => {
@@ -268,15 +268,15 @@ describe("MarkdownBody", () => {
       <QueryClientProvider client={new QueryClient()}>
         <ThemeProvider>
           <MarkdownBody linkIssueReferences={false}>
-            {"Depends on PAP-1271 and [manual link](PAP-1271)."}
+            {"Depends on MERC-1271 and [manual link](MERC-1271)."}
           </MarkdownBody>
         </ThemeProvider>
       </QueryClientProvider>,
     );
 
-    expect(html).not.toContain('href="/issues/PAP-1271"');
-    expect(html).toContain("Depends on PAP-1271");
-    expect(html).toContain('href="PAP-1271"');
+    expect(html).not.toContain('href="/issues/MERC-1271"');
+    expect(html).toContain("Depends on MERC-1271");
+    expect(html).toContain('href="MERC-1271"');
   });
 
   it("applies wrap-friendly styles to long inline content", () => {
@@ -367,13 +367,13 @@ describe("MarkdownBody", () => {
   });
 
   it("renders internal issue links and bare identifiers as inline issue refs", () => {
-    const html = renderMarkdown(`See PAP-42 and [linked task](${buildIssueReferenceHref("PAP-77")}) for follow-up.`, [
-      { identifier: "PAP-42", status: "done" },
-      { identifier: "PAP-77", status: "blocked" },
+    const html = renderMarkdown(`See MERC-42 and [linked task](${buildIssueReferenceHref("MERC-77")}) for follow-up.`, [
+      { identifier: "MERC-42", status: "done" },
+      { identifier: "MERC-77", status: "blocked" },
     ]);
 
-    expect(html).toContain('href="/issues/PAP-42"');
-    expect(html).toContain('href="/issues/PAP-77"');
+    expect(html).toContain('href="/issues/MERC-42"');
+    expect(html).toContain('href="/issues/MERC-77"');
     expect(html).toContain('data-mention-kind="issue"');
     expect(html).toContain("mercury-markdown-issue-ref");
     expect(html).not.toContain("mercury-mention-chip--issue");
