@@ -1,0 +1,25 @@
+ui/storybook/.storybook/preview.tsx
+  s_5b7e057571194d::t_3577967268567e 166-172
+  s_5b7e057571194d::t_8638bc8d760d46 90-98,103-128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "5e7085d04d17aa140bcaf4c6121a3fa4f2a7e2d8",
+  "prompts": {},
+  "humans": {
+    "h_b281b7259c1604": {
+      "author": "Mercury Rebrand <rebrand@local>"
+    }
+  },
+  "sessions": {
+    "s_5b7e057571194d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0652d702-274e-46bb-be41-411300668d86",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
