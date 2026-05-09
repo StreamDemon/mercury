@@ -1,0 +1,46 @@
+package.json
+  s_5b7e057571194d::t_edeb2ef5ad1dd2 14-16
+ui/storybook/.storybook/preview.tsx
+  s_5b7e057571194d::t_4057d05eef1718 152-160
+scripts/dev-docker-entrypoint.sh
+  s_5b7e057571194d::t_d5242b95337d00 33-35
+  s_5b7e057571194d::t_d5c4ea09579963 37
+  s_5b7e057571194d::t_8cb5b032a01d18 1-31,40-44,58
+  s_5b7e057571194d::t_e8b2e04e07c820 45-57
+  s_5b7e057571194d::t_5a9f4d3f09a4ab 32,36,38-39
+Dockerfile.dev
+  s_5b7e057571194d::t_937c1bd9faed5b 61
+  s_5b7e057571194d::t_600f2da6bd93ab 1-47,53,63-102,109-118,120,125
+  s_5b7e057571194d::t_a2b3fec26725c2 54-60,62
+  s_5b7e057571194d::t_9421ff0c1ef4b1 119
+  s_5b7e057571194d::t_b09e296cc4dd97 48-52
+  s_5b7e057571194d::t_e26ed37b634a2b 103-108
+  s_5b7e057571194d::t_eda903b55ede21 121-124
+docker/docker-compose.dev.yml
+  s_5b7e057571194d::t_f0b5e5f4a992a3 54-60
+  s_5b7e057571194d::t_94561a9342b5c4 1-15,18-53,61-104,112-115,124-150
+  s_5b7e057571194d::t_711412f0125789 105-111,123
+  s_5b7e057571194d::t_a1a877b1c1ce85 16-17
+  s_5b7e057571194d::t_da53c27e82f7d2 116-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1f61a00e6d856c8ee97fab828757cdd4d9244611",
+  "prompts": {},
+  "humans": {
+    "h_b281b7259c1604": {
+      "author": "Mercury Rebrand <rebrand@local>"
+    }
+  },
+  "sessions": {
+    "s_5b7e057571194d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0652d702-274e-46bb-be41-411300668d86",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
