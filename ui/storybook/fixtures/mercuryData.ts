@@ -32,7 +32,7 @@ export const storybookCompanies: Company[] = [
     status: "active",
     pauseReason: null,
     pausedAt: null,
-    issuePrefix: "PAP",
+    issuePrefix: "MERC",
     issueCounter: 1641,
     budgetMonthlyCents: 250_000,
     spentMonthlyCents: 67_500,
