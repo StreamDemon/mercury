@@ -149,6 +149,15 @@ function installStorybookApiFixtures() {
   };
 }
 
+// Install fetch fixtures at module load so that React Query's queryFn (which
+// fires during first render) sees the intercepted /api/* responses. Putting
+// this in a useEffect inside StorybookProviders is too late — the queryFn
+// runs in a microtask after first render, before useEffect commits, and the
+// fetch falls through to Vite which 404s every Mercury endpoint. Safe at
+// module load because the function early-returns when `typeof window` is
+// undefined (SSR / non-browser contexts).
+installStorybookApiFixtures();
+
 function applyStorybookTheme(theme: "light" | "dark") {
   if (typeof document === "undefined") return;
   document.documentElement.classList.toggle("dark", theme === "dark");
@@ -176,7 +185,6 @@ function StorybookProviders({
 
   useEffect(() => {
     applyStorybookTheme(theme);
-    installStorybookApiFixtures();
   }, [theme]);
 
   return (

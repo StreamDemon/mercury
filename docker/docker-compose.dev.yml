@@ -1,0 +1,150 @@
+# Mercury development container with hot reload, real Postgres, and Storybook.
+# Companion to docker-compose.yml (production runtime). Keep these separate so
+# the prod stack stays free of dev concerns.
+#
+# Quickstart:
+#   pnpm dev:docker             # build + start
+#   pnpm dev:docker -- --build  # force rebuild
+#   docker compose -f docker/docker-compose.dev.yml down -v  # full reset
+#
+# Ports use a +10 offset from defaults so a host-side `pnpm dev` (3100) and
+# `pnpm storybook` (6006) can run simultaneously alongside the dev container.
+#   - 3110 -> Mercury server (container :3100)
+#   - 6016 -> Storybook       (container :6006)
+#   - 5442 -> Postgres        (container :5432)
+
+name: mercury-dev
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: mercury
+      POSTGRES_PASSWORD: mercury
+      POSTGRES_DB: mercury
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mercury -d mercury"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5442:5432"
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+
+  dev:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+      args:
+        USER_UID: "${USER_UID:-1000}"
+        USER_GID: "${USER_GID:-1000}"
+    image: mercury-dev:latest
+    init: true
+    tty: true
+    stdin_open: true
+    ports:
+      - "${MERCURY_DEV_PORT:-3110}:3100"
+    environment:
+      DATABASE_URL: "postgres://mercury:mercury@db:5432/mercury"
+      HOST: "0.0.0.0"
+      PORT: "3100"
+      MERCURY_HOME: "/mercury"
+      MERCURY_INSTANCE_ID: "default"
+      # `npm_config_bind=lan` tells scripts/dev-runner.ts (line 121) to flip
+      # Mercury into authenticated/private mode with bind=lan (0.0.0.0). Without
+      # this, dev-runner defaults to local_trusted which requires bind=loopback,
+      # which is unreachable from the host through the port mapping. The
+      # MERCURY_DEPLOYMENT_MODE/EXPOSURE vars below are still useful as a
+      # fallback / documentation but dev-runner overwrites them based on bind.
+      npm_config_bind: "lan"
+      MERCURY_DEPLOYMENT_MODE: "${MERCURY_DEPLOYMENT_MODE:-authenticated}"
+      MERCURY_DEPLOYMENT_EXPOSURE: "${MERCURY_DEPLOYMENT_EXPOSURE:-private}"
+      MERCURY_PUBLIC_URL: "${MERCURY_PUBLIC_URL:-http://localhost:3110}"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set in .env or shell}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+    volumes:
+      # Source bind-mount: host repo -> /app
+      - ..:/app
+      # Anonymous volumes shadow host's Windows-built node_modules at every
+      # workspace path. Without these, host node_modules (built for win32-x64)
+      # would shadow the container's Linux-built copy and break esbuild,
+      # embedded-postgres, etc. List is mirrored from Dockerfile.dev's deps stage.
+      - /app/node_modules
+      - /app/cli/node_modules
+      - /app/server/node_modules
+      - /app/ui/node_modules
+      - /app/packages/shared/node_modules
+      - /app/packages/db/node_modules
+      - /app/packages/adapter-utils/node_modules
+      - /app/packages/mcp-server/node_modules
+      - /app/packages/adapters/claude-local/node_modules
+      - /app/packages/adapters/codex-local/node_modules
+      - /app/packages/adapters/cursor-local/node_modules
+      - /app/packages/adapters/gemini-local/node_modules
+      - /app/packages/adapters/hermes-local/node_modules
+      - /app/packages/adapters/openclaw-gateway/node_modules
+      - /app/packages/adapters/opencode-local/node_modules
+      - /app/packages/adapters/pi-local/node_modules
+      - /app/packages/plugins/sdk/node_modules
+      - /app/packages/plugins/mercury-plugin-fake-sandbox/node_modules
+      # Dev-only Mercury runtime data (instance dir, logs, embedded-pg if it
+      # ever runs, etc.). Named volume so it survives `down`.
+      - mercury-data-dev:/mercury
+    depends_on:
+      db:
+        condition: service_healthy
+
+  storybook:
+    image: mercury-dev:latest
+    init: true
+    tty: true
+    stdin_open: true
+    ports:
+      # Map host:container 1:1. Storybook's Vite HMR client hardcodes the
+      # connection URL to `ws://<browser-host>:<server-port>` where server-port
+      # is whatever storybook is bound to inside the container. If we mapped
+      # 6016->6006, the browser at :6016 would try `ws://localhost:6006` which
+      # the host doesn't expose, breaking HMR. Matching ports avoids needing
+      # to thread `server.hmr.clientPort` through Storybook's vite config.
+      - "${MERCURY_DEV_STORYBOOK_PORT:-6016}:6016"
+    environment:
+      HOST: "0.0.0.0"
+      USER_UID: "${USER_UID:-1000}"
+      USER_GID: "${USER_GID:-1000}"
+    # Invoke storybook directly instead of via `pnpm --filter ... storybook`.
+    # The pnpm filter forwarding inserts a literal `--` separator into argv,
+    # which Storybook 10.x's `dev` subcommand rejects with "too many arguments
+    # for 'dev'". Calling pnpm exec from inside ui/ bypasses that.
+    command:
+      - sh
+      - -c
+      - "cd /app/ui && exec pnpm exec storybook dev -p 6016 -c storybook/.storybook --host 0.0.0.0"
+    volumes:
+      - ..:/app
+      - /app/node_modules
+      - /app/cli/node_modules
+      - /app/server/node_modules
+      - /app/ui/node_modules
+      - /app/packages/shared/node_modules
+      - /app/packages/db/node_modules
+      - /app/packages/adapter-utils/node_modules
+      - /app/packages/mcp-server/node_modules
+      - /app/packages/adapters/claude-local/node_modules
+      - /app/packages/adapters/codex-local/node_modules
+      - /app/packages/adapters/cursor-local/node_modules
+      - /app/packages/adapters/gemini-local/node_modules
+      - /app/packages/adapters/hermes-local/node_modules
+      - /app/packages/adapters/openclaw-gateway/node_modules
+      - /app/packages/adapters/opencode-local/node_modules
+      - /app/packages/adapters/pi-local/node_modules
+      - /app/packages/plugins/sdk/node_modules
+      - /app/packages/plugins/mercury-plugin-fake-sandbox/node_modules
+    # Storybook depends on the dev image build, not the dev service itself.
+    # Both can run independently; declaring no `depends_on` so storybook can
+    # be brought up alone via `docker compose -f ... up storybook`.
+
+volumes:
+  pgdata-dev:
+  mercury-data-dev:

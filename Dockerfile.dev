@@ -1,0 +1,125 @@
+# syntax=docker/dockerfile:1.20
+# Mercury development container with hot-reload, Claude Code, Codex, and Hermes
+# preinstalled. Companion to Dockerfile (production) — kept separate so the prod
+# image stays free of dev-only tooling.
+#
+# Build: docker compose -f docker/docker-compose.dev.yml build
+# Run:   pnpm dev:docker  (or docker compose -f docker/docker-compose.dev.yml up)
+
+FROM node:lts-trixie-slim AS base
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# System packages:
+# - ca-certificates, curl, git, gh, wget: standard dev-loop tooling
+# - ripgrep: required by Hermes installer + general dev use
+# - tini: clean PID 1 / signal forwarding (Ctrl-C in attached shells)
+# - ffmpeg, sqlite3: required by Hermes runtime; preinstalled so the Hermes
+#   curl-installer doesn't have to fetch them
+# - python3, python3-venv: needed for some tooling and any future Python adapter work
+# - gosu: drop privileges in the entrypoint (matches Dockerfile pattern)
+# - build-essential: native node module builds (esbuild, embedded-postgres patches)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    ca-certificates curl wget git gh ripgrep tini gosu \
+    ffmpeg sqlite3 \
+    python3 python3-venv \
+    build-essential \
+  && rm -rf /var/lib/apt/lists/* \
+  && corepack enable
+
+# Match host UID/GID so bind-mounted source files don't end up root-owned on the
+# Windows host. Runtime override happens in the entrypoint.
+RUN usermod -u $USER_UID --non-unique node \
+  && groupmod -g $USER_GID --non-unique node
+
+# Globally installed agent CLIs. Limited to Claude Code + Codex per the dev
+# container scope; opencode/Pi/Gemini are not needed for the current
+# integration roadmap and would just inflate the image.
+RUN npm install --global \
+    @anthropic-ai/claude-code@latest \
+    @openai/codex@latest
+
+# Hermes Agent: canonical install per
+# https://hermes-agent.nousresearch.com/docs/getting-started/installation
+# Run as root → installs `hermes` to /usr/local/bin/hermes (system-wide).
+# Fresh install, never copied from WSL — preserves option to diverge as the
+# Mercury x Hermes integration deepens (see project_hermes_integration memory).
+# `hermes --version` at build time would fail because the installer writes to
+# shell rc files (~/.bashrc, etc.) that are not sourced inside a Dockerfile RUN.
+# PATH gets repaired in interactive shells started from the running container;
+# verify with `hermes --version` after `pnpm dev:docker` if needed.
+RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+
+# Install pnpm system-wide via npm to bypass corepack's per-user cache.
+# `corepack enable` (above) created /usr/local/bin/pnpm as a shim that downloads
+# the version named in `packageManager` to ~/.cache/node/corepack on first use.
+# When the entrypoint switches to `node` via gosu, that root-owned cache is not
+# visible, so corepack would re-download pnpm. Installing pnpm directly via npm
+# overwrites the corepack shim with a real binary that all users can run without
+# touching corepack's cache.
+RUN npm install --global --force pnpm@9.15.4
+
+WORKDIR /app
+
+# ---- Dependency layer ----
+# Copy only manifest files first so `pnpm install` is cached unless deps change.
+# Mirrors the workspace list from the prod Dockerfile's deps stage.
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY cli/package.json cli/
+COPY server/package.json server/
+COPY ui/package.json ui/
+COPY packages/shared/package.json packages/shared/
+COPY packages/db/package.json packages/db/
+COPY packages/adapter-utils/package.json packages/adapter-utils/
+COPY packages/mcp-server/package.json packages/mcp-server/
+COPY packages/adapters/claude-local/package.json packages/adapters/claude-local/
+COPY packages/adapters/codex-local/package.json packages/adapters/codex-local/
+COPY packages/adapters/cursor-local/package.json packages/adapters/cursor-local/
+COPY packages/adapters/gemini-local/package.json packages/adapters/gemini-local/
+COPY packages/adapters/hermes-local/package.json packages/adapters/hermes-local/
+COPY packages/adapters/openclaw-gateway/package.json packages/adapters/openclaw-gateway/
+COPY packages/adapters/opencode-local/package.json packages/adapters/opencode-local/
+COPY packages/adapters/pi-local/package.json packages/adapters/pi-local/
+COPY packages/plugins/sdk/package.json packages/plugins/sdk/
+COPY --parents packages/plugins/sandbox-providers/./*/package.json packages/plugins/sandbox-providers/
+COPY packages/plugins/mercury-plugin-fake-sandbox/package.json packages/plugins/mercury-plugin-fake-sandbox/
+COPY patches/ patches/
+
+RUN pnpm install --frozen-lockfile
+
+# ---- Dev runtime ----
+# Source code is provided via bind-mount in compose, NOT baked into the image.
+# This stage exists primarily to inherit the deps layer's node_modules and set
+# the entrypoint. The source COPY here is a fallback for `docker run` without
+# compose; the bind-mount in docker-compose.dev.yml shadows it.
+FROM base AS dev
+WORKDIR /app
+COPY --from=deps /app /app
+COPY scripts/dev-docker-entrypoint.sh /usr/local/bin/dev-docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/dev-docker-entrypoint.sh
+# Anonymous node_modules volumes in docker-compose.dev.yml are populated from
+# this image's /app on first start. pnpm install ran as root in the deps stage,
+# so without chown the volumes would be root-owned, and `gosu node` at runtime
+# couldn't write to .bin/, .cache/, or any nested package dir. Storybook hits
+# this first with `mkdir '/app/ui/node_modules/.cache/storybook'` -> EACCES.
+RUN chown -R node:node /app
+
+ENV NODE_ENV=development \
+  HOST=0.0.0.0 \
+  PORT=3100 \
+  MERCURY_HOME=/mercury \
+  MERCURY_INSTANCE_ID=default \
+  USER_UID=${USER_UID} \
+  USER_GID=${USER_GID}
+
+VOLUME ["/mercury"]
+EXPOSE 3100 6016
+
+# `init: true` in docker-compose.dev.yml runs docker-init at PID 1 which already
+# handles signal forwarding + zombie reaping, so we don't need tini wrapping
+# here. Wrapping anyway makes tini complain because it ends up at PID > 1.
+ENTRYPOINT ["dev-docker-entrypoint.sh"]
+CMD ["pnpm", "dev"]
