@@ -87,8 +87,43 @@ function installStorybookApiFixtures() {
       });
     }
 
+    if (url.pathname === "/api/instance/settings/general") {
+      return Response.json({
+        censorUsernameInLogs: false,
+        keyboardShortcuts: true,
+        feedbackDataSharingPreference: "prompt",
+        backupRetention: { dailyDays: 7, weeklyWeeks: 4, monthlyMonths: 1 },
+      });
+    }
+
     if (url.pathname === "/api/plugins/ui-contributions") {
       return Response.json([]);
+    }
+
+    // Top-level (non-company-scoped) endpoints. These fall outside the
+    // /api/companies/{id}/{resource} regex below.
+    const heartbeatRunLogMatch = url.pathname.match(
+      /^\/api\/heartbeat-runs\/([^/]+)\/log$/,
+    );
+    if (heartbeatRunLogMatch) {
+      const [, runId] = heartbeatRunLogMatch;
+      return Response.json({
+        runId,
+        store: "storybook",
+        logRef: `storybook:${runId}`,
+        content: "",
+        nextOffset: 0,
+      });
+    }
+
+    const issueByIdentifierMatch = url.pathname.match(/^\/api\/issues\/([^/]+)$/);
+    if (issueByIdentifierMatch) {
+      const [, identifier] = issueByIdentifierMatch;
+      const issue = storybookIssues.find((entry) => entry.identifier === identifier);
+      if (issue) {
+        return Response.json(issue);
+      }
+      return Response.json({ error: "Issue not found" }, { status: 404 });
     }
 
     const companyResourceMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/([^/]+)$/);
@@ -126,6 +161,13 @@ function installStorybookApiFixtures() {
         );
       }
       if (resource === "join-requests") {
+        return Response.json([]);
+      }
+      if (resource === "skills") {
+        // No `storybookCompanySkills` fixture exists yet — return [] so the
+        // EditorAutocompleteContext skill picker renders without crashing.
+        // Add a fixture if/when a story actually wants to exercise the
+        // skill-attached UI.
         return Response.json([]);
       }
       if (resource === "issues") {
