@@ -1,58 +1,8 @@
-import type { ActivityEvent, RunLivenessState } from "@mercuryai/shared";
+import type { ActivityEvent } from "@mercuryai/shared";
+import { issueForRunSchema, runForIssueSchema } from "@mercuryai/shared";
 import { api } from "./client";
 
-export type { RunLivenessState } from "@mercuryai/shared";
-
-export interface RunForIssue {
-  runId: string;
-  status: string;
-  agentId: string;
-  adapterType: string;
-  startedAt: string | null;
-  finishedAt: string | null;
-  createdAt: string;
-  invocationSource: string;
-  usageJson: Record<string, unknown> | null;
-  resultJson: Record<string, unknown> | null;
-  logBytes?: number | null;
-  retryOfRunId?: string | null;
-  scheduledRetryAt?: string | null;
-  scheduledRetryAttempt?: number;
-  scheduledRetryReason?: string | null;
-  retryExhaustedReason?: string | null;
-  livenessState?: RunLivenessState | null;
-  livenessReason?: string | null;
-  continuationAttempt?: number;
-  lastUsefulActionAt?: string | null;
-  nextAction?: string | null;
-  contextSnapshot?: Record<string, unknown> | null;
-  environment?: {
-    id: string;
-    name: string;
-    driver: string;
-  } | null;
-  environmentLease?: {
-    id: string;
-    status: string;
-    leasePolicy: string;
-    provider: string | null;
-    providerLeaseId: string | null;
-    executionWorkspaceId: string | null;
-    workspacePath: string | null;
-    failureReason: string | null;
-    cleanupStatus: string | null;
-    acquiredAt: string | Date;
-    releasedAt: string | Date | null;
-  } | null;
-}
-
-export interface IssueForRun {
-  issueId: string;
-  identifier: string | null;
-  title: string;
-  status: string;
-  priority: string;
-}
+export type { IssueForRun, RunForIssue, RunLivenessState } from "@mercuryai/shared";
 
 export const activityApi = {
   list: (companyId: string, filters?: { entityType?: string; entityId?: string; agentId?: string; limit?: number }) => {
@@ -65,6 +15,6 @@ export const activityApi = {
     return api.get<ActivityEvent[]>(`/companies/${companyId}/activity${qs ? `?${qs}` : ""}`);
   },
   forIssue: (issueId: string) => api.get<ActivityEvent[]>(`/issues/${issueId}/activity`),
-  runsForIssue: (issueId: string) => api.get<RunForIssue[]>(`/issues/${issueId}/runs`),
-  issuesForRun: (runId: string) => api.get<IssueForRun[]>(`/heartbeat-runs/${runId}/issues`),
+  runsForIssue: (issueId: string) => api.get(`/issues/${issueId}/runs`, runForIssueSchema.array()),
+  issuesForRun: (runId: string) => api.get(`/heartbeat-runs/${runId}/issues`, issueForRunSchema.array()),
 };
