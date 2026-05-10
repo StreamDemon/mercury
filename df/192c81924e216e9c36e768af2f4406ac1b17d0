@@ -1,0 +1,19 @@
+scripts/dev-docker-entrypoint.sh
+  s_7aad1e142804b4::t_8e353038823bd0 40-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "df192c81924e216e9c36e768af2f4406ac1b17d0",
+  "prompts": {},
+  "sessions": {
+    "s_7aad1e142804b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88dec0bb-bcb4-4ea8-b63c-d25ef19ed424",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
