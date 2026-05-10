@@ -1,0 +1,19 @@
+server/src/startup-banner.ts
+  s_7aad1e142804b4::t_0df930b9454972 47-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "faacd7ffdec5e37a57f2a417be67c18d69285fdf",
+  "prompts": {},
+  "sessions": {
+    "s_7aad1e142804b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88dec0bb-bcb4-4ea8-b63c-d25ef19ed424",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
