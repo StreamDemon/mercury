@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { Db } from "@mercuryai/db";
+import { issueForRunSchema, runForIssueSchema } from "@mercuryai/shared";
 import { validate } from "../middleware/validate.js";
 import { activityService, normalizeActivityLimit } from "../services/activity.js";
 import { assertAuthenticated, assertBoard, assertCompanyAccess } from "./authz.js";
@@ -78,7 +79,7 @@ export function activityRoutes(db: Db) {
     }
     assertCompanyAccess(req, issue.companyId);
     const result = await svc.runsForIssue(issue.companyId, issue.id);
-    res.json(result);
+    res.jsonValidated(runForIssueSchema.array(), result);
   });
 
   router.get("/heartbeat-runs/:runId/issues", async (req, res) => {
@@ -86,12 +87,12 @@ export function activityRoutes(db: Db) {
     const runId = req.params.runId as string;
     const run = await heartbeat.getRun(runId);
     if (!run) {
-      res.json([]);
+      res.jsonValidated(issueForRunSchema.array(), []);
       return;
     }
     assertCompanyAccess(req, run.companyId);
     const result = await svc.issuesForRun(runId);
-    res.json(result);
+    res.jsonValidated(issueForRunSchema.array(), result);
   });
 
   return router;
