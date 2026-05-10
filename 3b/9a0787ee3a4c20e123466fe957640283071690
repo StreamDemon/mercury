@@ -1,0 +1,39 @@
+packages/shared/src/validators/agent.test.ts
+  s_5135cf36ca45b7::t_d1b4be64e9a8d3 1-82
+packages/shared/src/validators/run.ts
+  s_5135cf36ca45b7::t_e712517bb5c786 1-68
+packages/shared/src/validators/skill-discovery.ts
+  s_5135cf36ca45b7::t_6fac12b16cc2c2 1-13
+packages/shared/src/validators/skill-discovery.test.ts
+  s_5135cf36ca45b7::t_356809b4047d45 1-79
+packages/shared/src/validators/run.test.ts
+  s_5135cf36ca45b7::t_e7e0acabc69707 24
+  s_5135cf36ca45b7::t_6b4a6e18f2a26c 1-23,25-51,53-173
+  s_5135cf36ca45b7::t_7610162b4ae73b 52
+packages/shared/src/validators/index.ts
+  s_5135cf36ca45b7::t_5c4b3e0f33a41e 121,134,137-159
+packages/shared/src/index.ts
+  s_5135cf36ca45b7::t_977e08841ff3e0 622,635-649
+packages/shared/src/validators/adapter.ts
+  s_5135cf36ca45b7::t_f169631881cc6b 1-25
+packages/shared/src/validators/agent.ts
+  s_5135cf36ca45b7::t_2eb13aad60832e 145-167
+packages/shared/src/validators/adapter.test.ts
+  s_5135cf36ca45b7::t_4fc8d347363b0c 1-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "3b9a0787ee3a4c20e123466fe957640283071690",
+  "prompts": {},
+  "sessions": {
+    "s_5135cf36ca45b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "213be5ca-232e-43ad-b64f-72ab05a39a58",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
