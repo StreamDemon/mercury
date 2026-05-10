@@ -37,6 +37,19 @@ if [ -d /mercury ]; then
     chown -R node:node /mercury
 fi
 
+# Stale dev-runner registry sweep. /mercury is a named volume that persists
+# across container lifecycles, but runtime-services/*.json records process-local
+# state (PIDs) from the previous container. The container PID namespace resets
+# on every restart, so any previous-container record is guaranteed invalid —
+# and worse, a coincidental PID match (the new supervisor often lands on the
+# same low PID as the old one's record) makes dev-runner.ts's idempotency
+# check report "already running", exit 0, and take the container down with it.
+# Wiping these on container start is safe because runtime-services records have
+# no value across a fresh PID namespace.
+if [ -d /mercury/instances ]; then
+    find /mercury/instances -path '*/runtime-services/*.json' -type f -delete 2>/dev/null || true
+fi
+
 # Make sure node owns its home so global npm/pnpm caches work
 if [ -d /home/node ]; then
     chown -R node:node /home/node 2>/dev/null || true
