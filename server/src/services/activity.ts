@@ -507,8 +507,8 @@ export function activityService(db: Db) {
                 workspacePath,
                 failureReason: leaseRow.lease.failureReason,
                 cleanupStatus: leaseRow.lease.cleanupStatus,
-                acquiredAt: leaseRow.lease.acquiredAt,
-                releasedAt: leaseRow.lease.releasedAt,
+                acquiredAt: leaseRow.lease.acquiredAt.toISOString(),
+                releasedAt: leaseRow.lease.releasedAt?.toISOString() ?? null,
               }
             : null,
           retryExhaustedReason: retryExhaustedReasonByRunId.get(run.runId) ?? null,
