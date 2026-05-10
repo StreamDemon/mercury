@@ -1,0 +1,23 @@
+server/src/routes/adapters.ts
+  s_5135cf36ca45b7::t_44d2bfd07d251a 22
+  s_5135cf36ca45b7::t_d6b5c2af49e9b6 191
+ui/src/api/adapters.ts
+  s_5135cf36ca45b7::t_d28ab03bd21a18 19
+  s_5135cf36ca45b7::t_7039ba36e06c8a 5,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "9d10481afbf19423cd3836aecc61b2acb675694c",
+  "prompts": {},
+  "sessions": {
+    "s_5135cf36ca45b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "213be5ca-232e-43ad-b64f-72ab05a39a58",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
