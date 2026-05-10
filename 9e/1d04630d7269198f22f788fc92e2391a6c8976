@@ -1,0 +1,19 @@
+server/src/services/activity.ts
+  s_5135cf36ca45b7::t_29603d0cdc28cc 510-511
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "9e1d04630d7269198f22f788fc92e2391a6c8976",
+  "prompts": {},
+  "sessions": {
+    "s_5135cf36ca45b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "213be5ca-232e-43ad-b64f-72ab05a39a58",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
