@@ -1,0 +1,23 @@
+ui/src/api/client.test.ts
+  s_5135cf36ca45b7::t_3f429978b3458c 1-139
+ui/package.json
+  s_5135cf36ca45b7::t_569353944727d1 62-63
+ui/src/api/client.ts
+  s_5135cf36ca45b7::t_d1c746e6714084 1-2,17-31,52-64,68-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "7ac5d6101f299861a849d2f71391ca6967f07031",
+  "prompts": {},
+  "sessions": {
+    "s_5135cf36ca45b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "213be5ca-232e-43ad-b64f-72ab05a39a58",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
