@@ -142,3 +142,26 @@ export const updateAgentPermissionsSchema = z.object({
 });
 
 export type UpdateAgentPermissions = z.infer<typeof updateAgentPermissionsSchema>;
+
+// Org chart node returned by the org-chart endpoint. The server uses
+// String(node.role)/String(node.status) when projecting these, so role and
+// status are unconstrained strings rather than enums. The recursive shape
+// requires the explicit z.ZodType<OrgNode> annotation; without it z.lazy()
+// would trip TypeScript's circular-inference check.
+export type OrgNode = {
+  id: string;
+  name: string;
+  role: string;
+  status: string;
+  reports: OrgNode[];
+};
+
+export const orgNodeSchema: z.ZodType<OrgNode> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    role: z.string(),
+    status: z.string(),
+    reports: z.array(orgNodeSchema),
+  }),
+);

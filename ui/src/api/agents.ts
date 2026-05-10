@@ -9,10 +9,13 @@ import type {
   AgentRuntimeState,
   AgentTaskSession,
   AgentWakeupResponse,
+  AvailableSkill,
   HeartbeatRun,
   Approval,
   AgentConfigRevision,
+  OrgNode,
 } from "@mercuryai/shared";
+import { availableSkillsResponseSchema, orgNodeSchema } from "@mercuryai/shared";
 import { isUuidLike, normalizeAgentUrlKey } from "@mercuryai/shared";
 import { ApiError, api } from "./client";
 
@@ -44,13 +47,7 @@ export interface ClaudeLoginResult {
   stderr: string;
 }
 
-export interface OrgNode {
-  id: string;
-  name: string;
-  role: string;
-  status: string;
-  reports: OrgNode[];
-}
+export type { OrgNode } from "@mercuryai/shared";
 
 export interface AgentHireResponse {
   agent: Agent;
@@ -74,7 +71,7 @@ function agentPath(id: string, companyId?: string, suffix = "") {
 
 export const agentsApi = {
   list: (companyId: string) => api.get<Agent[]>(`/companies/${companyId}/agents`),
-  org: (companyId: string) => api.get<OrgNode[]>(`/companies/${companyId}/org`),
+  org: (companyId: string) => api.get<OrgNode[]>(`/companies/${companyId}/org`, orgNodeSchema.array()),
   listConfigurations: (companyId: string) =>
     api.get<Record<string, unknown>[]>(`/companies/${companyId}/agent-configurations`),
   get: async (id: string, companyId?: string) => {
@@ -196,11 +193,7 @@ export const agentsApi = {
   loginWithClaude: (id: string, companyId?: string) =>
     api.post<ClaudeLoginResult>(agentPath(id, companyId, "/claude-login"), {}),
   availableSkills: () =>
-    api.get<{ skills: AvailableSkill[] }>("/skills/available"),
+    api.get("/skills/available", availableSkillsResponseSchema),
 };
 
-export interface AvailableSkill {
-  name: string;
-  description: string;
-  isMercuryManaged: boolean;
-}
+export type { AvailableSkill } from "@mercuryai/shared";

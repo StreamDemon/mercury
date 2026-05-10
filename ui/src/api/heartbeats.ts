@@ -1,6 +1,7 @@
 import type {
   HeartbeatRun,
   HeartbeatRunEvent,
+  HeartbeatRunStatus,
   InstanceSchedulerHeartbeatAgent,
   WorkspaceOperation,
 } from "@mercuryai/shared";
@@ -16,7 +17,7 @@ export interface RunLivenessFields {
 
 export interface ActiveRunForIssue {
   id: string;
-  status: string;
+  status: HeartbeatRunStatus;
   invocationSource: string;
   triggerDetail: string | null;
   startedAt: string | Date | null;
@@ -38,7 +39,7 @@ export interface ActiveRunForIssue {
 
 export interface LiveRunForIssue {
   id: string;
-  status: string;
+  status: HeartbeatRunStatus;
   invocationSource: string;
   triggerDetail: string | null;
   startedAt: string | null;

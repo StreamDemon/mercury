@@ -13,6 +13,7 @@ import {
   createAgentSchema,
   deriveAgentUrlKey,
   isUuidLike,
+  orgNodeSchema,
   resetAgentSessionSchema,
   testAdapterEnvironmentSchema,
   type AgentSkillSnapshot,
@@ -1219,7 +1220,7 @@ export function agentRoutes(
     assertCompanyAccess(req, companyId);
     const tree = await svc.orgForCompany(companyId);
     const leanTree = tree.map((node) => toLeanOrgNode(node as Record<string, unknown>));
-    res.json(leanTree);
+    res.jsonValidated(orgNodeSchema.array(), leanTree);
   });
 
   router.get("/companies/:companyId/org.svg", async (req, res) => {
