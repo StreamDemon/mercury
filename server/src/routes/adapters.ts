@@ -19,6 +19,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { Router } from "express";
+import { adapterInfoSchema, type AdapterCapabilities, type AdapterInfo } from "@mercuryai/shared";
 import {
   listServerAdapters,
   findServerAdapter,
@@ -59,30 +60,6 @@ interface AdapterInstallRequest {
   isLocalPath?: boolean;
   /** Target version for npm packages (optional, defaults to latest) */
   version?: string;
-}
-
-interface AdapterCapabilities {
-  supportsInstructionsBundle: boolean;
-  supportsSkills: boolean;
-  supportsLocalAgentJwt: boolean;
-  requiresMaterializedRuntimeSkills: boolean;
-}
-
-interface AdapterInfo {
-  type: string;
-  label: string;
-  source: "builtin" | "external";
-  modelsCount: number;
-  loaded: boolean;
-  disabled: boolean;
-  capabilities: AdapterCapabilities;
-  /** True when an external plugin has replaced a built-in adapter of the same type. */
-  overriddenBuiltin?: boolean;
-  /** True when the external override for a builtin type is currently paused. */
-  overridePaused?: boolean;
-  version?: string;
-  packageName?: string;
-  isLocalPath?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -211,7 +188,7 @@ export function adapterRoutes() {
       buildAdapterInfo(adapter, externalRecords.get(adapter.type), disabledSet),
     ).sort((a, b) => a.type.localeCompare(b.type));
 
-    res.json(result);
+    res.jsonValidated(adapterInfoSchema.array(), result);
   });
 
   /**
