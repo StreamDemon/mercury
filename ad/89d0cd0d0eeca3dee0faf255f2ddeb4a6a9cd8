@@ -1,0 +1,21 @@
+cli/src/commands/allowed-hostname.ts
+  s_7aad1e142804b4::t_b44e99950e63d3 11
+cli/src/commands/auth-bootstrap-ceo.ts
+  s_7aad1e142804b4::t_30e303782fc827 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ad89d0cd0d0eeca3dee0faf255f2ddeb4a6a9cd8",
+  "prompts": {},
+  "sessions": {
+    "s_7aad1e142804b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88dec0bb-bcb4-4ea8-b63c-d25ef19ed424",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
