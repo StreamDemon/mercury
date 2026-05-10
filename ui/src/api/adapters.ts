@@ -2,34 +2,10 @@
  * @fileoverview Frontend API client for external adapter management.
  */
 
+import { adapterInfoSchema } from "@mercuryai/shared";
 import { api } from "./client";
 
-export interface AdapterCapabilities {
-  supportsInstructionsBundle: boolean;
-  supportsSkills: boolean;
-  supportsLocalAgentJwt: boolean;
-  requiresMaterializedRuntimeSkills: boolean;
-}
-
-export interface AdapterInfo {
-  type: string;
-  label: string;
-  source: "builtin" | "external";
-  modelsCount: number;
-  loaded: boolean;
-  disabled: boolean;
-  capabilities: AdapterCapabilities;
-  /** Installed version (for external npm adapters) */
-  version?: string;
-  /** Package name (for external adapters) */
-  packageName?: string;
-  /** Whether the adapter was installed from a local path (vs npm). */
-  isLocalPath?: boolean;
-  /** True when an external plugin has replaced a built-in adapter of the same type. */
-  overriddenBuiltin?: boolean;
-  /** True when the external override for a builtin type is currently paused. */
-  overridePaused?: boolean;
-}
+export type { AdapterCapabilities, AdapterInfo } from "@mercuryai/shared";
 
 export interface AdapterInstallResult {
   type: string;
@@ -40,7 +16,7 @@ export interface AdapterInstallResult {
 
 export const adaptersApi = {
   /** List all registered adapters (built-in + external). */
-  list: () => api.get<AdapterInfo[]>("/adapters"),
+  list: () => api.get("/adapters", adapterInfoSchema.array()),
 
   /** Install an external adapter from npm or a local path. */
   install: (params: { packageName: string; version?: string; isLocalPath?: boolean }) =>
