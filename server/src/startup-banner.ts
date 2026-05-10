@@ -44,6 +44,12 @@ const ansi = {
   yellow: "\x1b[33m",
   magenta: "\x1b[35m",
   blue: "\x1b[34m",
+  // Mercury brand orange (#F47B20). Truecolor escape — falls back to no
+  // color in terminals that don't recognize 24-bit; if you're hitting a
+  // non-truecolor terminal (rare in 2026: GHA, Windows Terminal, VS Code,
+  // iTerm2, modern Linux all support it), the worst case is the brand
+  // glyphs render uncolored rather than as the wrong color.
+  mercuryOrange: "\x1b[38;2;244;123;32m",
 };
 
 function color(text: string, c: keyof typeof ansi): string {
@@ -134,12 +140,12 @@ export function printStartupBanner(opts: StartupBannerOptions): void {
     : color("disabled", "yellow");
 
   const art = [
-    color("██████╗  █████╗ ██████╗ ███████╗██████╗  ██████╗██╗     ██╗██████╗ ", "cyan"),
-    color("██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝██║     ██║██╔══██╗", "cyan"),
-    color("██████╔╝███████║██████╔╝█████╗  ██████╔╝██║     ██║     ██║██████╔╝", "cyan"),
-    color("██╔═══╝ ██╔══██║██╔═══╝ ██╔══╝  ██╔══██╗██║     ██║     ██║██╔═══╝ ", "cyan"),
-    color("██║     ██║  ██║██║     ███████╗██║  ██║╚██████╗███████╗██║██║     ", "cyan"),
-    color("╚═╝     ╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝╚═╝     ", "cyan"),
+    color("███╗   ███╗███████╗██████╗  ██████╗██╗   ██╗██████╗ ██╗   ██╗", "mercuryOrange"),
+    color("████╗ ████║██╔════╝██╔══██╗██╔════╝██║   ██║██╔══██╗╚██╗ ██╔╝", "mercuryOrange"),
+    color("██╔████╔██║█████╗  ██████╔╝██║     ██║   ██║██████╔╝ ╚████╔╝ ", "mercuryOrange"),
+    color("██║╚██╔╝██║██╔══╝  ██╔══██╗██║     ██║   ██║██╔══██╗  ╚██╔╝  ", "mercuryOrange"),
+    color("██║ ╚═╝ ██║███████╗██║  ██║╚██████╗╚██████╔╝██║  ██║   ██║   ", "mercuryOrange"),
+    color("╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ", "mercuryOrange"),
   ];
 
   const lines = [

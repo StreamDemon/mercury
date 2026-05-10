@@ -37,7 +37,7 @@ function defaultStorageBaseDir(): string {
 }
 
 export async function envCommand(opts: { config?: string }): Promise<void> {
-  p.intro(pc.bgCyan(pc.black(" mercury env ")));
+  p.intro(pc.bgCyan(pc.black(" mercuryai env ")));
 
   const configPath = resolveMercuryConfigPath(opts.config);
   let config: MercuryConfig | null = null;

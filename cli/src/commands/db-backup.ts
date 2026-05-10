@@ -48,7 +48,7 @@ function resolveBackupDir(raw: string): string {
 
 export async function dbBackupCommand(opts: DbBackupOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercury db:backup ")));
+  p.intro(pc.bgCyan(pc.black(" mercuryai db:backup ")));
 
   const configPath = resolveMercuryConfigPath(opts.config);
   const config = readConfig(opts.config);

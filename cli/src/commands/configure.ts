@@ -77,7 +77,7 @@ export async function configure(opts: {
   section?: string;
 }): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercury configure ")));
+  p.intro(pc.bgCyan(pc.black(" mercuryai configure ")));
   const configPath = resolveMercuryConfigPath(opts.config);
 
   if (!configExists(opts.config)) {
