@@ -62,7 +62,7 @@ export async function bootstrapCeoInvite(opts: {
   loadMercuryEnvFile(configPath);
   const config = readConfig(configPath);
   if (!config) {
-    p.log.error(`No config found at ${configPath}. Run ${pc.cyan("mercury onboard")} first.`);
+    p.log.error(`No config found at ${configPath}. Run ${pc.cyan("mercuryai onboard")} first.`);
     return;
   }
 
