@@ -29,7 +29,7 @@ export async function doctor(opts: {
   yes?: boolean;
 }): Promise<{ passed: number; warned: number; failed: number }> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercury doctor ")));
+  p.intro(pc.bgCyan(pc.black(" mercuryai doctor ")));
 
   const configPath = resolveMercuryConfigPath(opts.config);
   loadMercuryEnvFile(configPath);
