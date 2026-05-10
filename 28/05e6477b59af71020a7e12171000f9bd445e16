@@ -1,0 +1,45 @@
+cli/src/commands/configure.ts
+  s_7aad1e142804b4::t_addeeb13147800 3
+  s_7aad1e142804b4::t_e5504e21697859 81
+cli/src/commands/doctor.ts
+  s_7aad1e142804b4::t_6c316d7d5bb91f 33
+  s_7aad1e142804b4::t_febe182b2007e2 3
+cli/src/utils/banner.ts
+  s_7aad1e142804b4::t_744bfd911dc9b8 2,18-19
+cli/src/commands/worktree.ts
+  s_7aad1e142804b4::t_a9e00733165997 22
+  s_7aad1e142804b4::t_872853e110d8c5 1496,1502,1715,3153,3159
+cli/src/commands/run.ts
+  s_7aad1e142804b4::t_747873271a6779 7
+  s_7aad1e142804b4::t_4c541943df08fe 50
+cli/src/commands/db-backup.ts
+  s_7aad1e142804b4::t_20cd1516b7ebb5 4
+  s_7aad1e142804b4::t_2debfa28d9277d 52
+cli/src/utils/colors.ts
+  s_7aad1e142804b4::t_b003d888b41722 1-45
+server/src/startup-banner.ts
+  s_7aad1e142804b4::t_196e31723fcc79 160,183
+  s_7aad1e142804b4::t_a155b3b04129d4 47-56,58
+cli/src/commands/onboard.ts
+  s_7aad1e142804b4::t_b5a95974fb5ed4 332
+  s_7aad1e142804b4::t_666d9923361584 4
+cli/src/commands/env.ts
+  s_7aad1e142804b4::t_0fc2cf3bc1be78 41
+  s_7aad1e142804b4::t_204b1b2bd2d05d 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "2805e6477b59af71020a7e12171000f9bd445e16",
+  "prompts": {},
+  "sessions": {
+    "s_7aad1e142804b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88dec0bb-bcb4-4ea8-b63c-d25ef19ed424",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
