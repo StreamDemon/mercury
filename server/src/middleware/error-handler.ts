@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { HttpError } from "../errors.js";
 import { trackErrorHandlerCrash } from "@mercuryai/shared/telemetry";
 import { getTelemetryClient } from "../telemetry.js";
+import { ResponseValidationError } from "./validate-response.js";
 
 export interface ErrorContext {
   error: { message: string; stack?: string; name?: string; details?: unknown; raw?: unknown };
@@ -53,6 +54,24 @@ export function errorHandler(
       error: err.message,
       ...(err.details ? { details: err.details } : {}),
     });
+    return;
+  }
+
+  if (err instanceof ResponseValidationError) {
+    attachErrorContext(
+      req,
+      res,
+      {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+        details: err.zodError.errors,
+      },
+      err,
+    );
+    const tc = getTelemetryClient();
+    if (tc) trackErrorHandlerCrash(tc, { errorCode: err.name });
+    res.status(500).json({ error: "Internal server error" });
     return;
   }
 
