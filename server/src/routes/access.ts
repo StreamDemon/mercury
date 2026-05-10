@@ -30,6 +30,7 @@ import {
 } from "@mercuryai/db";
 import {
   acceptInviteSchema,
+  availableSkillsResponseSchema,
   createCliAuthChallengeSchema,
   claimJoinRequestApiKeySchema,
   createCompanyInviteSchema,
@@ -45,7 +46,7 @@ import {
   updateUserCompanyAccessSchema,
   PERMISSION_KEYS
 } from "@mercuryai/shared";
-import type { DeploymentExposure, DeploymentMode, HumanCompanyMembershipRole, PermissionKey } from "@mercuryai/shared";
+import type { AvailableSkill, DeploymentExposure, DeploymentMode, HumanCompanyMembershipRole, PermissionKey } from "@mercuryai/shared";
 import {
   forbidden,
   conflict,
@@ -196,12 +197,6 @@ function parseSkillFrontmatter(markdown: string): { description: string } {
       .join(" ")
       .trim(),
   };
-}
-
-interface AvailableSkill {
-  name: string;
-  description: string;
-  isMercuryManaged: boolean;
 }
 
 /** Discover all available Claude Code skills from ~/.claude/skills/. */
@@ -2848,7 +2843,7 @@ export function accessRoutes(
 
   router.get("/skills/available", (req, res) => {
     assertAuthenticated(req);
-    res.json({ skills: listAvailableSkills() });
+    res.jsonValidated(availableSkillsResponseSchema, { skills: listAvailableSkills() });
   });
 
   router.get("/skills/index", (req, res) => {
