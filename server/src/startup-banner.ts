@@ -44,15 +44,18 @@ const ansi = {
   yellow: "\x1b[33m",
   magenta: "\x1b[35m",
   blue: "\x1b[34m",
-  // Mercury brand orange (#F47B20), emitted unconditionally as a 24-bit
-  // truecolor escape. There is no in-code degradation here — the CLI
-  // banner (cli/src/utils/banner.ts) implements isColorSupported +
-  // COLORTERM detection with a yellow fallback, but this server file
-  // does not. Acceptable today because the server banner only renders
-  // at boot in dev contexts (Docker exec, IDE terminal, GHA logs) where
-  // truecolor is universally supported; if that ever changes, lift the
-  // CLI's mercuryOrange() helper into a shared util and use it here.
+  // Mercury brand orange palette, emitted unconditionally as 24-bit
+  // truecolor escapes. There is no in-code degradation here — the CLI
+  // (cli/src/utils/colors.ts) implements isColorSupported + COLORTERM
+  // detection with yellow fallbacks, but this server file does not.
+  // Acceptable today because the server banner only renders at boot in
+  // dev contexts (Docker exec, IDE terminal, GHA logs) where truecolor
+  // is universally supported; if that ever changes, lift the CLI's
+  // `mercury` helper into a shared util and use it here.
+  //   mercuryOrange — brand orange (#F47B20): wordmark, primary accent
+  //   mercuryDark   — dark amber (#A04A0A): structural divider lines
   mercuryOrange: "\x1b[38;2;244;123;32m",
+  mercuryDark: "\x1b[38;2;160;74;10m",
 };
 
 function color(text: string, c: keyof typeof ansi): string {
@@ -154,7 +157,7 @@ export function printStartupBanner(opts: StartupBannerOptions): void {
   const lines = [
     "",
     ...art,
-    color("  ───────────────────────────────────────────────────────", "blue"),
+    color("  ───────────────────────────────────────────────────────", "mercuryDark"),
     row("Mode", `${dbMode}  |  ${uiMode}`),
     row("Deploy", `${opts.deploymentMode} (${opts.deploymentExposure})`),
     row("Bind", `${opts.bind} ${color(`(${opts.host})`, "dim")}`),
@@ -177,7 +180,7 @@ export function printStartupBanner(opts: StartupBannerOptions): void {
     agentJwtSecret.status === "warn"
       ? color("  ───────────────────────────────────────────────────────", "yellow")
       : null,
-    color("  ───────────────────────────────────────────────────────", "blue"),
+    color("  ───────────────────────────────────────────────────────", "mercuryDark"),
     "",
   ];
 

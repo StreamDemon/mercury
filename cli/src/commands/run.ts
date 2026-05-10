@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import { bootstrapCeoInvite } from "./auth-bootstrap-ceo.js";
 import { onboard } from "./onboard.js";
 import { doctor } from "./doctor.js";
@@ -46,7 +47,7 @@ export async function runCommand(opts: RunOptions): Promise<void> {
   process.env.MERCURY_CONFIG = configPath;
   loadMercuryEnvFile(configPath);
 
-  p.intro(pc.bgCyan(pc.black(" mercuryai run ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai run ")));
   p.log.message(pc.dim(`Home: ${paths.homeDir}`));
   p.log.message(pc.dim(`Instance: ${paths.instanceId}`));
   p.log.message(pc.dim(`Config: ${configPath}`));

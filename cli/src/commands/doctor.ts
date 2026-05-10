@@ -1,5 +1,6 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import type { MercuryConfig } from "../config/schema.js";
 import { readConfig, resolveMercuryConfigPath } from "../config/store.js";
 import {
@@ -29,7 +30,7 @@ export async function doctor(opts: {
   yes?: boolean;
 }): Promise<{ passed: number; warned: number; failed: number }> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai doctor ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai doctor ")));
 
   const configPath = resolveMercuryConfigPath(opts.config);
   loadMercuryEnvFile(configPath);

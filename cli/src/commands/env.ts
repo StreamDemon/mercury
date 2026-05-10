@@ -1,5 +1,6 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import type { MercuryConfig } from "../config/schema.js";
 import { configExists, readConfig, resolveMercuryConfigPath } from "../config/store.js";
 import {
@@ -37,7 +38,7 @@ function defaultStorageBaseDir(): string {
 }
 
 export async function envCommand(opts: { config?: string }): Promise<void> {
-  p.intro(pc.bgCyan(pc.black(" mercuryai env ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai env ")));
 
   const configPath = resolveMercuryConfigPath(opts.config);
   let config: MercuryConfig | null = null;
