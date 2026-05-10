@@ -1,6 +1,7 @@
 ﻿import * as p from "@clack/prompts";
 import path from "node:path";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import {
   AUTH_BASE_URL_MODES,
   BIND_MODES,
@@ -328,7 +329,7 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
   }
 
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai onboard ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai onboard ")));
   const configPath = resolveMercuryConfigPath(opts.config);
   const instance = describeLocalInstancePaths(resolveMercuryInstanceId());
   p.log.message(

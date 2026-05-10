@@ -19,6 +19,7 @@ import { createServer } from "node:net";
 import { Readable } from "node:stream";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import {
   applyPendingMigrations,
@@ -1492,13 +1493,13 @@ async function runWorktreeInit(opts: WorktreeInitOptions): Promise<void> {
 
 export async function worktreeInitCommand(opts: WorktreeInitOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai worktree init ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai worktree init ")));
   await runWorktreeInit(opts);
 }
 
 export async function worktreeMakeCommand(nameArg: string, opts: WorktreeMakeOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai worktree:make ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai worktree:make ")));
 
   const name = resolveWorktreeMakeName(nameArg);
   const startPoint = resolveWorktreeStartPoint(opts.startPoint);
@@ -1711,7 +1712,7 @@ function worktreePathHasUncommittedChanges(worktreePath: string): boolean {
 
 export async function worktreeCleanupCommand(nameArg: string, opts: WorktreeCleanupOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai worktree:cleanup ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai worktree:cleanup ")));
 
   const name = resolveWorktreeMakeName(nameArg);
   const sourceCwd = process.cwd();
@@ -3149,13 +3150,13 @@ async function runWorktreeReseed(opts: WorktreeReseedOptions): Promise<void> {
 
 export async function worktreeReseedCommand(opts: WorktreeReseedOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai worktree reseed ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai worktree reseed ")));
   await runWorktreeReseed(opts);
 }
 
 export async function worktreeRepairCommand(opts: WorktreeRepairOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai worktree repair ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai worktree repair ")));
 
   const seedMode = opts.seedMode ?? "minimal";
   if (!isWorktreeSeedMode(seedMode)) {

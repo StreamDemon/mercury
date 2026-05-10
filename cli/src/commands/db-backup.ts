@@ -1,6 +1,7 @@
 ﻿import path from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import { formatDatabaseBackupResult, runDatabaseBackup } from "@mercuryai/db";
 import {
   expandHomePrefix,
@@ -48,7 +49,7 @@ function resolveBackupDir(raw: string): string {
 
 export async function dbBackupCommand(opts: DbBackupOptions): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai db:backup ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai db:backup ")));
 
   const configPath = resolveMercuryConfigPath(opts.config);
   const config = readConfig(opts.config);

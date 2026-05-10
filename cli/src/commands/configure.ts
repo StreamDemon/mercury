@@ -1,5 +1,6 @@
 ﻿import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { mercury } from "../utils/colors.js";
 import { readConfig, writeConfig, configExists, resolveMercuryConfigPath } from "../config/store.js";
 import type { MercuryConfig } from "../config/schema.js";
 import { ensureLocalSecretsKeyFile } from "../config/secrets-key.js";
@@ -77,7 +78,7 @@ export async function configure(opts: {
   section?: string;
 }): Promise<void> {
   printMercuryCliBanner();
-  p.intro(pc.bgCyan(pc.black(" mercuryai configure ")));
+  p.intro(mercury.bgBright(pc.black(" mercuryai configure ")));
   const configPath = resolveMercuryConfigPath(opts.config);
 
   if (!configExists(opts.config)) {
