@@ -118,6 +118,7 @@ export {
   testAdapterEnvironmentSchema,
   agentPermissionsSchema,
   updateAgentPermissionsSchema,
+  orgNodeSchema,
   type CreateAgent,
   type CreateAgentHire,
   type UpdateAgent,
@@ -130,7 +131,31 @@ export {
   type ResetAgentSession,
   type TestAdapterEnvironment,
   type UpdateAgentPermissions,
+  type OrgNode,
 } from "./agent.js";
+
+export {
+  availableSkillSchema,
+  availableSkillsResponseSchema,
+  type AvailableSkill,
+  type AvailableSkillsResponse,
+} from "./skill-discovery.js";
+
+export {
+  adapterCapabilitiesSchema,
+  adapterInfoSchema,
+  type AdapterCapabilities,
+  type AdapterInfo,
+} from "./adapter.js";
+
+export {
+  environmentLeaseSummarySchema,
+  runForIssueSchema,
+  issueForRunSchema,
+  type EnvironmentLeaseSummary,
+  type RunForIssue,
+  type IssueForRun,
+} from "./run.js";
 
 export {
   createProjectSchema,
