@@ -44,11 +44,14 @@ const ansi = {
   yellow: "\x1b[33m",
   magenta: "\x1b[35m",
   blue: "\x1b[34m",
-  // Mercury brand orange (#F47B20). Truecolor escape — falls back to no
-  // color in terminals that don't recognize 24-bit; if you're hitting a
-  // non-truecolor terminal (rare in 2026: GHA, Windows Terminal, VS Code,
-  // iTerm2, modern Linux all support it), the worst case is the brand
-  // glyphs render uncolored rather than as the wrong color.
+  // Mercury brand orange (#F47B20), emitted unconditionally as a 24-bit
+  // truecolor escape. There is no in-code degradation here — the CLI
+  // banner (cli/src/utils/banner.ts) implements isColorSupported +
+  // COLORTERM detection with a yellow fallback, but this server file
+  // does not. Acceptable today because the server banner only renders
+  // at boot in dev contexts (Docker exec, IDE terminal, GHA logs) where
+  // truecolor is universally supported; if that ever changes, lift the
+  // CLI's mercuryOrange() helper into a shared util and use it here.
   mercuryOrange: "\x1b[38;2;244;123;32m",
 };
 
