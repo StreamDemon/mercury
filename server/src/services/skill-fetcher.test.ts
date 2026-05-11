@@ -306,6 +306,17 @@ describe("readUrlSkillImports", () => {
     ).rejects.toThrow(/Unsupported skill source/);
   });
 
+  it("rejects plain http URLs (TLS is required for skill imports)", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      readUrlSkillImports(COMPANY_ID, "http://example.test/skills/direct/SKILL.md"),
+    ).rejects.toThrow(/Unsupported skill source/);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   // Pins current behavior of the requestedSkillSlug fallback at the body of
   // readUrlSkillImports (the "slug !== requestedSkillSlug" OR-clause).
   // When the requested slug does not match the folder name but DOES match

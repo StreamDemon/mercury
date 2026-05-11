@@ -466,7 +466,7 @@ export async function readUrlSkillImports(
     return { skills, warnings };
   }
 
-  if (url.startsWith("http://") || url.startsWith("https://")) {
+  if (url.startsWith("https://")) {
     const markdown = await fetchText(url);
     const parsedMarkdown = parseFrontmatterMarkdown(markdown);
     const urlObj = new URL(url);
@@ -505,5 +505,5 @@ export async function readUrlSkillImports(
     };
   }
 
-  throw unprocessable("Unsupported skill source. Use a local path or URL.");
+  throw unprocessable("Unsupported skill source. Use a local path or HTTPS URL.");
 }
