@@ -1,7 +1,5 @@
-import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { promisify } from "node:util";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import type { Db } from "@mercuryai/db";
 import { executionWorkspaces, issues, projects, projectWorkspaces, workspaceRuntimeServices } from "@mercuryai/db";
@@ -20,10 +18,10 @@ import {
   listCurrentRuntimeServicesForExecutionWorkspaces,
   listCurrentRuntimeServicesForProjectWorkspaces,
 } from "./workspace-runtime-read-model.js";
+import { runGit } from "../utils/git-runner.js";
 
 type ExecutionWorkspaceRow = typeof executionWorkspaces.$inferSelect;
 type WorkspaceRuntimeServiceRow = typeof workspaceRuntimeServices.$inferSelect;
-const execFileAsync = promisify(execFile);
 const TERMINAL_ISSUE_STATUSES = new Set(["done", "cancelled"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -63,10 +61,6 @@ async function pathExists(value: string | null | undefined) {
   } catch {
     return false;
   }
-}
-
-async function runGit(args: string[], cwd: string) {
-  return await execFileAsync("git", ["-C", cwd, ...args], { cwd });
 }
 
 async function inspectGitCloseReadiness(workspace: ExecutionWorkspace): Promise<{
