@@ -1,0 +1,25 @@
+server/src/services/execution-workspaces.ts
+  s_6ca8dd8040dd41::t_f9e18fcdcdb32d 21
+server/src/services/company-portability.ts
+  s_6ca8dd8040dd41::t_f9e18fcdcdb32d 82,842,845,848,857,864,1926-1927
+server/src/__tests__/company-portability.test.ts
+  s_6ca8dd8040dd41::t_f9e18fcdcdb32d 7,975-977
+server/src/utils/__tests__/git-runner.test.ts
+  s_6ca8dd8040dd41::t_f9e18fcdcdb32d 30,43,62,71,82,88,106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "b38d4af991e6ba37b27bbb626876edb7863c2c10",
+  "prompts": {},
+  "sessions": {
+    "s_6ca8dd8040dd41": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4418638c-dd8f-48c5-a0cd-27a817a56e4c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
