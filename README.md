@@ -381,8 +381,6 @@ We welcome contributions. See the [contributing guide](CONTRIBUTING.md) for deta
 
 ## Community
 
-- [Discord](https://discord.gg/m4HZY7xNG3) — Join the community
-- [Twitter / X](https://x.com/ModernMethodAI) — Follow updates and announcements
 - [GitHub Issues](https://github.com/StreamDemon/mercury/issues) — bugs and feature requests
 - [GitHub Discussions](https://github.com/StreamDemon/mercury/discussions) — ideas and RFC
 
@@ -391,10 +389,6 @@ We welcome contributions. See the [contributing guide](CONTRIBUTING.md) for deta
 ## License
 
 MIT &copy; 2026 Mercury
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/image?repos=StreamDemon/mercury&type=date&legend=top-left)](https://www.star-history.com/?repos=mercuryai%2Fmercury&type=date&legend=top-left)
 
 <br/>
 
