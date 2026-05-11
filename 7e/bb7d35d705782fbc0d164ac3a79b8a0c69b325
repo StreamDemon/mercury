@@ -1,0 +1,30 @@
+server/src/__tests__/workspace-runtime.test.ts
+  s_6ca8dd8040dd41::t_6d80fd17f41fba 48
+  s_6ca8dd8040dd41::t_11648a2b997fd3 63
+server/src/utils/git-runner.ts
+  s_6ca8dd8040dd41::t_8b299b15cb23f4 1-77
+server/src/__tests__/execution-workspaces-service.test.ts
+  s_6ca8dd8040dd41::t_2840734f7b9bb5 24
+  s_6ca8dd8040dd41::t_0904f779521c2a 128
+server/src/utils/__tests__/git-runner.test.ts
+  s_6ca8dd8040dd41::t_b900cf33670836 17-22
+  s_6ca8dd8040dd41::t_41d529429c4854 1-16,23-107
+server/src/services/workspace-runtime.ts
+  s_6ca8dd8040dd41::t_86ed2efb4e6335 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "7ebb7d35d705782fbc0d164ac3a79b8a0c69b325",
+  "prompts": {},
+  "sessions": {
+    "s_6ca8dd8040dd41": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4418638c-dd8f-48c5-a0cd-27a817a56e4c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
