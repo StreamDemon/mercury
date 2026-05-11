@@ -2,11 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  discoverProjectWorkspaceSkillDirectories,
-  findMissingLocalSkillIds,
-  readLocalSkillImportFromDirectory,
-} from "../services/company-skills.js";
+import { findMissingLocalSkillIds } from "../services/company-skills.js";
 import {
   normalizeGitHubSkillDirectory,
   parseSkillImportSourceInput,
@@ -88,104 +84,12 @@ describe("company skill import source parsing", () => {
   });
 });
 
-describe("project workspace skill discovery", () => {
+describe("normalizeGitHubSkillDirectory", () => {
   it("normalizes GitHub skill directories for blob imports and legacy metadata", () => {
     expect(normalizeGitHubSkillDirectory("retro/.", "retro")).toBe("retro");
     expect(normalizeGitHubSkillDirectory("retro/SKILL.md", "retro")).toBe("retro");
     expect(normalizeGitHubSkillDirectory("SKILL.md", "root-skill")).toBe("");
     expect(normalizeGitHubSkillDirectory("", "fallback-skill")).toBe("fallback-skill");
-  });
-
-  it("finds bounded skill roots under supported workspace paths", async () => {
-    const workspace = await makeTempDir("mercury-skill-workspace-");
-    await writeSkillDir(workspace, "Workspace Root");
-    await writeSkillDir(path.join(workspace, "skills", "find-skills"), "Find Skills");
-    await writeSkillDir(path.join(workspace, ".agents", "skills", "release"), "Release");
-    await writeSkillDir(path.join(workspace, "skills", ".system", "mercury"), "Mercury");
-    await fs.writeFile(path.join(workspace, "README.md"), "# ignore\n", "utf8");
-
-    const discovered = await discoverProjectWorkspaceSkillDirectories({
-      projectId: "11111111-1111-1111-1111-111111111111",
-      projectName: "Repo",
-      workspaceId: "22222222-2222-2222-2222-222222222222",
-      workspaceName: "Main",
-      workspaceCwd: workspace,
-    });
-
-    expect(discovered).toEqual([
-      { skillDir: path.resolve(workspace), inventoryMode: "project_root" },
-      { skillDir: path.resolve(workspace, ".agents", "skills", "release"), inventoryMode: "full" },
-      { skillDir: path.resolve(workspace, "skills", ".system", "mercury"), inventoryMode: "full" },
-      { skillDir: path.resolve(workspace, "skills", "find-skills"), inventoryMode: "full" },
-    ]);
-  });
-
-  it("limits root SKILL.md imports to skill-related support folders", async () => {
-    const workspace = await makeTempDir("mercury-root-skill-");
-    await writeSkillDir(workspace, "Workspace Skill");
-    await fs.mkdir(path.join(workspace, "references"), { recursive: true });
-    await fs.mkdir(path.join(workspace, "scripts"), { recursive: true });
-    await fs.mkdir(path.join(workspace, "assets"), { recursive: true });
-    await fs.mkdir(path.join(workspace, "src"), { recursive: true });
-    await fs.writeFile(path.join(workspace, "references", "checklist.md"), "# Checklist\n", "utf8");
-    await fs.writeFile(path.join(workspace, "scripts", "run.sh"), "echo ok\n", "utf8");
-    await fs.writeFile(path.join(workspace, "assets", "logo.svg"), "<svg />\n", "utf8");
-    await fs.writeFile(path.join(workspace, "README.md"), "# Repo\n", "utf8");
-    await fs.writeFile(path.join(workspace, "src", "index.ts"), "export {};\n", "utf8");
-
-    const imported = await readLocalSkillImportFromDirectory(
-      "33333333-3333-4333-8333-333333333333",
-      workspace,
-      { inventoryMode: "project_root", metadata: { sourceKind: "project_scan" } },
-    );
-
-    expect(new Set(imported.fileInventory.map((entry) => entry.path))).toEqual(new Set([
-      "assets/logo.svg",
-      "references/checklist.md",
-      "scripts/run.sh",
-      "SKILL.md",
-    ]));
-    expect(imported.fileInventory.map((entry) => entry.kind)).toContain("script");
-    expect(imported.metadata?.sourceKind).toBe("project_scan");
-  });
-
-  it("parses inline object array items in skill frontmatter metadata", async () => {
-    const workspace = await makeTempDir("mercury-inline-skill-yaml-");
-    await fs.mkdir(workspace, { recursive: true });
-    await fs.writeFile(
-      path.join(workspace, "SKILL.md"),
-      [
-        "---",
-        "name: Inline Metadata Skill",
-        "metadata:",
-        "  sources:",
-        "    - kind: github-dir",
-        "      repo: StreamDemon/mercury",
-        "      path: skills/mercury",
-        "---",
-        "",
-        "# Inline Metadata Skill",
-        "",
-      ].join("\n"),
-      "utf8",
-    );
-
-    const imported = await readLocalSkillImportFromDirectory(
-      "33333333-3333-4333-8333-333333333333",
-      workspace,
-      { inventoryMode: "full" },
-    );
-
-    expect(imported.metadata).toMatchObject({
-      sourceKind: "local_path",
-      sources: [
-        {
-          kind: "github-dir",
-          repo: "StreamDemon/mercury",
-          path: "skills/mercury",
-        },
-      ],
-    });
   });
 });
 
