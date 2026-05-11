@@ -30,6 +30,7 @@ import type { WorkspaceOperationRecorder } from "./workspace-operations.js";
 import { readExecutionWorkspaceConfig } from "./execution-workspaces.js";
 import { readProjectWorkspaceRuntimeConfig } from "./project-workspace-runtime-config.js";
 import { runBoundedProcess } from "../utils/bounded-process.js";
+import { gitOutput as runGit } from "../utils/git-runner.js";
 
 export function resolveShell(): string {
   const fallback = process.platform === "win32" ? "sh" : "/bin/sh";
@@ -400,18 +401,6 @@ function formatCommandForDisplay(command: string, args: string[]) {
   return [command, ...args]
     .map((part) => (/^[A-Za-z0-9_./:-]+$/.test(part) ? part : JSON.stringify(part)))
     .join(" ");
-}
-
-async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = await runBoundedProcess({
-    command: "git",
-    args,
-    cwd,
-  });
-  if (proc.code !== 0) {
-    throw new Error(proc.stderr.trim() || proc.stdout.trim() || `git ${args.join(" ")} failed`);
-  }
-  return proc.stdout.trim();
 }
 
 function gitErrorIncludes(error: unknown, needle: string) {
