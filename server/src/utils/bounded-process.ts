@@ -91,6 +91,11 @@ export async function runBoundedProcess(input: BoundedProcessInput): Promise<Bou
       stdio: ["ignore", "pipe", "pipe"],
       env: input.env ?? process.env,
     });
+    // Decode at the stream level so UTF-8 codepoints split across `data`
+    // events are buffered by Node's StringDecoder instead of being mangled
+    // by per-chunk `Buffer.toString("utf8")` calls.
+    child.stdout?.setEncoding("utf8");
+    child.stderr?.setEncoding("utf8");
     const stdout = createProcessOutputCapture(input.maxStdoutBytes ?? DEFAULT_BOUNDED_PROCESS_OUTPUT_BYTES);
     const stderr = createProcessOutputCapture(input.maxStderrBytes ?? DEFAULT_BOUNDED_PROCESS_OUTPUT_BYTES);
     let timedOut = false;
@@ -101,11 +106,11 @@ export async function runBoundedProcess(input: BoundedProcessInput): Promise<Bou
         child.kill("SIGTERM");
       }, input.timeoutMs);
     }
-    child.stdout?.on("data", (chunk) => {
-      stdout.append(String(chunk));
+    child.stdout?.on("data", (chunk: string) => {
+      stdout.append(chunk);
     });
-    child.stderr?.on("data", (chunk) => {
-      stderr.append(String(chunk));
+    child.stderr?.on("data", (chunk: string) => {
+      stderr.append(chunk);
     });
     child.on("error", (err) => {
       if (timeoutHandle) clearTimeout(timeoutHandle);
