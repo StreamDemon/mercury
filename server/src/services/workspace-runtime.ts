@@ -29,6 +29,7 @@ import {
 import type { WorkspaceOperationRecorder } from "./workspace-operations.js";
 import { readExecutionWorkspaceConfig } from "./execution-workspaces.js";
 import { readProjectWorkspaceRuntimeConfig } from "./project-workspace-runtime-config.js";
+import { runBoundedProcess } from "../utils/bounded-process.js";
 
 export function resolveShell(): string {
   const fallback = process.platform === "win32" ? "sh" : "/bin/sh";
@@ -111,18 +112,6 @@ interface RuntimeServiceRecord extends RuntimeServiceRef {
 const runtimeServicesById = new Map<string, RuntimeServiceRecord>();
 const runtimeServicesByReuseKey = new Map<string, string>();
 const runtimeServiceLeasesByRun = new Map<string, string[]>();
-const DEFAULT_EXECUTE_PROCESS_OUTPUT_BYTES = 256 * 1024;
-
-type ProcessOutputCapture = {
-  text: string;
-  truncated: boolean;
-  totalBytes: number;
-};
-
-type ProcessOutputAccumulator = {
-  append(chunk: string): void;
-  finish(): ProcessOutputCapture;
-};
 
 export async function resetRuntimeServicesForTests() {
   for (const record of runtimeServicesById.values()) {
@@ -413,101 +402,8 @@ function formatCommandForDisplay(command: string, args: string[]) {
     .join(" ");
 }
 
-function trimToLastBytes(value: string, limit: number) {
-  const byteLength = Buffer.byteLength(value, "utf8");
-  if (byteLength <= limit) return value;
-  return Buffer.from(value, "utf8").subarray(byteLength - limit).toString("utf8");
-}
-
-function createProcessOutputCapture(maxBytes: number): ProcessOutputAccumulator {
-  const limit = Math.max(1, Math.trunc(maxBytes));
-  let text = "";
-  let truncated = false;
-  let totalBytes = 0;
-
-  return {
-    append(chunk: string) {
-      if (!chunk) return;
-      totalBytes += Buffer.byteLength(chunk, "utf8");
-
-      const combined = text + chunk;
-      if (Buffer.byteLength(combined, "utf8") <= limit) {
-        text = combined;
-        return;
-      }
-
-      text = trimToLastBytes(combined, limit);
-      truncated = true;
-    },
-    finish(): ProcessOutputCapture {
-      if (!truncated) {
-        return {
-          text,
-          truncated: false,
-          totalBytes,
-        };
-      }
-      return {
-        text: `[output truncated to last ${limit} bytes; total ${totalBytes} bytes]\n${text}`,
-        truncated: true,
-        totalBytes,
-      };
-    },
-  };
-}
-
-async function executeProcess(input: {
-  command: string;
-  args: string[];
-  cwd: string;
-  env?: NodeJS.ProcessEnv;
-  maxStdoutBytes?: number;
-  maxStderrBytes?: number;
-}): Promise<{
-  stdout: string;
-  stderr: string;
-  code: number | null;
-  stdoutTruncated: boolean;
-  stderrTruncated: boolean;
-  stdoutBytes: number;
-  stderrBytes: number;
-}> {
-  const proc = await new Promise<{
-    stdout: ProcessOutputAccumulator;
-    stderr: ProcessOutputAccumulator;
-    code: number | null;
-  }>((resolve, reject) => {
-    const child = spawn(input.command, input.args, {
-      cwd: input.cwd,
-      stdio: ["ignore", "pipe", "pipe"],
-      env: input.env ?? process.env,
-    });
-    const stdout = createProcessOutputCapture(input.maxStdoutBytes ?? DEFAULT_EXECUTE_PROCESS_OUTPUT_BYTES);
-    const stderr = createProcessOutputCapture(input.maxStderrBytes ?? DEFAULT_EXECUTE_PROCESS_OUTPUT_BYTES);
-    child.stdout?.on("data", (chunk) => {
-      stdout.append(String(chunk));
-    });
-    child.stderr?.on("data", (chunk) => {
-      stderr.append(String(chunk));
-    });
-    child.on("error", reject);
-    child.on("close", (code) => resolve({ stdout, stderr, code }));
-  });
-  const stdout = proc.stdout.finish();
-  const stderr = proc.stderr.finish();
-  return {
-    stdout: stdout.text,
-    stderr: stderr.text,
-    code: proc.code,
-    stdoutTruncated: stdout.truncated,
-    stderrTruncated: stderr.truncated,
-    stdoutBytes: stdout.totalBytes,
-    stderrBytes: stderr.totalBytes,
-  };
-}
-
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = await executeProcess({
+  const proc = await runBoundedProcess({
     command: "git",
     args,
     cwd,
@@ -744,7 +640,7 @@ async function runWorkspaceCommand(input: {
   label: string;
 }) {
   const shell = resolveShell();
-  const proc = await executeProcess({
+  const proc = await runBoundedProcess({
     command: shell,
     args: ["-c", input.resolvedCommand ?? input.command],
     cwd: input.cwd,
@@ -784,7 +680,7 @@ async function recordGitOperation(
     cwd: input.cwd,
     metadata: input.metadata ?? null,
     run: async () => {
-      const result = await executeProcess({
+      const result = await runBoundedProcess({
         command: "git",
         args: input.args,
         cwd: input.cwd,
@@ -850,7 +746,7 @@ async function recordWorkspaceCommandOperation(
     metadata: input.metadata ?? null,
     run: async () => {
       const shell = resolveShell();
-      const result = await executeProcess({
+      const result = await runBoundedProcess({
         command: shell,
         args: ["-c", input.resolvedCommand ?? input.command],
         cwd: input.cwd,
