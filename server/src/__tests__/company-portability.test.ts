@@ -1,10 +1,10 @@
-import { execFileSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CompanyPortabilityFileEntry } from "@mercuryai/shared";
+import { runGit as runGitFacade } from "../utils/git-runner.js";
 
 const companySvc = {
   getById: vi.fn(),
@@ -972,12 +972,9 @@ describe("company portability", () => {
   it("infers portable git metadata from a local checkout without task warning fan-out", async () => {
     const portability = companyPortabilityService({} as any);
     const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), "mercury-portability-git-"));
-    execFileSync("git", ["init"], { cwd: repoDir, stdio: "ignore" });
-    execFileSync("git", ["checkout", "-b", "main"], { cwd: repoDir, stdio: "ignore" });
-    execFileSync("git", ["remote", "add", "origin", "https://github.com/StreamDemon/mercury.git"], {
-      cwd: repoDir,
-      stdio: "ignore",
-    });
+    await runGitFacade(["init"], repoDir);
+    await runGitFacade(["checkout", "-b", "main"], repoDir);
+    await runGitFacade(["remote", "add", "origin", "https://github.com/StreamDemon/mercury.git"], repoDir);
 
     projectSvc.list.mockResolvedValue([
       {
