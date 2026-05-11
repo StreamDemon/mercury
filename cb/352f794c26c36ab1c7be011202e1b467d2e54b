@@ -1,0 +1,21 @@
+server/src/utils/bounded-process.ts
+  s_6ca8dd8040dd41::t_f3d146f9b72e93 1-132
+server/src/services/workspace-runtime.ts
+  s_6ca8dd8040dd41::t_53146c05141061 32,406,643,683,749
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "cb352f794c26c36ab1c7be011202e1b467d2e54b",
+  "prompts": {},
+  "sessions": {
+    "s_6ca8dd8040dd41": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4418638c-dd8f-48c5-a0cd-27a817a56e4c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
