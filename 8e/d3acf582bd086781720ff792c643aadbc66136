@@ -1,0 +1,30 @@
+server/src/services/company-skills.ts
+  s_b2a9feb4845f98::t_b7e28321591d8f 32,34,50-61
+server/src/__tests__/company-skills.test.ts
+  s_b2a9feb4845f98::t_8cc15280ad1e48 87
+  s_b2a9feb4845f98::t_6e4e4b8fc24084 5
+server/src/services/skill-fetcher.test.ts
+  s_b2a9feb4845f98::t_160d6a785533d8 1-195,197-224,226-275,277-307,344
+  s_b2a9feb4845f98::t_d314628a92320e 225
+  s_b2a9feb4845f98::t_7fe49842271d07 276
+  s_b2a9feb4845f98::t_29ab91c6754d73 196
+  s_b2a9feb4845f98::t_e1784f339c2e42 308-343
+server/src/services/skill-fetcher.ts
+  s_b2a9feb4845f98::t_6cd0827a62175f 1-509
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "8ed3acf582bd086781720ff792c643aadbc66136",
+  "prompts": {},
+  "sessions": {
+    "s_b2a9feb4845f98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "14319a6a-a974-43ea-8f64-624d407a7619",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
