@@ -1,0 +1,22 @@
+server/src/services/skill-fetcher.test.ts
+  s_b2a9feb4845f98::t_f429acf2535bb4 309-319
+server/src/services/skill-fetcher.ts
+  s_b2a9feb4845f98::t_bfc34763404e2c 469
+  s_b2a9feb4845f98::t_a2ce14e9d2b6c7 508
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "0a4ce7fcb06a889a3bb1a24062ebe8c51f411bc9",
+  "prompts": {},
+  "sessions": {
+    "s_b2a9feb4845f98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "14319a6a-a974-43ea-8f64-624d407a7619",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
