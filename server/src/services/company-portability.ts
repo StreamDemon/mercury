@@ -1,7 +1,5 @@
 import { promises as fs } from "node:fs";
-import { execFile } from "node:child_process";
 import path from "node:path";
-import { promisify } from "node:util";
 import type { Db } from "@mercuryai/db";
 import type {
   CompanyPortabilityAgentManifestEntry,
@@ -81,6 +79,7 @@ import { issueService } from "./issues.js";
 import { projectService } from "./projects.js";
 import { routineService } from "./routines.js";
 import { secretService } from "./secrets.js";
+import { gitOutput, gitOutputOrNull } from "../utils/git-runner.js";
 
 /** Build OrgNode tree from manifest agent list (slug + reportsToSlug). */
 function buildOrgTreeFromManifest(agents: CompanyPortabilityManifest["agents"]): OrgNode[] {
@@ -137,7 +136,6 @@ const DEFAULT_INCLUDE: CompanyPortabilityInclude = {
 
 const DEFAULT_COLLISION_STRATEGY: CompanyPortabilityCollisionStrategy = "rename";
 const IMPORT_FORBIDDEN_ADAPTER_TYPES = new Set(["process", "http"]);
-const execFileAsync = promisify(execFile);
 let bundledSkillsCommitPromise: Promise<string | null> | null = null;
 
 function resolveImportMode(options?: ImportBehaviorOptions): ImportMode {
@@ -829,12 +827,6 @@ function stripPortableProjectExecutionWorkspaceRefs(policy: Record<string, unkno
   return isPlainRecord(cleaned) ? cleaned : null;
 }
 
-async function readGitOutput(cwd: string, args: string[]) {
-  const { stdout } = await execFileAsync("git", ["-C", cwd, ...args], { cwd });
-  const trimmed = stdout.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
 async function inferPortableWorkspaceGitMetadata(workspace: NonNullable<ProjectLike["workspaces"]>[number]) {
   const cwd = asString(workspace.cwd);
   if (!cwd) {
@@ -847,13 +839,13 @@ async function inferPortableWorkspaceGitMetadata(workspace: NonNullable<ProjectL
 
   let repoUrl: string | null = null;
   try {
-    repoUrl = await readGitOutput(cwd, ["remote", "get-url", "origin"]);
+    repoUrl = await gitOutputOrNull(["remote", "get-url", "origin"], cwd);
   } catch {
     try {
-      const firstRemote = await readGitOutput(cwd, ["remote"]);
+      const firstRemote = await gitOutputOrNull(["remote"], cwd);
       const remoteName = firstRemote?.split("\n").map((entry) => entry.trim()).find(Boolean) ?? null;
       if (remoteName) {
-        repoUrl = await readGitOutput(cwd, ["remote", "get-url", remoteName]);
+        repoUrl = await gitOutputOrNull(["remote", "get-url", remoteName], cwd);
       }
     } catch {
       repoUrl = null;
@@ -862,14 +854,14 @@ async function inferPortableWorkspaceGitMetadata(workspace: NonNullable<ProjectL
 
   let repoRef: string | null = null;
   try {
-    repoRef = await readGitOutput(cwd, ["branch", "--show-current"]);
+    repoRef = await gitOutputOrNull(["branch", "--show-current"], cwd);
   } catch {
     repoRef = null;
   }
 
   let defaultRef: string | null = null;
   try {
-    const remoteHead = await readGitOutput(cwd, ["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"]);
+    const remoteHead = await gitOutputOrNull(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"], cwd);
     defaultRef = remoteHead?.startsWith("origin/") ? remoteHead.slice("origin/".length) : remoteHead;
   } catch {
     defaultRef = null;
@@ -1931,11 +1923,8 @@ function applySelectedFilesToSource(source: ResolvedSource, selectedFiles?: stri
 
 async function resolveBundledSkillsCommit() {
   if (!bundledSkillsCommitPromise) {
-    bundledSkillsCommitPromise = execFileAsync("git", ["rev-parse", "HEAD"], {
-      cwd: process.cwd(),
-      encoding: "utf8",
-    })
-      .then(({ stdout }) => stdout.trim() || null)
+    bundledSkillsCommitPromise = gitOutput(["rev-parse", "HEAD"], process.cwd())
+      .then((value) => value.length > 0 ? value : null)
       .catch(() => null);
   }
   return bundledSkillsCommitPromise;

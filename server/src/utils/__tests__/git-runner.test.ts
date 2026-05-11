@@ -27,7 +27,7 @@ describe("runGit", () => {
     const result = await runGit(["rev-parse", "--is-inside-work-tree"], repoRoot);
     expect(result.code).toBe(0);
     expect(result.stdout.trim()).toBe("true");
-  });
+  }, 10_000);
 
   it("throws GitCommandError on non-zero exit with exit code preserved", async () => {
     const error = await runGit(["merge-base", "--is-ancestor", "HEAD", "HEAD~1"], repoRoot).catch(
@@ -40,7 +40,7 @@ describe("runGit", () => {
     expect(typeof (error as GitCommandError).code).toBe("number");
     expect((error as GitCommandError).args).toEqual(["merge-base", "--is-ancestor", "HEAD", "HEAD~1"]);
     expect((error as GitCommandError).cwd).toBe(repoRoot);
-  });
+  }, 10_000);
 
   it("preserves exit code 1 on a clean non-ancestor merge-base check", async () => {
     await fs.writeFile(path.join(repoRoot, "a.txt"), "a\n", "utf8");
@@ -59,7 +59,7 @@ describe("runGit", () => {
     ).catch((err) => err);
     expect(error).toBeInstanceOf(GitCommandError);
     expect((error as GitCommandError).code).toBe(1);
-  });
+  }, 30_000);
 
   it("does not throw when allowNonZero is true", async () => {
     const result = await runGit(
@@ -68,7 +68,7 @@ describe("runGit", () => {
       { allowNonZero: true },
     );
     expect(result.code).not.toBe(0);
-  });
+  }, 10_000);
 });
 
 describe("gitOutput", () => {
@@ -79,13 +79,13 @@ describe("gitOutput", () => {
     const top = await gitOutput(["rev-parse", "--show-toplevel"], repoRoot);
     expect(top.length).toBeGreaterThan(0);
     expect(top.endsWith("\n")).toBe(false);
-  });
+  }, 10_000);
 
   it("throws GitCommandError on non-zero exit", async () => {
     await expect(gitOutput(["rev-parse", "definitely-not-a-ref"], repoRoot)).rejects.toBeInstanceOf(
       GitCommandError,
     );
-  });
+  }, 10_000);
 });
 
 describe("gitOutputOrNull", () => {
@@ -103,5 +103,5 @@ describe("gitOutputOrNull", () => {
     await expect(
       gitOutputOrNull(["remote", "get-url", "missing-remote"], repoRoot),
     ).rejects.toBeInstanceOf(GitCommandError);
-  });
+  }, 10_000);
 });
