@@ -5,6 +5,11 @@
 // `{ timedOut: true, exitCode: null, signal: null }`; executeRun derives
 // `outcome = "timed_out"`, `runErrorCode = "timeout"`, `status = "timed_out"`.
 //
+// Trace LOCKED per operator sign-off 2026-05-17 (Wave 2 batch approval — all
+// 6 Wave 2 fixtures approved as-is). F6_CANONICAL_TRACE below is the binding
+// contract; any change to the sequence is a deliberate ordering decision that
+// must be re-reviewed and re-signed-off by the operator before merging.
+//
 // Expected divergences from F1 (succeeded) — see heartbeat.ts cited line:
 //   - setRunStatus(run.id, "timed_out", ...)              (5666-5673, 5714)
 //   - setWakeupStatus(..., "timed_out", ...)              (5733: outcome === "succeeded" ? "completed" : status)
@@ -16,46 +21,44 @@
 //                                                          contract because runErrorCode is "timeout".
 //                                                          See readTransientRecoveryContractFromRun
 //                                                          at heartbeat.ts:209.)
+//   - clearTaskSessions arm (not upsertTaskSession)       (5780: adapterResult omits sessionId)
 //   - finalizeAgentStatus(agent.id, "timed_out")          (5800)
-//
-// CAPTURE MODE: this fixture intentionally does NOT call toMatchTraceSequence.
-// The captured trace is logged for operator sign-off; once approved it will be
-// frozen into an F6_CANONICAL_TRACE matcher in a follow-up.
 //
 // Locked decisions inherited from F1:
 //   1B — issueId present so the issue-side finalize path runs (refresh /
 //        finalizeIssueCommentPolicy / releaseIssueExecutionAndPromote with
 //        issue context). Note: no issue comment is POSTED here (success-only).
 //   2B — taskKey present in contextSnapshot. For timed_out, adapterResult has
-//        no sessionId, so nextSessionState should be empty and the
-//        success-block branch at heartbeat.ts:5780 takes the clearTaskSessions
-//        arm rather than upsertTaskSession. The captured trace will show
-//        which arm fires — operator confirms during sign-off.
+//        no sessionId, so nextSessionState is empty and the success-block
+//        branch at heartbeat.ts:5780 takes the clearTaskSessions arm rather
+//        than upsertTaskSession.
 //   4B — stub invokes onMeta so the adapter.invoke appendRunEvent (seq=2)
 //        appears in the trace.
 //
-// Loop-breaker scope cut (follow-up to PR #56 first capture, per operator
-// decision 1a — standardize F3's pattern across all non-success fixtures):
-// the timed_out terminal status leaves the issue in `in_progress`, so the
-// finally's `startNextQueuedRunForAgent` would re-claim and re-time-out on
-// every scheduler tick, producing an unbounded re-queue tail in the capture.
-// We stub `startNextQueuedRunForAgent` to a no-op AFTER the recorder
-// installs its wrappers, scoping the trace to a SINGLE clean executeRun
-// cycle that ends at the finally's `releaseRuntimeServicesForRun`.
-// Trade-off: `internal:startNextQueuedRunForAgent` and the downstream
-// re-queue side effect do not appear in the trace — that boundary is
-// suppressed by design here and will be characterized in a queue-drain
-// fixture where the loop concern does not apply.
+// Loop-breaker scope cut (per operator decision 1a — standardize F3's pattern
+// across all non-success fixtures): the timed_out terminal status leaves the
+// issue in `in_progress`, so the finally's `startNextQueuedRunForAgent` would
+// re-claim and re-time-out on every scheduler tick, producing an unbounded
+// re-queue tail in the trace. We stub `startNextQueuedRunForAgent` to a no-op
+// AFTER the recorder installs its wrappers, scoping the trace to a SINGLE
+// clean executeRun cycle that ends at the finally's
+// `releaseRuntimeServicesForRun`. Trade-off: `internal:startNextQueuedRunForAgent`
+// and the downstream re-queue side effect do not appear in the trace — that
+// boundary is suppressed by design here and will be characterized in a
+// queue-drain fixture where the loop concern does not apply.
 //
 // PR #62 (cancelRunInternal widen) and PR #63 (releaseIssueExecutionAndPromote
 // promote-tail widen) plugged closure leaks at heartbeat.ts:6373 that
-// previously bypassed the internalsForTests indirection. Before those PRs,
-// the loop-breaker stub above was bypassed because the production code path
-// captured the original `startNextQueuedRunForAgent` reference at module
-// scope rather than reading through `internalsForTests`. With both leaks
-// plugged, this stub now actually breaks the loop and the captured trace
-// is a single clean executeRun cycle (28 events ending at
+// previously bypassed the internalsForTests indirection. With both leaks
+// plugged, the loop-breaker stub actually breaks the loop and the locked
+// trace is a single clean executeRun cycle (28 events ending at
 // `internal:releaseRuntimeServicesForRun`).
+//
+// Note on event [20] (liveEvent:heartbeat.run.queued): this is the promote-tail
+// enqueue from releaseIssueExecutionAndPromote. The claim is BLOCKED because
+// the loop-breaker stubs startNextQueuedRunForAgent to a no-op — the queued
+// event still fires (releaseIssueExecutionAndPromote enqueues independently),
+// but no follow-up executeRun cycle runs.
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -123,6 +126,7 @@ vi.mock("../adapters/index.ts", async () => {
 import { heartbeatService } from "../services/heartbeat.ts";
 import {
   createTraceRecorder,
+  type TraceMatcher,
 } from "../services/__tests__/helpers/trace-recorder.js";
 
 const embeddedPostgresSupport = await getEmbeddedPostgresTestSupport();
@@ -134,6 +138,77 @@ if (!embeddedPostgresSupport.supported) {
     `Skipping executeRun trace fixtures on this host: ${embeddedPostgresSupport.reason ?? "unsupported environment"}`,
   );
 }
+
+// F6 canonical sequence — 28 events. Operator-approved 2026-05-17 (Wave 2 batch
+// sign-off). Argument matchers use the predicate form because the matcher's
+// array form has no positional wildcard; predicates skip noisy args (runIds,
+// agent rows, timestamps) and assert only stable invariants (status enums,
+// seq numbers, event kinds, error codes).
+const F6_CANONICAL_TRACE: readonly TraceMatcher[] = [
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  { kind: "liveEvent", type: "heartbeat.run.status" },
+  { kind: "internal", name: "realizeExecutionWorkspace" },
+  { kind: "liveEvent", type: "activity.logged" },
+  { kind: "liveEvent", type: "agent.status" },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 1 && (args[2] as { eventType?: string })?.eventType === "lifecycle",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 1, eventType: "lifecycle" } },
+  { kind: "liveEvent", type: "heartbeat.run.log" },
+  { kind: "internal", name: "ensureRuntimeServicesForRun" },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 2 && (args[2] as { eventType?: string })?.eventType === "adapter.invoke",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 2, eventType: "adapter.invoke" } },
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) =>
+      args[1] === "timed_out" &&
+      (args[2] as { errorCode?: string } | undefined)?.errorCode === "timeout",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "timed_out" } },
+  { kind: "internal", name: "classifyAndPersistRunLiveness" },
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "timed_out",
+  },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) => {
+      const payload = args[2] as { eventType?: string; level?: string } | undefined;
+      return args[1] === 3 && payload?.eventType === "lifecycle" && payload?.level === "error";
+    },
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 3, eventType: "lifecycle" } },
+  { kind: "internal", name: "refreshContinuationSummaryForRun" },
+  { kind: "internal", name: "finalizeIssueCommentPolicy" },
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  // promote-tail enqueue from releaseIssueExecutionAndPromote. The downstream
+  // claim is blocked by the loop-breaker stub on startNextQueuedRunForAgent.
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  { kind: "internal", name: "handleRunLivenessContinuation" },
+  { kind: "internal", name: "updateRuntimeState" },
+  // clearTaskSessions arm — adapterResult omits sessionId, so the success
+  // block at heartbeat.ts:5780 takes this branch rather than upsertTaskSession.
+  { kind: "internal", name: "clearTaskSessions" },
+  {
+    kind: "internal",
+    name: "finalizeAgentStatus",
+    argsMatch: (args) => args[1] === "timed_out",
+  },
+  { kind: "liveEvent", type: "agent.status" },
+  { kind: "liveEvent", type: "activity.logged" },
+  { kind: "internal", name: "releaseRuntimeServicesForRun" },
+];
 
 describeEmbeddedPostgres("executeRun characterization fixtures — F6 timeout (wince #3 Track B Phase 1)", () => {
   let db!: ReturnType<typeof createDb>;
@@ -186,7 +261,7 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F6 timeout (w
     await tempDb?.cleanup();
   });
 
-  it("F6 — adapter timeout captures the timed_out finalize trace [CAPTURE]", async () => {
+  it("F6 — adapter timeout matches the canonical 28-event timed_out trace", async () => {
     const companyId = randomUUID();
     const agentId = randomUUID();
     const issueId = randomUUID();
@@ -240,9 +315,8 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F6 timeout (w
       heartbeat.__internalsForTests.startNextQueuedRunForAgent = async () => undefined;
 
       // Decision 2B inherited from F1: include taskKey in contextSnapshot.
-      // For timed_out, the success-block branch at heartbeat.ts:5780 still
-      // runs; the captured trace shows which arm (clearTaskSessions vs
-      // upsertTaskSession) fires for this adapter shape.
+      // For timed_out, the success-block branch at heartbeat.ts:5780 takes
+      // the clearTaskSessions arm (adapterResult omits sessionId).
       const queued = await heartbeat.invoke(
         agentId,
         "on_demand",
@@ -261,44 +335,32 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F6 timeout (w
       const trace = recorder.getOrderedTrace();
       const snapshot = await recorder.getDbSnapshot(queued!.id);
 
-      // CAPTURE MODE — do NOT lock toMatchTraceSequence here. The recorded
-      // trace is the artifact under review.
-      expect(trace.length).toBeGreaterThan(0);
-      expect(snapshot.run?.status).toBe("timed_out");
+      // The locked canonical contract. Any change to this sequence is a
+      // deliberate ordering decision that must be reviewed (and re-signed-off
+      // by the operator) before merging — that is the whole point.
+      expect(trace).toMatchTraceSequence(F6_CANONICAL_TRACE);
 
-      // Echo the captured trace for PR sign-off. Structured one-line-per-event
-      // so the operator can scan it in the PR body verbatim.
-      // eslint-disable-next-line no-console
-      console.log(
-        "\n[F6 captured trace] ordered events:\n" +
-          trace
-            .map((ev, i) => {
-              if (ev.kind === "internal") {
-                return `  ${String(i).padStart(2, "0")}  internal   ${String(ev.name)}`;
-              }
-              return `  ${String(i).padStart(2, "0")}  liveEvent  ${ev.type}`;
-            })
-            .join("\n"),
-      );
-      // eslint-disable-next-line no-console
-      console.log(
-        "\n[F6 captured trace] DB snapshot:\n" +
-          JSON.stringify(
-            {
-              runStatus: snapshot.run?.status,
-              runErrorCode: snapshot.run?.errorCode,
-              wakeupStatus: snapshot.wakeupRequest?.status,
-              runEventsCount: snapshot.runEvents.length,
-              costEventsCount: snapshot.costEvents.length,
-              issueCommentsCount: snapshot.issueComments.length,
-              scheduleBoundedRetryForRunSeen: trace.some(
-                (ev) => ev.kind === "internal" && ev.name === "scheduleBoundedRetryForRun",
-              ),
-            },
-            null,
-            2,
-          ),
-      );
+      // DB cross-checks — these confirm the spy/live-event recording stayed
+      // consistent with what actually persisted.
+      expect(snapshot.run?.status).toBe("timed_out");
+      expect(snapshot.run?.errorCode).toBe("timeout");
+      expect(snapshot.wakeupRequest?.status).toBe("timed_out");
+      // heartbeatRunEvents row count must equal the spy-recorded appendRunEvent
+      // count (3: seq=1 "run started", seq=2 "adapter.invoke", seq=3 "run timed_out").
+      expect(snapshot.runEvents).toHaveLength(3);
+      const appendRunEventCount = trace.filter(
+        (ev) => ev.kind === "internal" && ev.name === "appendRunEvent",
+      ).length;
+      expect(snapshot.runEvents.length).toBe(appendRunEventCount);
+      // No issue comment on timeout (gated by outcome === "succeeded" at 5752).
+      expect(snapshot.issueComments).toHaveLength(0);
+      // costUsd deliberately omitted (decision 3A inherited from F1).
+      expect(snapshot.costEvents).toHaveLength(0);
+      // scheduleBoundedRetryForRun must NOT appear (gated to outcome === "failed";
+      // timed_out routes to a distinct branch).
+      expect(
+        trace.some((ev) => ev.kind === "internal" && ev.name === "scheduleBoundedRetryForRun"),
+      ).toBe(false);
     } finally {
       recorder.dispose();
     }
