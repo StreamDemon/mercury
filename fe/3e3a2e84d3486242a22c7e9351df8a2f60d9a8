@@ -1,0 +1,19 @@
+server/src/__tests__/heartbeat-execute-run-trace-f7-cancel.test.ts
+  s_6cb38cf12a965e::t_4ed047984a7196 1-8,12-16,21,23,25-28,66,74-75,165,178-323,377,480-484,486-500
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "fe3e3a2e84d3486242a22c7e9351df8a2f60d9a8",
+  "prompts": {},
+  "sessions": {
+    "s_6cb38cf12a965e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf0d044b-f016-401c-9c79-279fc9197b9a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
