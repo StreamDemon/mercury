@@ -1,0 +1,28 @@
+server/src/services/heartbeat.ts
+  s_6cb38cf12a965e::t_9ef01df4491eb5 5383
+  s_6cb38cf12a965e::t_57136373296277 4996
+  s_6cb38cf12a965e::t_7d6cd3a5dab13f 5515
+  s_6cb38cf12a965e::t_e9dc31ec1c585f 5714,5730,5733,5740,5751,5769,5771-5773,5777,5782,5787
+  s_6cb38cf12a965e::t_e3889a2793abe6 5942
+  s_6cb38cf12a965e::t_4e2d0c8f517911 5886,5897,5905,5911,5914-5915,5917,5921,5940
+  s_6cb38cf12a965e::t_cea8f8cdf677a9 7636-7642
+  s_6cb38cf12a965e::t_0f794807c764a9 4679-4702,4722,4727,4732
+  s_6cb38cf12a965e::t_71d975303f070c 5800,5824,5838,5844,5850-5853,5855,5865,5878
+  s_6cb38cf12a965e::t_96489f4e9a7349 5465
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "b795a17f404f200e4de4dabd9ed6fdbdb43ed780",
+  "prompts": {},
+  "sessions": {
+    "s_6cb38cf12a965e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf0d044b-f016-401c-9c79-279fc9197b9a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
