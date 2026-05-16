@@ -1,0 +1,33 @@
+server/src/__tests__/heartbeat-execute-run-trace.test.ts
+  s_6cb38cf12a965e::t_45db46e1859a6e 205-207
+  s_6cb38cf12a965e::t_01b708144b9448 48,50
+  s_6cb38cf12a965e::t_6d4959fbd25b20 226,228,249-260,265-272
+  s_6cb38cf12a965e::t_0f093b06d092bd 8-10,58-79,81-82,95-98,110-171,193,223,284-288,290-291,293-305
+  s_6cb38cf12a965e::t_ce434e102ae699 277-280
+  s_6cb38cf12a965e::t_e95fc61aa3cccd 172
+  s_6cb38cf12a965e::t_210a17704f3339 6-7,11-28
+  s_6cb38cf12a965e::t_f1e00db68ca034 1-5,29-41,44-47,51-57,80,83-94,99-109,173-181,191-192,194,198-199,208-222,224-225,227,229-248,261-264,273-276,281-283,289,292,306-310
+  s_6cb38cf12a965e::t_2d07f59686e20c 200,204
+  s_6cb38cf12a965e::t_6620da6640145d 42-43,49
+  s_6cb38cf12a965e::t_10d65c175721a9 182-190,195-197
+  s_6cb38cf12a965e::t_238f0265395216 201-203
+server/src/services/__tests__/helpers/trace-recorder.ts
+  s_6cb38cf12a965e::t_362cf4df1c45b0 57-63
+  s_6cb38cf12a965e::t_3be31fc8d5df90 171-195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "b31237ec5ae04eb225bac0f7cd839c720c233041",
+  "prompts": {},
+  "sessions": {
+    "s_6cb38cf12a965e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf0d044b-f016-401c-9c79-279fc9197b9a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
