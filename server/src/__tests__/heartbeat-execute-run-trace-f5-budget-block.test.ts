@@ -24,16 +24,29 @@
 // budget block, free the slot, and call heartbeat.resumeQueuedRuns() — claim
 // fires deterministically, sees the block, and cascades through cancelRunInternal.
 //
-// Spy stream caveat: cancelRunInternal (heartbeat.ts:7166) calls setRunStatus,
+// Spy stream coverage (re-verified 2026-05-17 after PR #62 + PR #63):
+// cancelRunInternal (heartbeat.ts:7166-7218) previously called setRunStatus,
 // setWakeupStatus, appendRunEvent, releaseIssueExecutionAndPromote,
-// finalizeAgentStatus, and startNextQueuedRunForAgent via local closure refs,
-// NOT through internals.X. So the F5 spy stream will NOT capture those calls —
-// only the executeRun body routes through internals. F5's recorded trace will
-// be liveEvent-dominated. That is a true characterization of the current
-// cancellation path; if a future refactor routes cancellation through
-// internals.X (so cancellation paths get the same fixture treatment as
-// executeRun), this fixture's trace will grow and need re-approval. That is
-// the intended behavior of golden-trace pinning.
+// finalizeAgentStatus, and startNextQueuedRunForAgent via LOCAL CLOSURE refs,
+// so F5's spy stream was nearly empty for the cancel cascade. PR #62 widened
+// cancelRunInternal to route those calls through `internals.X`, and PR #63
+// widened releaseIssueExecutionAndPromote's promote-tail (the cycle-2 queue
+// event + startNextQueuedRunForAgent invocation) through `internals.X`. With
+// both leaks plugged, F5's recorded trace now shows the cancel cluster as
+// explicit `internal:*` events (setRunStatus, setWakeupStatus, appendRunEvent,
+// releaseIssueExecutionAndPromote, finalizeAgentStatus) — this is the
+// post-#62/#63 characterization of the cancellation path.
+//
+// Loop-breaker (matches F2/F3/F6 precedent): with PR #63 in place,
+// releaseIssueExecutionAndPromote's promote-tail re-promotes the
+// still-in_progress issue, which queues a second cycle that ALSO hits the
+// budget block and cascades through cancelRunInternal again. Without a
+// loop-breaker stub, this cycle 2 produces 22 events (vs 10 for cycle 1
+// alone) AND its in-flight transactions race recorder.getDbSnapshot, returning
+// run=null. The cycle-3 startNextQueuedRunForAgent also holds the
+// agent_start_lock for the full 30s timeout. We stub
+// __internalsForTests.startNextQueuedRunForAgent to a no-op AFTER recorder
+// construction; the trade-off is documented at the stub site below.
 //
 // CAPTURE MODE: this file does NOT call toMatchTraceSequence. It prints the
 // captured trace via console.log and asserts only loose invariants (trace not
@@ -234,6 +247,20 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F5 budget-blo
 
     const heartbeat = heartbeatService(db);
     const recorder = createTraceRecorder({ db, heartbeat, companyId });
+
+    // Loop-breaker (matches F2/F3/F6 precedent, finalized after PR #62 + #63):
+    // stub `startNextQueuedRunForAgent` to a no-op AFTER recorder construction
+    // but BEFORE heartbeat.resumeQueuedRuns. Without this, cycle 1's
+    // releaseIssueExecutionAndPromote re-promotes the still-in_progress issue,
+    // which queues + cancels a second cycle (events 7-14 in the unstubbed
+    // trace) and triggers a third startNextQueuedRunForAgent that holds the
+    // agent_start_lock for the full 30s timeout. The downstream lock
+    // contention also causes recorder.getDbSnapshot to race the in-flight
+    // cycle-2 transactions and return run=null. With the stub, the cancel
+    // cascade ends after the first cycle and the test runs cleanly in <1s.
+    // Trade-off: internal:startNextQueuedRunForAgent and the cycle-2 re-promote
+    // do not appear in the trace — that side effect is suppressed by design.
+    heartbeat.__internalsForTests.startNextQueuedRunForAgent = async () => undefined;
 
     try {
       // 1. Invoke. Budget is OK here (no policy yet, company not paused), so
