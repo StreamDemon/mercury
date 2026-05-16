@@ -7,6 +7,21 @@
 // `.catch(() => undefined)`, so even if individual recovery writes fail the
 // overall sequence still progresses.
 //
+// RE-VERIFICATION (2026-05-17): originally captured a 16-event trace, but
+// post-capture investigation (during F6) revealed cycle 2 was running
+// INVISIBLY — the loop-breaker stubbed `startNextQueuedRunForAgent`, but the
+// outer catch's `releaseIssueExecutionAndPromote` was re-promoting through a
+// closure-captured reference that bypassed the internals indirection, claiming
+// the next run via a different path and running cycle 2 entirely outside the
+// recorder's view (a stray `liveEvent:heartbeat.run.status` between the
+// re-promotion queue event and `finalizeAgentStatus` was the only visible
+// leak). PR #62 (cancelRunInternal widen) and PR #63 (releaseIssueExecution-
+// AndPromote tail widen) plugged those closure leaks at heartbeat.ts:6373.
+// Re-running this fixture against the patched base now produces a clean
+// 15-event single-cycle trace — the stray cycle-2 status flip is gone
+// because the loop is TRULY broken now, not just visually muted. This is
+// the trace we're locking in.
+//
 // Expected outer-catch sequence (per heartbeat.ts:5880-5921):
 //   setRunStatus("failed", errorCode="adapter_failed")
 //   setWakeupStatus("failed")
