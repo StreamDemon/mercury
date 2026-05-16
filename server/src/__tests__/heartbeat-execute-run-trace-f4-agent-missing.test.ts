@@ -14,8 +14,16 @@
 // try block opens at line 4719 BEFORE the agent check at 4721, so the return
 // at 4733 DOES fall into the finally. The captured trace below therefore
 // includes the finally tail (releaseRuntimeServicesForRun +
-// startNextQueuedRunForAgent + envOrchestrator.releaseForRun side effects).
-// This is the truthful trace; the spec was wrong and is corrected here.
+// startNextQueuedRunForAgent). This is the truthful trace; the spec was
+// wrong and is corrected here.
+//
+// Note on the finally tail: unlike F2/F3/F5/F6/F7, F4 does NOT need a
+// loop-breaker stub for startNextQueuedRunForAgent. The agent-not-found
+// early-exit never reaches releaseIssueExecutionAndPromote's promote-tail
+// (there's no issue context to promote on this run), so the finally's call
+// to startNextQueuedRunForAgent runs once and bottoms out — it does not
+// re-enter executeRun. The canonical trace therefore INCLUDES that single
+// startNextQueuedRunForAgent at the tail.
 //
 // Induction (deterministic, via postgres trigger):
 // The two gates upstream of executeRun's `getAgent` (`startNextQueuedRunForAgent`
@@ -41,9 +49,8 @@
 // row, calls `getAgent(run.agentId)` at heartbeat.ts:4720, gets null, and
 // takes the agent-not-found path.
 //
-// CAPTURE MODE — this fixture does NOT call toMatchTraceSequence. The
-// captured trace is console.logged for operator review; once the operator
-// signs off, a follow-up PR will lock the trace in. Same convention as F1.
+// CANONICAL TRACE LOCKED per operator sign-off 2026-05-17 (batch approval of
+// all Wave 2 fixtures F2-F7 as-captured).
 
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -103,7 +110,10 @@ vi.mock("../adapters/index.ts", async () => {
 });
 
 import { heartbeatService } from "../services/heartbeat.ts";
-import { createTraceRecorder } from "../services/__tests__/helpers/trace-recorder.js";
+import {
+  createTraceRecorder,
+  type TraceMatcher,
+} from "../services/__tests__/helpers/trace-recorder.js";
 
 const embeddedPostgresSupport = await getEmbeddedPostgresTestSupport();
 const describeEmbeddedPostgres = embeddedPostgresSupport.supported ? describe : describe.skip;
@@ -114,6 +124,39 @@ if (!embeddedPostgresSupport.supported) {
     `Skipping executeRun trace fixtures on this host: ${embeddedPostgresSupport.reason ?? "unsupported environment"}`,
   );
 }
+
+// F4 canonical sequence — 7 events. Operator-approved 2026-05-17 (Wave 2 batch).
+// Argument matchers use the predicate form to skip noisy args (runIds, full
+// run rows, timestamps) and assert only stable invariants (status enums,
+// errorCode, wakeup status).
+const F4_CANONICAL_TRACE: readonly TraceMatcher[] = [
+  // [00] claimQueuedRun flips queued -> running and emits the status live event.
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "running" } },
+  // [01] executeRun's getAgent returns null -> setRunStatus(failed, agent_not_found).
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) =>
+      args[1] === "failed" &&
+      (args[2] as { errorCode?: string })?.errorCode === "agent_not_found",
+  },
+  // [02] status live event for the failure flip.
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "failed" } },
+  // [03] setWakeupStatus(failed) for the corresponding wakeup row.
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "failed",
+  },
+  // [04] releaseIssueExecutionAndPromote — runs even with no issue context;
+  // there's nothing to promote so this bottoms out without re-entering.
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  // [05] outer finally: releaseRuntimeServicesForRun.
+  { kind: "internal", name: "releaseRuntimeServicesForRun" },
+  // [06] outer finally: startNextQueuedRunForAgent. No queued successor exists,
+  // so this single call bottoms out — no loop-breaker stub required for F4.
+  { kind: "internal", name: "startNextQueuedRunForAgent" },
+];
 
 describeEmbeddedPostgres(
   "executeRun characterization fixtures (wince #3 Track B Phase 1) — F4 agent-not-found",
@@ -200,7 +243,7 @@ describeEmbeddedPostgres(
     });
 
     it(
-      "F4 — agent deleted between claim and getAgent triggers agent-not-found failure",
+      "F4 — agent deleted between claim and getAgent matches the canonical 7-event trace",
       async () => {
         const heartbeat = heartbeatService(db);
 
@@ -291,13 +334,6 @@ describeEmbeddedPostgres(
 
         const recorder = createTraceRecorder({ db, heartbeat, companyId });
 
-        let capturedTrace: ReturnType<
-          ReturnType<typeof createTraceRecorder>["getOrderedTrace"]
-        > | null = null;
-        let capturedSnapshot: Awaited<
-          ReturnType<ReturnType<typeof createTraceRecorder>["getDbSnapshot"]>
-        > | null = null;
-
         try {
           // Drive the scheduler. resumeQueuedRuns -> startNextQueuedRunForAgent
           // -> claimQueuedRun's UPDATE fires the trigger (deletes agent atomic
@@ -309,18 +345,35 @@ describeEmbeddedPostgres(
           const settled = await recorder.waitForRunSettled(runId, 10_000);
           await recorder.waitForTraceQuiescent(300, 5_000);
 
-          capturedTrace = recorder.getOrderedTrace();
-          capturedSnapshot = await recorder.getDbSnapshot(runId);
+          const trace = recorder.getOrderedTrace();
+          const snapshot = await recorder.getDbSnapshot(runId);
 
-          // Confirm the induction worked: the agent row is gone and the run
-          // settled with the expected failure code.
+          // Confirm the induction worked: the agent row is gone.
           const [agentRow] = await db
             .select({ id: agents.id })
             .from(agents)
             .where(eq(agents.id, agentId))
             .limit(1);
           expect(agentRow).toBeUndefined();
-          expect(settled?.status ?? capturedSnapshot.run?.status).toBe("failed");
+          expect(settled?.status ?? snapshot.run?.status).toBe("failed");
+
+          // The locked canonical contract. Any change to this sequence is a
+          // deliberate ordering decision that must be reviewed (and re-signed-off
+          // by the operator) before merging — that is the whole point.
+          expect(trace).toMatchTraceSequence(F4_CANONICAL_TRACE);
+
+          // DB cross-checks — these confirm the spy/live-event recording stayed
+          // consistent with what actually persisted.
+          expect(snapshot.run?.status).toBe("failed");
+          expect(snapshot.run?.errorCode).toBe("agent_not_found");
+          expect(snapshot.wakeupRequest?.status).toBe("failed");
+          // Agent-not-found exits before any appendRunEvent calls fire, so no
+          // run events should be persisted.
+          expect(snapshot.runEvents).toHaveLength(0);
+          // No issue context on this run; no issue comments expected.
+          expect(snapshot.issueComments).toHaveLength(0);
+          // Adapter.execute never reached; no cost events expected.
+          expect(snapshot.costEvents).toHaveLength(0);
         } finally {
           recorder.dispose();
           // Drop the test-only trigger so afterEach cleanup is unimpeded.
@@ -331,72 +384,6 @@ describeEmbeddedPostgres(
             .execute(sql.raw(`DROP FUNCTION IF EXISTS "${fnName}"()`))
             .catch(() => undefined);
         }
-
-        const trace = capturedTrace!;
-        const snapshot = capturedSnapshot!;
-        const lastRunId = runId;
-
-        // CAPTURE MODE assertions — minimal guarantees only. No
-        // toMatchTraceSequence lock-in until operator signs off.
-        expect(trace.length).toBeGreaterThan(0);
-        expect(snapshot.run?.status).toBe("failed");
-        expect(snapshot.run?.errorCode).toBe("agent_not_found");
-        expect(snapshot.wakeupRequest?.status).toBe("failed");
-
-        // Sanity: the captured trace must contain a setRunStatus call with
-        // status="failed" and errorCode="agent_not_found" — this is the
-        // characteristic side effect of the path we are pinning. If absent,
-        // the induction wrapper fired on a different setWakeupStatus call
-        // and executeRun took a different branch.
-        const failedSetRunStatus = trace.find(
-          (ev) =>
-            ev.kind === "internal" &&
-            ev.name === "setRunStatus" &&
-            ev.args[1] === "failed" &&
-            (ev.args[2] as { errorCode?: string })?.errorCode === "agent_not_found",
-        );
-        expect(failedSetRunStatus, "agent-not-found setRunStatus must appear in trace").toBeDefined();
-
-        // Display the full captured trace for operator review (same pattern
-        // F1 used before the canonical trace was locked in).
-        // eslint-disable-next-line no-console
-        console.log(`\n[F4] CAPTURED TRACE (${trace.length} events) — runId=${lastRunId}`);
-        for (const [idx, ev] of trace.entries()) {
-          if (ev.kind === "internal") {
-            // Render argsMatch-like info (status, errorCode, seq) when present
-            // without dumping full agent/run rows.
-            const arg1 = ev.args[1];
-            const arg2 = ev.args[2];
-            const argSummary =
-              arg2 && typeof arg2 === "object"
-                ? JSON.stringify({
-                    arg1,
-                    eventType: (arg2 as Record<string, unknown>).eventType,
-                    errorCode: (arg2 as Record<string, unknown>).errorCode,
-                  })
-                : JSON.stringify({ arg1 });
-            // eslint-disable-next-line no-console
-            console.log(`  ${String(idx).padStart(3, " ")}. internal  ${ev.name}  ${argSummary}`);
-          } else {
-            const payload = ev.payload as Record<string, unknown>;
-            const payloadSummary = JSON.stringify({
-              status: payload.status,
-              seq: payload.seq,
-              eventType: payload.eventType,
-            });
-            // eslint-disable-next-line no-console
-            console.log(`  ${String(idx).padStart(3, " ")}. liveEvent ${ev.type}  ${payloadSummary}`);
-          }
-        }
-
-        // eslint-disable-next-line no-console
-        console.log(`\n[F4] DB snapshot: ` +
-          `run.status=${snapshot.run?.status} ` +
-          `run.errorCode=${snapshot.run?.errorCode} ` +
-          `wakeup.status=${snapshot.wakeupRequest?.status} ` +
-          `runEvents=${snapshot.runEvents.length} ` +
-          `issueComments=${snapshot.issueComments.length} ` +
-          `costEvents=${snapshot.costEvents.length}`);
       },
       90_000,
     );
