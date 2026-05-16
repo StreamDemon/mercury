@@ -54,6 +54,13 @@ export interface TraceRecorder {
     runId: string,
     timeoutMs?: number,
   ): Promise<typeof heartbeatRuns.$inferSelect | null | undefined>;
+  /**
+   * Wait until the recorded trace stops growing for `quietMs` consecutive
+   * milliseconds, or until `timeoutMs` elapses. Use after `waitForRunSettled`
+   * to capture executeRun's post-status-change tail (recovery handoff,
+   * task-session persist, agent-status finalize, finally-block cleanup).
+   */
+  waitForTraceQuiescent(quietMs?: number, timeoutMs?: number): Promise<void>;
   dispose(): void;
 }
 
@@ -159,6 +166,31 @@ export function createTraceRecorder(options: TraceRecorderOptions): TraceRecorde
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
       return heartbeat.getRun(runId);
+    },
+
+    async waitForTraceQuiescent(quietMs = 250, timeoutMs = 5_000) {
+      // The heartbeatRuns row's status flips to a terminal value at the
+      // setRunStatus call inside executeRun, but executeRun continues for
+      // several more internal calls (finalizeIssueCommentPolicy,
+      // releaseIssueExecutionAndPromote, handleRunLivenessContinuation,
+      // updateRuntimeState, clearTaskSessions/upsertTaskSession,
+      // finalizeAgentStatus) and then the unconditional `finally` block
+      // (releaseRuntimeServicesForRun, startNextQueuedRunForAgent).
+      // Polling heartbeat.getRun(runId) alone returns BEFORE that tail is
+      // observable. Use this helper after waitForRunSettled to wait until the
+      // recorded trace stops growing for `quietMs` consecutive milliseconds.
+      const deadline = Date.now() + timeoutMs;
+      let lastLength = trace.length;
+      let lastChangeAt = Date.now();
+      while (Date.now() < deadline) {
+        if (trace.length !== lastLength) {
+          lastLength = trace.length;
+          lastChangeAt = Date.now();
+        } else if (Date.now() - lastChangeAt >= quietMs) {
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
     },
 
     dispose() {
