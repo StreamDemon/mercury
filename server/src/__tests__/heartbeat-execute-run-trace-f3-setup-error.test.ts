@@ -57,10 +57,11 @@
 // `startNextQueuedRunForAgent` behavior in a happy-path or queue-drain
 // fixture where the loop concern does not apply.
 //
-// CAPTURE MODE: this fixture intentionally does NOT call
-// `toMatchTraceSequence(...)`. Phase 1 lands captures first, then the
-// operator reviews and signs off on the ordered sequence in the PR body,
-// then a follow-up commit converts the capture to a locked canonical trace.
+// LOCKED 2026-05-17: operator batch-approved the captured 15-event trace
+// (Wave 2 sign-off). The sequence below is now the canonical contract for
+// the outer-catch setup-error path — any change is a deliberate ordering
+// decision that must be reviewed and re-signed-off by the operator before
+// merging.
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -130,7 +131,58 @@ vi.mock("../adapters/index.ts", async () => {
 });
 
 import { heartbeatService } from "../services/heartbeat.ts";
-import { createTraceRecorder } from "../services/__tests__/helpers/trace-recorder.js";
+import {
+  createTraceRecorder,
+  type TraceMatcher,
+} from "../services/__tests__/helpers/trace-recorder.js";
+
+// F3 canonical sequence — 15 events. Operator-approved 2026-05-17 (Wave 2
+// batch sign-off). Outer-catch path: realizeExecutionWorkspace throws BEFORE
+// the inner try opens, so executeRun never reaches the spawn / runtime-
+// services / adapter-invoke cluster (no events for those). Argument matchers
+// use the predicate form because the matcher's array form has no positional
+// wildcard; predicates skip noisy args (runIds, agent rows, timestamps) and
+// assert only stable invariants (status enums, seq numbers, error codes,
+// event kinds).
+const F3_CANONICAL_TRACE: readonly TraceMatcher[] = [
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  { kind: "liveEvent", type: "heartbeat.run.status" },
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) =>
+      args[1] === "failed" &&
+      (args[2] as { errorCode?: string })?.errorCode === "adapter_failed",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "failed" } },
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "failed",
+  },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 1 && (args[2] as { eventType?: string })?.eventType === "error",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 1, eventType: "error" } },
+  { kind: "internal", name: "classifyAndPersistRunLiveness" },
+  { kind: "internal", name: "refreshContinuationSummaryForRun" },
+  { kind: "internal", name: "finalizeIssueCommentPolicy" },
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  // Promote-tail enqueues a fresh queued run for the re-promoted issue, but
+  // the loop-breaker stubs `startNextQueuedRunForAgent` so the claim never
+  // happens — the queued event is the only visible artifact of cycle 2.
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  {
+    kind: "internal",
+    name: "finalizeAgentStatus",
+    argsMatch: (args) => args[1] === "failed",
+  },
+  { kind: "liveEvent", type: "agent.status" },
+  { kind: "internal", name: "releaseRuntimeServicesForRun" },
+];
 
 const embeddedPostgresSupport = await getEmbeddedPostgresTestSupport();
 const describeEmbeddedPostgres = embeddedPostgresSupport.supported ? describe : describe.skip;
@@ -192,7 +244,7 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F3 setup erro
     await tempDb?.cleanup();
   });
 
-  it("F3 — outer-catch path captures the setup-error recovery sequence [CAPTURE]", async () => {
+  it("F3 — outer-catch setup-error matches the canonical 15-event trace", async () => {
     const companyId = randomUUID();
     const agentId = randomUUID();
     const issueId = randomUUID();
@@ -272,45 +324,29 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F3 setup erro
       const trace = recorder.getOrderedTrace();
       const snapshot = await recorder.getDbSnapshot(queued!.id);
 
-      // CAPTURE MODE assertions — no toMatchTraceSequence lock-in yet.
-      expect(trace.length).toBeGreaterThan(0);
+      // The locked canonical contract. Any change to this sequence is a
+      // deliberate ordering decision that must be reviewed (and re-signed-off
+      // by the operator) before merging — that is the whole point.
+      expect(trace).toMatchTraceSequence(F3_CANONICAL_TRACE);
+
+      // DB cross-checks — confirm the spy/live-event recording stayed
+      // consistent with what actually persisted.
       expect(snapshot.run?.status).toBe("failed");
       expect(snapshot.run?.errorCode).toBe("adapter_failed");
-
-      // Print the ordered sequence + DB snapshot stats for operator review in
-      // the PR body. Mirror F1's pre-lock-in capture pattern.
-      // eslint-disable-next-line no-console
-      console.log("\n===== F3 CAPTURED TRACE (setup-error outer catch) =====");
-      // eslint-disable-next-line no-console
-      console.log(`Total events: ${trace.length}`);
-      for (let i = 0; i < trace.length; i++) {
-        const ev = trace[i];
-        if (ev.kind === "internal") {
-          // eslint-disable-next-line no-console
-          console.log(`  [${i}] internal:${String(ev.name)}`);
-        } else {
-          // eslint-disable-next-line no-console
-          console.log(`  [${i}] liveEvent:${ev.type}`);
-        }
-      }
-      // eslint-disable-next-line no-console
-      console.log("\n----- DB snapshot -----");
-      // eslint-disable-next-line no-console
-      console.log(`  run.status        = ${snapshot.run?.status}`);
-      // eslint-disable-next-line no-console
-      console.log(`  run.errorCode     = ${snapshot.run?.errorCode}`);
-      // eslint-disable-next-line no-console
-      console.log(`  run.error         = ${snapshot.run?.error}`);
-      // eslint-disable-next-line no-console
-      console.log(`  wakeup.status     = ${snapshot.wakeupRequest?.status}`);
-      // eslint-disable-next-line no-console
-      console.log(`  runEvents.length  = ${snapshot.runEvents.length}`);
-      // eslint-disable-next-line no-console
-      console.log(`  costEvents.length = ${snapshot.costEvents.length}`);
-      // eslint-disable-next-line no-console
-      console.log(`  issueComments.length = ${snapshot.issueComments.length}`);
-      // eslint-disable-next-line no-console
-      console.log("===== END F3 CAPTURED TRACE =====\n");
+      expect(snapshot.wakeupRequest?.status).toBe("failed");
+      // Outer-catch path writes exactly one runEvent (seq=1 "error").
+      expect(snapshot.runEvents).toHaveLength(1);
+      expect(snapshot.runEvents[0]?.eventType).toBe("error");
+      const appendRunEventCount = trace.filter(
+        (ev) => ev.kind === "internal" && ev.name === "appendRunEvent",
+      ).length;
+      expect(snapshot.runEvents.length).toBe(appendRunEventCount);
+      // No issue comment is posted on the setup-error path (the inner success/
+      // failure branches that post comments never run — outer catch fires
+      // before adapter.execute).
+      expect(snapshot.issueComments).toHaveLength(0);
+      // No cost row — the adapter is never invoked.
+      expect(snapshot.costEvents).toHaveLength(0);
     } finally {
       recorder.dispose();
     }
