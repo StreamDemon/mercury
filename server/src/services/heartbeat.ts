@@ -7183,7 +7183,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       });
     }
 
-    const cancelled = await setRunStatus(run.id, "cancelled", {
+    const cancelled = await internals.setRunStatus(run.id, "cancelled", {
       finishedAt: new Date(),
       error: reason,
       errorCode: "cancelled",
@@ -7196,24 +7196,24 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       } : {}),
     });
 
-    await setWakeupStatus(run.wakeupRequestId, "cancelled", {
+    await internals.setWakeupStatus(run.wakeupRequestId, "cancelled", {
       finishedAt: new Date(),
       error: reason,
     });
 
     if (cancelled) {
-      await appendRunEvent(cancelled, 1, {
+      await internals.appendRunEvent(cancelled, 1, {
         eventType: "lifecycle",
         stream: "system",
         level: "warn",
         message: "run cancelled",
       });
-      await releaseIssueExecutionAndPromote(cancelled);
+      await internals.releaseIssueExecutionAndPromote(cancelled);
     }
 
     runningProcesses.delete(run.id);
-    await finalizeAgentStatus(run.agentId, "cancelled");
-    await startNextQueuedRunForAgent(run.agentId);
+    await internals.finalizeAgentStatus(run.agentId, "cancelled");
+    await internals.startNextQueuedRunForAgent(run.agentId);
     return cancelled;
   }
 
