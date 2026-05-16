@@ -1,21 +1,31 @@
-// Wince #3 Track B Phase 1 — F7: cancelled mid-run.
+// Wince #3 Track B Phase 1 — F7: cancelled mid-run (LOCKED).
+//
+// Operator sign-off: 2026-05-17 (Wave 2 batch approval). The 36-event sequence
+// below is the canonical contract for cancel-mid-run; the double-cascade
+// pattern (cancelRunInternal's cluster + executeRun's resume-block cluster) is
+// INTENTIONAL — it is the real audit-log evidence of both trigger points and
+// MUST NOT be deduplicated. Locking the duplicates as-is is the explicit
+// operator decision.
 //
 // What this fixture pins:
 //   The interleaving when heartbeat.cancelRun fires while executeRun is awaiting
-//   adapter.execute. Two ordered effect streams collide:
-//     A) cancelRunInternal's cascade (setRunStatus, setWakeupStatus, appendRunEvent,
-//        releaseIssueExecutionAndPromote, finalizeAgentStatus, startNextQueuedRunForAgent)
+//   adapter.execute. Two ordered effect streams collide and BOTH run end-to-end:
+//     A) cancelRunInternal's cascade (setRunStatus, setWakeupStatus, appendRunEvent
+//        seq=1 warn "run cancelled", releaseIssueExecutionAndPromote,
+//        finalizeAgentStatus("cancelled"), startNextQueuedRunForAgent → claim
+//        blocked by the test's loop-breaker).
 //     B) executeRun's post-adapter resume path. Because adapterResult arrives
 //        normally and the run row was already flipped to a terminal status, the
 //        outcome-resolution branch at heartbeat.ts:5629 takes
 //        `outcome = latestRun.status` ("cancelled") and the rest of the
-//        success-block tail fires under that outcome (setRunStatus a second
+//        success-block tail fires under that outcome (setRunStatus a SECOND
 //        time with terminal-row-already-set, classifyAndPersistRunLiveness,
+//        setWakeupStatus SECOND time, appendRunEvent seq=3 error "run cancelled",
 //        refreshContinuationSummaryForRun, finalizeIssueCommentPolicy,
-//        releaseIssueExecutionAndPromote, handleRunLivenessContinuation,
-//        updateRuntimeState, upsertTaskSession because taskKey + sessionId,
-//        finalizeAgentStatus, finally-block releaseRuntimeServicesForRun +
-//        startNextQueuedRunForAgent).
+//        releaseIssueExecutionAndPromote SECOND time, handleRunLivenessContinuation,
+//        updateRuntimeState, upsertTaskSession because taskKey + sessionId arm,
+//        finalizeAgentStatus("cancelled") SECOND time, finally-block
+//        releaseRuntimeServicesForRun).
 //
 // Race-handling approach (deterministic, no polling on row state):
 //   The stub adapter awaits onMeta SYNCHRONOUSLY first (so seq=2 adapter.invoke
@@ -53,8 +63,7 @@
 //   triggered is what matters for characterization, and that cascade is now
 //   suppressed.
 //
-// Expected duplicate-fire patterns from cancel + executeRun resume (all
-// observable via internals.X spies post-PR-#62):
+// Locked duplicate-fire patterns (the contract — DO NOT deduplicate):
 //   - setRunStatus("cancelled") TWICE (cancel:7186 + executeRun resume:5714)
 //   - setWakeupStatus("cancelled") TWICE (cancel:7199 + resume:5733)
 //   - releaseIssueExecutionAndPromote TWICE (cancel:7211 + resume:5772)
@@ -62,11 +71,8 @@
 //   - appendRunEvent rows with seq=1 TWICE persisted: cancel hardcodes seq=1
 //     at 7205, executeRun's local `let seq = 1` already wrote seq=1 for
 //     "run started". The heartbeat_run_events schema has no UNIQUE on seq —
-//     just an index — so both rows persist. Pre-existing behavior the
-//     fixture documents.
-//
-// CAPTURE MODE: this test does NOT call toMatchTraceSequence. Phase 1 locks
-// happen after operator sign-off on the captured trace recorded in the PR body.
+//     just an index — so both rows persist. heartbeatRunEvents row count = 4
+//     with seqs [1, 1, 2, 3] is the pre-existing characterization finding.
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -156,6 +162,7 @@ vi.mock("../adapters/index.ts", async () => {
 import { heartbeatService } from "../services/heartbeat.ts";
 import {
   createTraceRecorder,
+  type TraceMatcher,
 } from "../services/__tests__/helpers/trace-recorder.js";
 
 const embeddedPostgresSupport = await getEmbeddedPostgresTestSupport();
@@ -167,6 +174,152 @@ if (!embeddedPostgresSupport.supported) {
     `Skipping executeRun trace fixtures on this host: ${embeddedPostgresSupport.reason ?? "unsupported environment"}`,
   );
 }
+
+// F7 canonical sequence — 36 events. Operator-approved 2026-05-17 (Wave 2 batch).
+// The double-cascade (events 11-19 from cancelRunInternal, events 20-32 from
+// executeRun's resume block) is INTENTIONAL contract — both trigger points
+// produce real audit-log writes and the duplicates document both.
+//
+// Predicate matchers discriminate the duplicate calls by pinning stable invariants:
+//   - status="cancelled" arg on setRunStatus / setWakeupStatus / finalizeAgentStatus
+//   - seq + eventType + level on appendRunEvent (level="warn" at [14] vs "error" at [24])
+//   - seq + eventType on heartbeat.run.event live events
+// Position in the sequence is what discriminates the duplicate-fire pairs; the
+// matcher pins WHAT each call did, the order pins WHEN each call ran.
+const F7_CANONICAL_TRACE: readonly TraceMatcher[] = [
+  // [00] queued
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  // [01] status -> running
+  { kind: "liveEvent", type: "heartbeat.run.status" },
+  // [02] realize execution workspace
+  { kind: "internal", name: "realizeExecutionWorkspace" },
+  // [03] environment.lease_acquired
+  { kind: "liveEvent", type: "activity.logged" },
+  // [04] agent.status -> running
+  { kind: "liveEvent", type: "agent.status" },
+  // [05] appendRunEvent seq=1 lifecycle "run started"
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 1 && (args[2] as { eventType?: string })?.eventType === "lifecycle",
+  },
+  // [06] heartbeat.run.event seq=1
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 1, eventType: "lifecycle" } },
+  // [07] heartbeat.run.log
+  { kind: "liveEvent", type: "heartbeat.run.log" },
+  // [08] ensure runtime services
+  { kind: "internal", name: "ensureRuntimeServicesForRun" },
+  // [09] appendRunEvent seq=2 adapter.invoke
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 2 && (args[2] as { eventType?: string })?.eventType === "adapter.invoke",
+  },
+  // [10] heartbeat.run.event seq=2
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 2, eventType: "adapter.invoke" } },
+
+  // --- cancel cluster: cancelRunInternal fires while adapter blocks ---
+  // [11] setRunStatus("cancelled") FIRST (cancel:7186)
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  // [12] heartbeat.run.status -> cancelled
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "cancelled" } },
+  // [13] setWakeupStatus("cancelled") FIRST (cancel:7199)
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  // [14] appendRunEvent seq=1 lifecycle warn "run cancelled" (cancel:7205,
+  //      hardcoded seq=1 — duplicate seq with [05] is intentional pre-existing
+  //      characterization; both rows persist in heartbeat_run_events)
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 1 &&
+      (args[2] as { eventType?: string; level?: string })?.eventType === "lifecycle" &&
+      (args[2] as { eventType?: string; level?: string })?.level === "warn",
+  },
+  // [15] heartbeat.run.event for the seq=1 warn lifecycle
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 1, eventType: "lifecycle" } },
+  // [16] releaseIssueExecutionAndPromote FIRST (cancel:7211)
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  // [17] follow-on heartbeat.run.queued from the release-promote tail —
+  //      claim blocked by the loop-breaker (canary event: this is the
+  //      ordering-sensitive event the advisor flagged; if it drifts, the
+  //      trace shape changed)
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  // [18] finalizeAgentStatus("cancelled") FIRST (cancel:7215)
+  {
+    kind: "internal",
+    name: "finalizeAgentStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  // [19] agent.status -> idle
+  { kind: "liveEvent", type: "agent.status" },
+
+  // --- executeRun resume path: adapter releases, outcome = latestRun.status ---
+  // [20] setRunStatus("cancelled") SECOND (executeRun resume:5714 — terminal row already set)
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  // [21] heartbeat.run.status -> cancelled (republished)
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "cancelled" } },
+  // [22] classifyAndPersistRunLiveness
+  { kind: "internal", name: "classifyAndPersistRunLiveness" },
+  // [23] setWakeupStatus("cancelled") SECOND (resume:5733)
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  // [24] appendRunEvent seq=3 lifecycle error "run cancelled" (resume:5740 —
+  //      level="error" because outcome !== "succeeded")
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 3 &&
+      (args[2] as { eventType?: string; level?: string })?.eventType === "lifecycle" &&
+      (args[2] as { eventType?: string; level?: string })?.level === "error",
+  },
+  // [25] heartbeat.run.event for seq=3
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 3, eventType: "lifecycle" } },
+  // [26] refreshContinuationSummaryForRun
+  { kind: "internal", name: "refreshContinuationSummaryForRun" },
+  // [27] finalizeIssueCommentPolicy
+  { kind: "internal", name: "finalizeIssueCommentPolicy" },
+  // [28] releaseIssueExecutionAndPromote SECOND (resume:5772)
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  // [29] handleRunLivenessContinuation
+  { kind: "internal", name: "handleRunLivenessContinuation" },
+  // [30] updateRuntimeState
+  { kind: "internal", name: "updateRuntimeState" },
+  // [31] upsertTaskSession — taskKey + sessionId arm at heartbeat.ts:5780
+  { kind: "internal", name: "upsertTaskSession" },
+  // [32] finalizeAgentStatus("cancelled") SECOND (resume:5800)
+  {
+    kind: "internal",
+    name: "finalizeAgentStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  // [33] agent.status -> idle (republished)
+  { kind: "liveEvent", type: "agent.status" },
+  // [34] environment.lease_released
+  { kind: "liveEvent", type: "activity.logged" },
+  // [35] releaseRuntimeServicesForRun — finally block cleanup
+  //      (startNextQueuedRunForAgent at 5942 is spied OUT by the loop-breaker
+  //      replacement; it's invoked but bypasses the recorder wrapper)
+  { kind: "internal", name: "releaseRuntimeServicesForRun" },
+];
 
 describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B Phase 1) — F7 cancel", () => {
   let db!: ReturnType<typeof createDb>;
@@ -221,7 +374,7 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
     await tempDb?.cleanup();
   });
 
-  it("F7 — cancel mid-run captures the cancel-cascade + executeRun resume trace [CAPTURE]", async () => {
+  it("F7 — cancel mid-run matches the canonical 36-event double-cascade trace", async () => {
     const companyId = randomUUID();
     const agentId = randomUUID();
     const issueId = randomUUID();
@@ -324,67 +477,27 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
       const trace = recorder.getOrderedTrace();
       const snapshot = await recorder.getDbSnapshot(queued!.id);
 
-      // CAPTURE-MODE assertions (per task spec). No toMatchTraceSequence lock.
-      expect(trace.length).toBeGreaterThan(0);
-      expect(snapshot.run?.status).toBe("cancelled");
+      // The locked canonical contract. The double-cascade is intentional per
+      // operator sign-off 2026-05-17 — any change to this sequence is a
+      // deliberate ordering decision that must be reviewed (and re-signed-off
+      // by the operator) before merging.
+      expect(trace).toMatchTraceSequence(F7_CANONICAL_TRACE);
 
-      // eslint-disable-next-line no-console
-      console.log(
-        "\n=== F7 captured trace (",
-        trace.length,
-        " events) ===\n" +
-          trace
-            .map((ev, i) => {
-              if (ev.kind === "internal") {
-                const argSummary = ev.args
-                  .map((a) => {
-                    if (a === null || a === undefined) return String(a);
-                    if (typeof a === "string") return JSON.stringify(a.length > 60 ? a.slice(0, 60) + "…" : a);
-                    if (typeof a === "number" || typeof a === "boolean") return String(a);
-                    if (typeof a === "object") {
-                      try {
-                        const json = JSON.stringify(a);
-                        return json.length > 80 ? json.slice(0, 80) + "…" : json;
-                      } catch {
-                        return "[unserializable]";
-                      }
-                    }
-                    return typeof a;
-                  })
-                  .join(", ");
-                return `  [${String(i).padStart(2, " ")}] internal:${String(ev.name)}(${argSummary})`;
-              }
-              const payloadJson = (() => {
-                try {
-                  const json = JSON.stringify(ev.payload);
-                  return json.length > 120 ? json.slice(0, 120) + "…" : json;
-                } catch {
-                  return "[unserializable]";
-                }
-              })();
-              return `  [${String(i).padStart(2, " ")}] liveEvent:${ev.type} ${payloadJson}`;
-            })
-            .join("\n") +
-          "\n=== /F7 captured trace ===\n",
-      );
-      // eslint-disable-next-line no-console
-      console.log(
-        "F7 DB snapshot:",
-        JSON.stringify(
-          {
-            runStatus: snapshot.run?.status,
-            runErrorCode: snapshot.run?.errorCode,
-            runError: snapshot.run?.error,
-            wakeupStatus: snapshot.wakeupRequest?.status,
-            runEventsCount: snapshot.runEvents.length,
-            runEventSeqs: snapshot.runEvents.map((e) => ({ seq: e.seq, eventType: e.eventType })),
-            costEventsCount: snapshot.costEvents.length,
-            issueCommentsCount: snapshot.issueComments.length,
-          },
-          null,
-          2,
-        ),
-      );
+      // DB cross-checks — these confirm the spy/live-event recording stayed
+      // consistent with what actually persisted.
+      expect(snapshot.run?.status).toBe("cancelled");
+      expect(snapshot.wakeupRequest?.status).toBe("cancelled");
+      // heartbeatRunEvents row count = 4, seqs [1, 1, 2, 3]: two rows with
+      // seq=1 (one from "run started" at executeRun, one from "run cancelled"
+      // at cancelRunInternal which hardcodes seq=1). Pre-existing
+      // characterization finding — schema has no UNIQUE on seq.
+      expect(snapshot.runEvents).toHaveLength(4);
+      expect(snapshot.runEvents.map((e) => e.seq)).toEqual([1, 1, 2, 3]);
+      // No issue comment on cancel (success-only path at heartbeat.ts:5752
+      // gates on outcome === "succeeded").
+      expect(snapshot.issueComments).toHaveLength(0);
+      // costUsd deliberately omitted in the stub adapter return — no cost row.
+      expect(snapshot.costEvents).toHaveLength(0);
     } finally {
       // Safety: ensure adapter is released even on test failure so afterEach
       // can drain.
