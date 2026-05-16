@@ -33,6 +33,19 @@
 // recorded ordered sequence via console.log so the operator can sign off on
 // the canonical F2 trace; a follow-up commit will replace the permissive
 // assertions with toMatchTraceSequence(F2_CANONICAL_TRACE).
+//
+// LOOP-BREAKER SCOPE CUT (Wave 2 operator decision 1a): the F2 fixture stubs
+// heartbeat.__internalsForTests.startNextQueuedRunForAgent to a no-op AFTER
+// recorder construction but BEFORE heartbeat.invoke. Without this, the
+// post-finalize startNextQueuedRunForAgent re-promotes the still-in_progress
+// issue and re-fires executeRun against the still-throwing adapter stub,
+// producing 4 cascading failure cycles (~109 events) that obscure the
+// single-cycle recovery handoff this fixture exists to characterize. F3
+// established the pattern; the operator standardized it across all
+// non-success fixtures. Trade-off: the trace ENDS at
+// internal:releaseRuntimeServicesForRun rather than continuing into
+// startNextQueuedRunForAgent — that side effect is suppressed by design and
+// is documented in the canonical sequence.
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -216,6 +229,14 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
 
     const heartbeat = heartbeatService(db);
     const recorder = createTraceRecorder({ db, heartbeat, companyId });
+
+    // Loop-breaker: prevent the post-finalize startNextQueuedRunForAgent from
+    // re-firing executeRun against the same throwing stub. F3 established this
+    // pattern; the operator standardized it across all non-success fixtures.
+    // Trade-off: trace ends at internal:releaseRuntimeServicesForRun instead of
+    // ending at internal:startNextQueuedRunForAgent — that side effect is
+    // suppressed by design. Document in the canonical sequence.
+    heartbeat.__internalsForTests.startNextQueuedRunForAgent = async () => undefined;
 
     try {
       // Decision 2B: include taskKey in contextSnapshot so the failure-block
