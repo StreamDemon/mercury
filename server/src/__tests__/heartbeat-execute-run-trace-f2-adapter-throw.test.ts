@@ -29,10 +29,9 @@
 //   6  — workspace-runtime calls remain opaque to the spy stream (same
 //        rationale as F1).
 //
-// CAPTURE MODE: This file does NOT lock toMatchTraceSequence. It surfaces the
-// recorded ordered sequence via console.log so the operator can sign off on
-// the canonical F2 trace; a follow-up commit will replace the permissive
-// assertions with toMatchTraceSequence(F2_CANONICAL_TRACE).
+// LOCKED 2026-05-17 per operator batch sign-off on Wave 2 fixtures. The
+// canonical sequence below is now the contract; any future drift requires
+// fresh operator sign-off before re-locking.
 //
 // LOOP-BREAKER (Wave 2 operator decision 1a, finalized after PR #62 + #63):
 // the F2 fixture stubs heartbeat.__internalsForTests.startNextQueuedRunForAgent
@@ -108,7 +107,10 @@ vi.mock("../adapters/index.ts", async () => {
 });
 
 import { heartbeatService } from "../services/heartbeat.ts";
-import { createTraceRecorder } from "../services/__tests__/helpers/trace-recorder.js";
+import {
+  createTraceRecorder,
+  type TraceMatcher,
+} from "../services/__tests__/helpers/trace-recorder.js";
 
 const embeddedPostgresSupport = await getEmbeddedPostgresTestSupport();
 const describeEmbeddedPostgres = embeddedPostgresSupport.supported ? describe : describe.skip;
@@ -120,28 +122,84 @@ if (!embeddedPostgresSupport.supported) {
   );
 }
 
-// Local helpers — capture-mode display utilities. Defined inline (rather than
-// shared with F1) so each capture fixture is self-contained for sign-off and
-// so future F3-F7 captures can fork these without coupling to F1.
-function summarizeTraceForDisplay(trace: ReadonlyArray<{ kind: string; name?: string; type?: string }>) {
-  return trace.map((ev, idx) => {
-    const idxStr = String(idx).padStart(2, "0");
-    if (ev.kind === "internal") return `[${idxStr}] internal:${ev.name ?? "<unknown>"}`;
-    if (ev.kind === "liveEvent") return `[${idxStr}] liveEvent:${ev.type ?? "<unknown>"}`;
-    return `[${idxStr}] ${ev.kind}`;
-  });
-}
+// F2 canonical sequence — 26 events. Operator-approved 2026-05-17 (Wave 2 batch).
+// Argument matchers use the predicate form because the matcher's array form
+// has no positional wildcard; predicates skip noisy args (runIds, agent rows,
+// timestamps) and assert only stable invariants (status enums, seq numbers,
+// event kinds, errorCode strings).
+//
+// Notable contract points vs F1 (success path):
+//   - setRunStatus("failed", { errorCode: "adapter_failed" })
+//   - setWakeupStatus(..., "failed")
+//   - finalizeAgentStatus(..., "failed")
+//   - 3 appendRunEvent calls: seq=1 lifecycle "run started", seq=2 "adapter.invoke",
+//     seq=3 lifecycle "run failed" (NOT a separate error event; the failure-block
+//     writes a single lifecycle entry on the way down).
+//   - At index 20: heartbeat.run.queued is emitted by the promote-tail invoked
+//     from releaseIssueExecutionAndPromote — the loop-breaker swallows the claim
+//     but the enqueue event still surfaces. This is by design.
+//   - The trace ENDS at internal:releaseRuntimeServicesForRun (the finally block);
+//     the post-finalize startNextQueuedRunForAgent side effect is suppressed by
+//     the loop-breaker (see header note for full rationale).
+const F2_CANONICAL_TRACE: readonly TraceMatcher[] = [
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  { kind: "liveEvent", type: "heartbeat.run.status" },
+  { kind: "internal", name: "realizeExecutionWorkspace" },
+  { kind: "liveEvent", type: "activity.logged" },
+  { kind: "liveEvent", type: "agent.status" },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 1 && (args[2] as { eventType?: string })?.eventType === "lifecycle",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 1, eventType: "lifecycle" } },
+  { kind: "liveEvent", type: "heartbeat.run.log" },
+  { kind: "internal", name: "ensureRuntimeServicesForRun" },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 2 && (args[2] as { eventType?: string })?.eventType === "adapter.invoke",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 2, eventType: "adapter.invoke" } },
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) =>
+      args[1] === "failed" && (args[2] as { errorCode?: string })?.errorCode === "adapter_failed",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "failed" } },
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "failed",
+  },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 3 && (args[2] as { eventType?: string })?.eventType === "error",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 3, eventType: "error" } },
+  { kind: "internal", name: "classifyAndPersistRunLiveness" },
+  { kind: "internal", name: "refreshContinuationSummaryForRun" },
+  { kind: "internal", name: "finalizeIssueCommentPolicy" },
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  // promote-tail enqueue surfaces, but the loop-breaker swallows the claim.
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  { kind: "internal", name: "updateRuntimeState" },
+  {
+    kind: "internal",
+    name: "finalizeAgentStatus",
+    argsMatch: (args) => args[1] === "failed",
+  },
+  { kind: "liveEvent", type: "agent.status" },
+  { kind: "liveEvent", type: "activity.logged" },
+  { kind: "internal", name: "releaseRuntimeServicesForRun" },
+];
 
-function countByKey(trace: ReadonlyArray<{ kind: string; name?: string; type?: string }>) {
-  const counts = new Map<string, number>();
-  for (const ev of trace) {
-    const key = ev.kind === "internal" ? `internal:${ev.name ?? "<unknown>"}` : `liveEvent:${ev.type ?? "<unknown>"}`;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  return Object.fromEntries([...counts.entries()].sort());
-}
-
-describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B Phase 1) — F2 capture", () => {
+describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B Phase 1) — F2", () => {
   let db!: ReturnType<typeof createDb>;
   let tempDb: Awaited<ReturnType<typeof startEmbeddedPostgresTestDatabase>> | null = null;
 
@@ -191,7 +249,7 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
     await tempDb?.cleanup();
   });
 
-  it("F2 — adapter throws (inner catch) — CAPTURE the recovery handoff trace", async () => {
+  it("F2 — adapter throws (inner catch) matches the canonical 26-event trace", async () => {
     const companyId = randomUUID();
     const agentId = randomUUID();
     const issueId = randomUUID();
@@ -261,38 +319,28 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
       const trace = recorder.getOrderedTrace();
       const snapshot = await recorder.getDbSnapshot(queued!.id);
 
-      // CAPTURE MODE assertions — permissive only. The locked
-      // F2_CANONICAL_TRACE matcher will be added in a follow-up commit AFTER
-      // the operator signs off on the captured sequence printed below.
-      expect(trace.length).toBeGreaterThan(0);
+      // The locked canonical contract. Any change to this sequence is a
+      // deliberate ordering decision that must be reviewed (and re-signed-off
+      // by the operator) before merging — that is the whole point.
+      expect(trace).toMatchTraceSequence(F2_CANONICAL_TRACE);
+
+      // DB cross-checks — these confirm the spy/live-event recording stayed
+      // consistent with what actually persisted.
       expect(snapshot.run?.status).toBe("failed");
       expect(snapshot.run?.errorCode).toBe("adapter_failed");
-
-      // Surface the captured trace + DB snapshot for operator sign-off.
-      // (PR body must include this verbatim under "Captured trace".)
-      // eslint-disable-next-line no-console
-      console.log("\n===== F2 captured trace (ordered) =====");
-      for (const line of summarizeTraceForDisplay(trace)) {
-        // eslint-disable-next-line no-console
-        console.log(line);
-      }
-      // eslint-disable-next-line no-console
-      console.log("\n===== F2 trace event counts (by key) =====");
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(countByKey(trace), null, 2));
-      // eslint-disable-next-line no-console
-      console.log("\n===== F2 DB snapshot =====");
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify({
-        runStatus: snapshot.run?.status ?? null,
-        runErrorCode: snapshot.run?.errorCode ?? null,
-        runErrorMessage: snapshot.run?.error ?? null,
-        wakeupStatus: snapshot.wakeupRequest?.status ?? null,
-        heartbeatRunEventsCount: snapshot.runEvents.length,
-        runEventTypes: snapshot.runEvents.map((ev: { eventType?: string }) => ev.eventType ?? null),
-        costEventsCount: snapshot.costEvents.length,
-        issueCommentsCount: snapshot.issueComments.length,
-      }, null, 2));
+      expect(snapshot.wakeupRequest?.status).toBe("failed");
+      // heartbeatRunEvents row count must equal the spy-recorded appendRunEvent
+      // count (3: seq=1 "run started", seq=2 "adapter.invoke", seq=3 error).
+      expect(snapshot.runEvents).toHaveLength(3);
+      const appendRunEventCount = trace.filter(
+        (ev) => ev.kind === "internal" && ev.name === "appendRunEvent",
+      ).length;
+      expect(snapshot.runEvents.length).toBe(appendRunEventCount);
+      // No issue comment on the adapter-throw path (the success arm posts one;
+      // the failure arm does not).
+      expect(snapshot.issueComments).toHaveLength(0);
+      // No cost row — adapter never returned an AdapterRunResult.
+      expect(snapshot.costEvents).toHaveLength(0);
     } finally {
       recorder.dispose();
     }
