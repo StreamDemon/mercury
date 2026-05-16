@@ -46,6 +46,16 @@
 // re-queue side effect do not appear in the trace — that boundary is
 // suppressed by design here and will be characterized in a queue-drain
 // fixture where the loop concern does not apply.
+//
+// PR #62 (cancelRunInternal widen) and PR #63 (releaseIssueExecutionAndPromote
+// promote-tail widen) plugged closure leaks at heartbeat.ts:6373 that
+// previously bypassed the internalsForTests indirection. Before those PRs,
+// the loop-breaker stub above was bypassed because the production code path
+// captured the original `startNextQueuedRunForAgent` reference at module
+// scope rather than reading through `internalsForTests`. With both leaks
+// plugged, this stub now actually breaks the loop and the captured trace
+// is a single clean executeRun cycle (28 events ending at
+// `internal:releaseRuntimeServicesForRun`).
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
