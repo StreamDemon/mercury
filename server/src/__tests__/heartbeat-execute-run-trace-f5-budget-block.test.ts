@@ -48,11 +48,11 @@
 // __internalsForTests.startNextQueuedRunForAgent to a no-op AFTER recorder
 // construction; the trade-off is documented at the stub site below.
 //
-// CAPTURE MODE: this file does NOT call toMatchTraceSequence. It prints the
-// captured trace via console.log and asserts only loose invariants (trace not
-// empty, run cancelled, wakeupRequest cancelled). The locked F5_CANONICAL_TRACE
-// constant will be added in a follow-up PR after user sign-off on the printed
-// sequence.
+// TRACE LOCKED 2026-05-17 (operator sign-off): Captured on Windows host with
+// process isolation (11 stale Postgres procs killed first to clear port
+// contention). Operator explicitly accepted Windows-host capture provenance
+// over a dev-container re-capture. F5_CANONICAL_TRACE below is the locked
+// 10-event sequence — any change requires a fresh sign-off.
 
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -126,7 +126,10 @@ vi.mock("../adapters/index.ts", async () => {
 });
 
 import { heartbeatService } from "../services/heartbeat.ts";
-import { createTraceRecorder } from "../services/__tests__/helpers/trace-recorder.js";
+import {
+  createTraceRecorder,
+  type TraceMatcher,
+} from "../services/__tests__/helpers/trace-recorder.js";
 
 const embeddedPostgresSupport = await getEmbeddedPostgresTestSupport();
 const describeEmbeddedPostgres = embeddedPostgresSupport.supported ? describe : describe.skip;
@@ -137,6 +140,49 @@ if (!embeddedPostgresSupport.supported) {
     `Skipping executeRun trace fixtures on this host: ${embeddedPostgresSupport.reason ?? "unsupported environment"}`,
   );
 }
+
+// F5 canonical sequence — 10 events. Operator-approved 2026-05-17 (Windows-host
+// capture with isolation; operator explicitly accepted this provenance over
+// dev-container re-capture).
+//
+// Argument matchers use the predicate form (matching F1's style): predicates
+// skip noisy args (runIds, agent rows, timestamps) and assert only stable
+// invariants (status="cancelled", errorCode="cancelled", seq=1, eventType=
+// "lifecycle"). Two queued liveEvents bracket the cascade: [00] from
+// enqueueWakeup at invoke time, [07] from the cycle-2 promote-tail whose
+// startNextQueuedRunForAgent is no-op'd by the loop-breaker stub but whose
+// queue liveEvent still fires.
+const F5_CANONICAL_TRACE: readonly TraceMatcher[] = [
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  {
+    kind: "internal",
+    name: "setRunStatus",
+    argsMatch: (args) =>
+      args[1] === "cancelled" &&
+      (args[2] as { errorCode?: string })?.errorCode === "cancelled",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.status", payloadMatch: { status: "cancelled" } },
+  {
+    kind: "internal",
+    name: "setWakeupStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  {
+    kind: "internal",
+    name: "appendRunEvent",
+    argsMatch: (args) =>
+      args[1] === 1 && (args[2] as { eventType?: string })?.eventType === "lifecycle",
+  },
+  { kind: "liveEvent", type: "heartbeat.run.event", payloadMatch: { seq: 1, eventType: "lifecycle" } },
+  { kind: "internal", name: "releaseIssueExecutionAndPromote" },
+  { kind: "liveEvent", type: "heartbeat.run.queued" },
+  {
+    kind: "internal",
+    name: "finalizeAgentStatus",
+    argsMatch: (args) => args[1] === "cancelled",
+  },
+  { kind: "liveEvent", type: "agent.status" },
+];
 
 describeEmbeddedPostgres("executeRun characterization fixtures — F5 budget-blocked claim", () => {
   let db!: ReturnType<typeof createDb>;
@@ -192,7 +238,7 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F5 budget-blo
     await tempDb?.cleanup();
   });
 
-  it("F5 — budget-blocked claim cancels queued run via cancelRunInternal cascade [CAPTURE]", async () => {
+  it("F5 — budget-blocked claim cancels queued run via cancelRunInternal cascade", async () => {
     const companyId = randomUUID();
     const agentId = randomUUID();
     const issueId = randomUUID();
@@ -258,8 +304,9 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F5 budget-blo
     // contention also causes recorder.getDbSnapshot to race the in-flight
     // cycle-2 transactions and return run=null. With the stub, the cancel
     // cascade ends after the first cycle and the test runs cleanly in <1s.
-    // Trade-off: internal:startNextQueuedRunForAgent and the cycle-2 re-promote
-    // do not appear in the trace — that side effect is suppressed by design.
+    // Trade-off: internal:startNextQueuedRunForAgent is suppressed; the
+    // cycle-2 heartbeat.run.queued liveEvent at trace index [07] still fires
+    // (the queue insertion happens before the stubbed call).
     heartbeat.__internalsForTests.startNextQueuedRunForAgent = async () => undefined;
 
     try {
@@ -324,45 +371,13 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F5 budget-blo
       const trace = recorder.getOrderedTrace();
       const snapshot = await recorder.getDbSnapshot(queued!.id);
 
-      // -------- CAPTURE MODE diagnostics --------
-      // eslint-disable-next-line no-console
-      console.log("\n=== F5 captured trace (budget-blocked claim) ===");
-      // eslint-disable-next-line no-console
-      console.log(`event count: ${trace.length}`);
-      trace.forEach((ev, i) => {
-        if (ev.kind === "internal") {
-          // eslint-disable-next-line no-console
-          console.log(`  [${i}] internal:${String(ev.name)}`);
-        } else {
-          // eslint-disable-next-line no-console
-          console.log(
-            `  [${i}] liveEvent:${ev.type} ${JSON.stringify(ev.payload).slice(0, 200)}`,
-          );
-        }
-      });
-      // eslint-disable-next-line no-console
-      console.log("=== F5 DB snapshot ===");
-      // eslint-disable-next-line no-console
-      console.log(`run.status         = ${snapshot.run?.status}`);
-      // eslint-disable-next-line no-console
-      console.log(`run.errorCode      = ${snapshot.run?.errorCode}`);
-      // eslint-disable-next-line no-console
-      console.log(`run.error          = ${snapshot.run?.error}`);
-      // eslint-disable-next-line no-console
-      console.log(`wakeupRequest.status = ${snapshot.wakeupRequest?.status}`);
-      // eslint-disable-next-line no-console
-      console.log(`runEvents.length     = ${snapshot.runEvents.length}`);
-      snapshot.runEvents.forEach((ev, i) => {
-        // eslint-disable-next-line no-console
-        console.log(`  runEvent[${i}] seq=${ev.seq} eventType=${ev.eventType} message=${ev.message}`);
-      });
-      // eslint-disable-next-line no-console
-      console.log(`issueComments.length = ${snapshot.issueComments.length}`);
-      // eslint-disable-next-line no-console
-      console.log(`costEvents.length    = ${snapshot.costEvents.length}`);
+      // The locked canonical contract. Any change to this sequence is a
+      // deliberate ordering decision that must be reviewed (and re-signed-off
+      // by the operator) before merging — that is the whole point.
+      expect(trace).toMatchTraceSequence(F5_CANONICAL_TRACE);
 
-      // -------- Loose invariants (no toMatchTraceSequence in CAPTURE mode) --------
-      expect(trace.length).toBeGreaterThan(0);
+      // DB cross-checks — these confirm the spy/live-event recording stayed
+      // consistent with what actually persisted.
       expect(snapshot.run?.status).toBe("cancelled");
       expect(snapshot.run?.errorCode).toBe("cancelled");
       // The block reason comes from budgets.getInvocationBlock's company-paused
@@ -371,14 +386,12 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F5 budget-blo
       expect(snapshot.run?.error ?? "").toContain("budget");
       expect(snapshot.wakeupRequest?.status).toBe("cancelled");
       // cancelRunInternal calls appendRunEvent at heartbeat.ts:7205 with seq=1
-      // ("run cancelled"). releaseIssueExecutionAndPromote may also append
-      // events if it triggers a recovery promotion, so we assert at-least-1
-      // rather than exactly-1 and verify the cancel event is present.
-      expect(snapshot.runEvents.length).toBeGreaterThanOrEqual(1);
-      const cancelEvent = snapshot.runEvents.find(
-        (ev) => ev.seq === 1 && ev.eventType === "lifecycle",
-      );
-      expect(cancelEvent).toBeDefined();
+      // ("run cancelled"). With the loop-breaker stub in place, no recovery
+      // promotion fires, so we get exactly one run event.
+      expect(snapshot.runEvents).toHaveLength(1);
+      const cancelEvent = snapshot.runEvents[0];
+      expect(cancelEvent?.seq).toBe(1);
+      expect(cancelEvent?.eventType).toBe("lifecycle");
       expect(cancelEvent?.message ?? "").toContain("cancelled");
       // No issue comments and no cost events on a cancelled-at-claim path.
       expect(snapshot.issueComments).toHaveLength(0);
