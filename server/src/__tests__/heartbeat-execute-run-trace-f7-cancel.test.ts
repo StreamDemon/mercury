@@ -21,48 +21,49 @@
 //   The stub adapter awaits onMeta SYNCHRONOUSLY first (so seq=2 adapter.invoke
 //   is recorded and published before cancel runs), then signals adapterStarted,
 //   then blocks on a promise the test resolves only AFTER cancelRun's full
-//   cascade has completed. Because cancelRunInternal awaits every step
-//   (setRunStatus → setWakeupStatus → appendRunEvent → releaseIssueExecutionAndPromote
-//   → finalizeAgentStatus → startNextQueuedRunForAgent), `await heartbeat.cancelRun`
-//   guarantees the entire cancel cascade is serialized before adapter returns.
-//   This is what makes a "mid-run" cancel test deterministic.
+//   cascade has completed. Because cancelRunInternal awaits every step,
+//   `await heartbeat.cancelRun` guarantees the entire cancel cascade is
+//   serialized before adapter returns. This is what makes a "mid-run" cancel
+//   test deterministic.
 //
-// IMPORTANT FINDING — spy visibility for cancelRunInternal:
-//   cancelRunInternal (heartbeat.ts:7166) calls its closures DIRECTLY
-//   (setRunStatus, setWakeupStatus, appendRunEvent, releaseIssueExecutionAndPromote,
-//   finalizeAgentStatus, startNextQueuedRunForAgent) — NOT through the
-//   `internals.*` indirection that executeRun uses. The trace-recorder's spy
-//   only wraps `internals.*`, so the cancel cascade is OBSERVABLE only via the
-//   live events it publishes (heartbeat.run.status "cancelled",
-//   heartbeat.run.event seq=1 lifecycle "run cancelled", agent.status, etc.),
-//   not via spy-recorded `internal:` entries. This is a real characterization
-//   finding about the asymmetry between executeRun's instrumentation
-//   discipline (uses internals.*) and the rest of the heartbeat module
-//   (closures). Phase 1 documents it; do NOT route cancel through internals
-//   to fix this — that's a wince #3 broader-refactor question.
+// Simplification after PR #62 + #63 (re-run on 2026-05-17):
+//   PR #62 widened cancelRunInternal's six closure-direct calls (setRunStatus,
+//   setWakeupStatus, appendRunEvent, releaseIssueExecutionAndPromote,
+//   finalizeAgentStatus, startNextQueuedRunForAgent) to dispatch through
+//   internals.X — so the cancel cluster is now FULLY OBSERVABLE in the spy
+//   stream as `internal:*` events, not just via cascading live events.
+//   PR #63 routed releaseIssueExecutionAndPromote's tail-promote (heartbeat.ts:6373)
+//   through internals.startNextQueuedRunForAgent — so stubbing that one entry
+//   actually breaks every cascading promote loop.
 //
-// Expected duplicate-fire patterns from cancel + executeRun resume:
-//   - setRunStatus("cancelled") TWICE (cancel:7186 [via closure, not spied]
-//     + executeRun resume:5714 [via internals.*, spied])
-//   - setWakeupStatus("cancelled") TWICE (cancel:7199 [closure] + resume:5733 [internals])
-//   - releaseIssueExecutionAndPromote TWICE (cancel:7211 [closure] + resume:5772 [internals])
-//   - finalizeAgentStatus("cancelled") TWICE (cancel:7215 [closure] + resume:5800 [internals])
-//   - startNextQueuedRunForAgent TWICE (cancel:7216 [closure] + finally:5942 [internals])
-//   - appendRunEvent rows with seq=1 TWICE persisted: cancel hardcodes seq=1 at 7205
-//     (via closure), executeRun's local `let seq = 1` already wrote seq=1 for
-//     "run started" (via internals). The heartbeat_run_events schema has no
-//     UNIQUE on seq — just an index — so both rows persist. Pre-existing
-//     behavior the fixture documents.
+//   The combined effect on F7: stubbing internals.startNextQueuedRunForAgent
+//   to a no-op blocks BOTH the cancel-cluster's own follow-on promote AND any
+//   tail-promote that releaseIssueExecutionAndPromote would have triggered
+//   through executeRun's resume path. Only one full executeRun cycle ever
+//   runs, so the original adapter-swap mid-test trick AND the manual runId
+//   filter are no longer required. Standard loop-breaker pattern, single
+//   clean cycle.
 //
-// Trace filter — to our runId only:
-//   cancelRun's startNextQueuedRunForAgent re-promotes other runs for the
-//   agent's still-assigned issue, and those new runs flow through executeRun
-//   and trip our stub mock as well, contaminating the raw trace. The captured
-//   trace below is filtered to events that reference OUR runId (either spy
-//   args[0] for internals.* calls that take a runId / run row, or payload.runId
-//   for live events). Events that don't carry a runId (e.g. agent.status,
-//   activity.logged with no runId) are kept conservatively to preserve the
-//   agent-level state transitions; the unfiltered trace stays in DEBUG logs.
+// Spy visibility note for the loop-breaker:
+//   Replacing `internals.startNextQueuedRunForAgent` AFTER createTraceRecorder
+//   overwrites the recorder's spy wrapper entirely. The call still happens at
+//   runtime but does not get recorded as an `internal:startNextQueuedRunForAgent`
+//   event in the trace — by design (the recorder has no public API to insert
+//   an event without invoking the original). The cascade it would have
+//   triggered is what matters for characterization, and that cascade is now
+//   suppressed.
+//
+// Expected duplicate-fire patterns from cancel + executeRun resume (all
+// observable via internals.X spies post-PR-#62):
+//   - setRunStatus("cancelled") TWICE (cancel:7186 + executeRun resume:5714)
+//   - setWakeupStatus("cancelled") TWICE (cancel:7199 + resume:5733)
+//   - releaseIssueExecutionAndPromote TWICE (cancel:7211 + resume:5772)
+//   - finalizeAgentStatus("cancelled") TWICE (cancel:7215 + resume:5800)
+//   - appendRunEvent rows with seq=1 TWICE persisted: cancel hardcodes seq=1
+//     at 7205, executeRun's local `let seq = 1` already wrote seq=1 for
+//     "run started". The heartbeat_run_events schema has no UNIQUE on seq —
+//     just an index — so both rows persist. Pre-existing behavior the
+//     fixture documents.
 //
 // CAPTURE MODE: this test does NOT call toMatchTraceSequence. Phase 1 locks
 // happen after operator sign-off on the captured trace recorded in the PR body.
@@ -268,6 +269,19 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
     const heartbeat = heartbeatService(db);
     const recorder = createTraceRecorder({ db, heartbeat, companyId });
 
+    // Standard Wave 2 loop-breaker pattern (mirrors F2/F6 design): stub
+    // internals.startNextQueuedRunForAgent to no-op so the post-cancel
+    // cascade doesn't auto-promote any follow-on runs into the blocking stub.
+    // Combined with PR #63's routing of heartbeat.ts:6373 through internals.X,
+    // this short-circuits BOTH (a) the finally-block startNext at 5942,
+    // (b) cancelRunInternal's own startNext at 7216, AND (c) the tail-promote
+    // inside releaseIssueExecutionAndPromote at 6373. Result: exactly one
+    // executeRun cycle, no contamination, no manual runId filtering needed.
+    const internals = heartbeat.__internalsForTests;
+    if (internals) {
+      internals.startNextQueuedRunForAgent = async () => {};
+    }
+
     try {
       const queued = await heartbeat.invoke(
         agentId,
@@ -295,21 +309,6 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
       const cancelled = await heartbeat.cancelRun(queued!.id);
       expect(cancelled?.status).toBe("cancelled");
 
-      // cancel's startNextQueuedRunForAgent re-promotes runs for the
-      // still-assigned issue. Swap the mock to a fast-finish stub so those
-      // follow-on runs return immediately and their effects can be filtered
-      // out of the captured trace (instead of all hitting the blocking stub
-      // and inheriting the "cancelled by F7 fixture" errorMessage path).
-      mockAdapterExecute.mockImplementation(async () => ({
-        exitCode: 0,
-        signal: null,
-        timedOut: false,
-        errorMessage: null,
-        summary: "F7 noop fast-finish for follow-on runs",
-        provider: "test",
-        model: "test-model",
-      }));
-
       // Release the adapter so executeRun's await on adapter.execute resolves
       // for our blocked invocation and the post-adapter resume path runs
       // (it will see the terminal row and take outcome = "cancelled" via the
@@ -329,93 +328,11 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
       expect(trace.length).toBeGreaterThan(0);
       expect(snapshot.run?.status).toBe("cancelled");
 
-      // Filter trace to events that reference our runId. Internals.* call
-      // signatures usually take either a runId string or a run row as args[0]
-      // (sometimes args[1] for appendRunEvent variants). Live events with a
-      // payload.runId are scoped to a specific run. Events without any runId
-      // reference are kept (agent-level state changes are part of the
-      // characterization).
-      const ourRunId = queued!.id;
-      const refsRunId = (value: unknown): boolean => {
-        if (value === ourRunId) return true;
-        if (value && typeof value === "object" && "id" in value && (value as { id?: unknown }).id === ourRunId) return true;
-        if (value && typeof value === "object" && "runId" in value && (value as { runId?: unknown }).runId === ourRunId) return true;
-        return false;
-      };
-      const refsOtherRunId = (value: unknown): boolean => {
-        if (typeof value === "string" && /^[0-9a-f-]{36}$/.test(value) && value !== ourRunId) return true;
-        if (value && typeof value === "object" && "id" in value) {
-          const id = (value as { id?: unknown }).id;
-          if (typeof id === "string" && /^[0-9a-f-]{36}$/.test(id) && id !== ourRunId) return true;
-        }
-        if (value && typeof value === "object" && "runId" in value) {
-          const rid = (value as { runId?: unknown }).runId;
-          if (typeof rid === "string" && rid !== ourRunId) return true;
-        }
-        return false;
-      };
-      const filteredTrace = trace.filter((ev) => {
-        if (ev.kind === "internal") {
-          if (ev.args.some(refsRunId)) return true;
-          // Drop if any arg references some other UUID run row.
-          if (ev.args.some(refsOtherRunId)) return false;
-          return true; // run-agnostic (e.g. startNextQueuedRunForAgent(agentId))
-        }
-        // liveEvent
-        const payload = ev.payload as { runId?: unknown };
-        if (payload && typeof payload === "object" && "runId" in payload) {
-          return payload.runId === ourRunId;
-        }
-        return true; // run-agnostic agent.status / activity.logged
-      });
-
       // eslint-disable-next-line no-console
       console.log(
-        "\n=== F7 captured trace — FILTERED to ourRunId (",
-        filteredTrace.length,
-        " of ",
+        "\n=== F7 captured trace (",
         trace.length,
         " events) ===\n" +
-          filteredTrace
-            .map((ev, i) => {
-              if (ev.kind === "internal") {
-                const argSummary = ev.args
-                  .map((a) => {
-                    if (a === null || a === undefined) return String(a);
-                    if (typeof a === "string") return JSON.stringify(a.length > 60 ? a.slice(0, 60) + "…" : a);
-                    if (typeof a === "number" || typeof a === "boolean") return String(a);
-                    if (typeof a === "object") {
-                      try {
-                        const json = JSON.stringify(a);
-                        return json.length > 80 ? json.slice(0, 80) + "…" : json;
-                      } catch {
-                        return "[unserializable]";
-                      }
-                    }
-                    return typeof a;
-                  })
-                  .join(", ");
-                return `  [${String(i).padStart(2, " ")}] internal:${String(ev.name)}(${argSummary})`;
-              }
-              const payloadJson = (() => {
-                try {
-                  const json = JSON.stringify(ev.payload);
-                  return json.length > 120 ? json.slice(0, 120) + "…" : json;
-                } catch {
-                  return "[unserializable]";
-                }
-              })();
-              return `  [${String(i).padStart(2, " ")}] liveEvent:${ev.type} ${payloadJson}`;
-            })
-            .join("\n") +
-          "\n=== /F7 filtered captured trace ===\n",
-      );
-
-      // eslint-disable-next-line no-console
-      console.log(
-        "\n=== F7 RAW unfiltered trace (",
-        trace.length,
-        "events — includes follow-on auto-promoted runs) ===\n" +
           trace
             .map((ev, i) => {
               if (ev.kind === "internal") {
@@ -448,7 +365,7 @@ describeEmbeddedPostgres("executeRun characterization fixtures (wince #3 Track B
               return `  [${String(i).padStart(2, " ")}] liveEvent:${ev.type} ${payloadJson}`;
             })
             .join("\n") +
-          "\n=== /F7 RAW trace ===\n",
+          "\n=== /F7 captured trace ===\n",
       );
       // eslint-disable-next-line no-console
       console.log(
