@@ -1,0 +1,20 @@
+server/src/__tests__/heartbeat-execute-run-trace-f5-budget-block.test.ts
+  s_6cb38cf12a965e::t_7a09eb304dd6e2 251-264
+  s_6cb38cf12a965e::t_73626701296ae8 27-28,30-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "1e0f6dc55b69a415eb32efdb7f93b014941c5327",
+  "prompts": {},
+  "sessions": {
+    "s_6cb38cf12a965e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf0d044b-f016-401c-9c79-279fc9197b9a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
