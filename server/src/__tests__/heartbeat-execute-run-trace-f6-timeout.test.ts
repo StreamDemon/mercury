@@ -33,6 +33,19 @@
 //        which arm fires — operator confirms during sign-off.
 //   4B — stub invokes onMeta so the adapter.invoke appendRunEvent (seq=2)
 //        appears in the trace.
+//
+// Loop-breaker scope cut (follow-up to PR #56 first capture, per operator
+// decision 1a — standardize F3's pattern across all non-success fixtures):
+// the timed_out terminal status leaves the issue in `in_progress`, so the
+// finally's `startNextQueuedRunForAgent` would re-claim and re-time-out on
+// every scheduler tick, producing an unbounded re-queue tail in the capture.
+// We stub `startNextQueuedRunForAgent` to a no-op AFTER the recorder
+// installs its wrappers, scoping the trace to a SINGLE clean executeRun
+// cycle that ends at the finally's `releaseRuntimeServicesForRun`.
+// Trade-off: `internal:startNextQueuedRunForAgent` and the downstream
+// re-queue side effect do not appear in the trace — that boundary is
+// suppressed by design here and will be characterized in a queue-drain
+// fixture where the loop concern does not apply.
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -207,6 +220,15 @@ describeEmbeddedPostgres("executeRun characterization fixtures — F6 timeout (w
     const recorder = createTraceRecorder({ db, heartbeat, companyId });
 
     try {
+      // Loop-breaker: prevent the post-finalize startNextQueuedRunForAgent from
+      // re-firing executeRun (the timed_out run keeps the issue in_progress, so
+      // the next scheduler tick would re-claim and re-time-out). F3 established
+      // this pattern; the operator standardized it across all non-success
+      // fixtures. Trade-off: trace ends at internal:releaseRuntimeServicesForRun
+      // instead of internal:startNextQueuedRunForAgent — that side effect is
+      // suppressed by design.
+      heartbeat.__internalsForTests.startNextQueuedRunForAgent = async () => undefined;
+
       // Decision 2B inherited from F1: include taskKey in contextSnapshot.
       // For timed_out, the success-block branch at heartbeat.ts:5780 still
       // runs; the captured trace shows which arm (clearTaskSessions vs
