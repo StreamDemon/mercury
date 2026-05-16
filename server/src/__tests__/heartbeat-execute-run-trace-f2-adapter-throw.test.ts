@@ -34,18 +34,20 @@
 // the canonical F2 trace; a follow-up commit will replace the permissive
 // assertions with toMatchTraceSequence(F2_CANONICAL_TRACE).
 //
-// LOOP-BREAKER SCOPE CUT (Wave 2 operator decision 1a): the F2 fixture stubs
-// heartbeat.__internalsForTests.startNextQueuedRunForAgent to a no-op AFTER
-// recorder construction but BEFORE heartbeat.invoke. Without this, the
-// post-finalize startNextQueuedRunForAgent re-promotes the still-in_progress
-// issue and re-fires executeRun against the still-throwing adapter stub,
-// producing 4 cascading failure cycles (~109 events) that obscure the
-// single-cycle recovery handoff this fixture exists to characterize. F3
-// established the pattern; the operator standardized it across all
-// non-success fixtures. Trade-off: the trace ENDS at
-// internal:releaseRuntimeServicesForRun rather than continuing into
-// startNextQueuedRunForAgent — that side effect is suppressed by design and
-// is documented in the canonical sequence.
+// LOOP-BREAKER (Wave 2 operator decision 1a, finalized after PR #62 + #63):
+// the F2 fixture stubs heartbeat.__internalsForTests.startNextQueuedRunForAgent
+// to a no-op AFTER recorder construction but BEFORE heartbeat.invoke. PRs #62
+// (widen cancelRunInternal through __internalsForTests) and #63 (route the
+// releaseIssueExecutionAndPromote promote-tail through __internalsForTests)
+// plugged the two remaining closure leaks at heartbeat.ts where the
+// pre-stub-bound function reference was being called directly — so the
+// loop-breaker now ACTUALLY breaks the loop. Without those PRs, the stub was
+// shadowed and re-promotions still fired, producing 4 cascading failure
+// cycles (~109 events). With them, the trace is a single clean cycle (26
+// events) ending at internal:releaseRuntimeServicesForRun from the finally
+// block. Trade-off: the trace ENDS at internal:releaseRuntimeServicesForRun
+// rather than continuing into startNextQueuedRunForAgent — that side effect
+// is suppressed by design and is documented in the canonical sequence.
 
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
