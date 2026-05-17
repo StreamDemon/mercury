@@ -4701,20 +4701,31 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
   };
 
   async function executeRun(runId: string) {
-    let run = await getRun(runId);
-    if (!run) return;
-    if (run.status !== "queued" && run.status !== "running") return;
-
-    if (run.status === "queued") {
-      const claimed = await claimQueuedRun(run);
-      if (!claimed) {
-        // claimQueuedRun can also leave the run queued when dependencies are unresolved.
-        return;
-      }
-      run = claimed;
-    }
+    const claimed = await claimAndValidate();
+    if (!claimed) return;
+    let run = claimed;
 
     activeRunExecutions.add(run.id);
+
+    // Top-of-run gate: fetches the run row, validates status, and (if queued) atomically
+    // claims it. Returns null in any of the three skip paths so the caller's top-level
+    // `if (!run) return;` exits executeRun before activeRunExecutions registers it.
+    async function claimAndValidate() {
+      let run = await getRun(runId);
+      if (!run) return null;
+      if (run.status !== "queued" && run.status !== "running") return null;
+
+      if (run.status === "queued") {
+        const claimed = await claimQueuedRun(run);
+        if (!claimed) {
+          // claimQueuedRun can also leave the run queued when dependencies are unresolved.
+          return null;
+        }
+        run = claimed;
+      }
+
+      return run;
+    }
 
     // Finally body — runs after every executeRun outcome (success path, inner catch F2,
     // outer catch F3, F4 early-exit, F5/F6/F7 cancels). Routes the two cleanup calls
