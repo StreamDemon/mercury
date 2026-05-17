@@ -1,0 +1,22 @@
+server/src/services/__tests__/helpers/trace-recorder.ts
+  s_7c993cdc499d28::t_7cc82cd3b79ef3 144-145
+server/src/services/__tests__/helpers/trace-recorder.smoke.test.ts
+  s_7c993cdc499d28::t_2ed3684b83d0e9 9
+  s_7c993cdc499d28::t_232504c827d47e 44-51,54,63,78,88,102,111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "a689d859c5825be515a7e68a60a4a40d73512cf5",
+  "prompts": {},
+  "sessions": {
+    "s_7c993cdc499d28": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5dfc9e17-9a8c-444b-8a9e-c8a3223d74a6",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
