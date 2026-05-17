@@ -4717,8 +4717,9 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     activeRunExecutions.add(run.id);
 
     try {
-    const agent = await getAgent(run.agentId);
-    if (!agent) {
+    // F4 contract: the `return` after this helper must fall through the outer-finally block.
+    // The helper is invoked inside outer-try; the caller's own `return` exits the try, finally runs.
+    async function handleAgentMissingEarlyExit() {
       await internals.setRunStatus(runId, "failed", {
         error: "Agent not found",
         errorCode: "agent_not_found",
@@ -4730,6 +4731,11 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       });
       const failedRun = await getRun(runId);
       if (failedRun) await internals.releaseIssueExecutionAndPromote(failedRun);
+    }
+
+    const agent = await getAgent(run.agentId);
+    if (!agent) {
+      await handleAgentMissingEarlyExit();
       return;
     }
 
