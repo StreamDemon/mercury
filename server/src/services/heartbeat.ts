@@ -4742,6 +4742,52 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           await internals.startNextQueuedRunForAgent(run.agentId);
     }
 
+    // Outer catch — fires when setup before adapter.execute throws (ensureRuntimeState,
+    // resolveWorkspaceForRun, etc.). The inner catch did not run, so we emit the failure
+    // trail directly here, with defensive .catch(() => undefined) so a secondary error
+    // (e.g., DB outage during finalizeAgentStatus) doesn't bubble past the outer-finally.
+    async function handleSetupFailure(outerErr: unknown) {
+      const message = outerErr instanceof Error ? outerErr.message : "Unknown setup failure";
+      logger.error({ err: outerErr, runId }, "heartbeat execution setup failed");
+      const setupFailureAgent = await getAgent(run.agentId).catch(() => null);
+      await internals.setRunStatus(runId, "failed", {
+        error: message,
+        errorCode: "adapter_failed",
+        finishedAt: new Date(),
+        ...(setupFailureAgent ? {
+          resultJson: mergeRunStopMetadataForAgent(setupFailureAgent, "failed", {
+            errorCode: "adapter_failed",
+            errorMessage: message,
+          }),
+        } : {}),
+      }).catch(() => undefined);
+      await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
+        finishedAt: new Date(),
+        error: message,
+      }).catch(() => undefined);
+      const failedRun = await getRun(runId).catch(() => null);
+      if (failedRun) {
+        // Emit a run-log event so the failure is visible in the run timeline,
+        // consistent with what the inner catch block does for adapter failures.
+        await internals.appendRunEvent(failedRun, 1, {
+          eventType: "error",
+          stream: "system",
+          level: "error",
+          message,
+        }).catch(() => undefined);
+        const livenessRun = await internals.classifyAndPersistRunLiveness(failedRun).catch(() => failedRun);
+        const failedAgent = setupFailureAgent ?? await getAgent(run.agentId).catch(() => null);
+        if (failedAgent) {
+          await internals.refreshContinuationSummaryForRun(livenessRun, failedAgent).catch(() => undefined);
+          await internals.finalizeIssueCommentPolicy(livenessRun, failedAgent).catch(() => undefined);
+        }
+        await internals.releaseIssueExecutionAndPromote(livenessRun).catch(() => undefined);
+      }
+      // Ensure the agent is not left stuck in "running" if the inner catch handler's
+      // DB calls threw (e.g. a transient DB error in finalizeAgentStatus).
+      await internals.finalizeAgentStatus(run.agentId, "failed").catch(() => undefined);
+    }
+
     try {
     // F4 contract: the `return` after this helper must fall through the outer-finally block.
     // The helper is invoked inside outer-try; the caller's own `return` exits the try, finally runs.
@@ -5920,47 +5966,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       await handleAdapterFailure(err);
     }
     } catch (outerErr) {
-          // Setup code before adapter.execute threw (e.g. ensureRuntimeState, resolveWorkspaceForRun).
-          // The inner catch did not fire, so we must record the failure here.
-          const message = outerErr instanceof Error ? outerErr.message : "Unknown setup failure";
-          logger.error({ err: outerErr, runId }, "heartbeat execution setup failed");
-          const setupFailureAgent = await getAgent(run.agentId).catch(() => null);
-          await internals.setRunStatus(runId, "failed", {
-            error: message,
-            errorCode: "adapter_failed",
-            finishedAt: new Date(),
-            ...(setupFailureAgent ? {
-              resultJson: mergeRunStopMetadataForAgent(setupFailureAgent, "failed", {
-                errorCode: "adapter_failed",
-                errorMessage: message,
-              }),
-            } : {}),
-          }).catch(() => undefined);
-          await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
-            finishedAt: new Date(),
-            error: message,
-          }).catch(() => undefined);
-          const failedRun = await getRun(runId).catch(() => null);
-          if (failedRun) {
-            // Emit a run-log event so the failure is visible in the run timeline,
-            // consistent with what the inner catch block does for adapter failures.
-            await internals.appendRunEvent(failedRun, 1, {
-              eventType: "error",
-              stream: "system",
-              level: "error",
-              message,
-            }).catch(() => undefined);
-            const livenessRun = await internals.classifyAndPersistRunLiveness(failedRun).catch(() => failedRun);
-            const failedAgent = setupFailureAgent ?? await getAgent(run.agentId).catch(() => null);
-            if (failedAgent) {
-              await internals.refreshContinuationSummaryForRun(livenessRun, failedAgent).catch(() => undefined);
-              await internals.finalizeIssueCommentPolicy(livenessRun, failedAgent).catch(() => undefined);
-            }
-            await internals.releaseIssueExecutionAndPromote(livenessRun).catch(() => undefined);
-          }
-          // Ensure the agent is not left stuck in "running" if the inner catch handler's
-          // DB calls threw (e.g. a transient DB error in finalizeAgentStatus).
-          await internals.finalizeAgentStatus(run.agentId, "failed").catch(() => undefined);
+      await handleSetupFailure(outerErr);
         } finally {
           await releaseAndDequeue();
         }
