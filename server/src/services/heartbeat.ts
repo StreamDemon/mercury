@@ -5619,6 +5619,15 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         })
         .where(eq(heartbeatRuns.id, runId));
 
+      // Hoisted to inner-try body so PR-12's executeAdapter helper can pass them
+      // to adapter.execute() via closure. Declaration order:
+      //   1. currentUserRedactionOptions — read by onLog and by downstream
+      //      classification (PR-13 reads it when redacting adapter error messages).
+      //   2. onLog — captures handle/outputProgressState/stdoutExcerpt/stderrExcerpt
+      //      /persistedLogBytes/outputSeq/lastOutputFlushAt from outer-try body scope.
+      //   3. onAdapterMeta — captures currentRun (inner-try local) plus seq/secretKeys.
+      //   4. runtimeServices — assigned inside ensureRuntimeServicesAndSetup helper
+      //      below; PR-12 reads it when merging adapter-managed services.
       const currentUserRedactionOptions = await getCurrentUserRedactionOptions();
       const onLog = async (stream: "stdout" | "stderr", chunk: string) => {
         const sanitizedChunk = compactRunLogChunk(
@@ -5664,65 +5673,6 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           },
         });
       };
-      if (runScopedMentionedSkillKeys.length > 0) {
-        await onLog(
-          "stdout",
-          `[mercury] Enabled run-scoped skills from issue mentions: ${runScopedMentionedSkillKeys.join(", ")}\n`,
-        );
-      }
-      for (const warning of runtimeWorkspaceWarnings) {
-        const logEntry = formatRuntimeWorkspaceWarningLog(warning);
-        await onLog(logEntry.stream, logEntry.chunk);
-      }
-      const adapterEnv = Object.fromEntries(
-        Object.entries(parseObject(resolvedConfig.env)).filter(
-          (entry): entry is [string, string] => typeof entry[0] === "string" && typeof entry[1] === "string",
-        ),
-      );
-      const runtimeServices = await internals.ensureRuntimeServicesForRun({
-        db,
-        runId: run.id,
-        agent: {
-          id: agent.id,
-          name: agent.name,
-          companyId: agent.companyId,
-        },
-        issue: issueRef,
-        workspace: executionWorkspace,
-        executionWorkspaceId: persistedExecutionWorkspace?.id ?? issueRef?.executionWorkspaceId ?? null,
-        config: effectiveResolvedConfig,
-        adapterEnv,
-        onLog,
-      });
-      if (runtimeServices.length > 0) {
-        context.mercuryRuntimeServices = runtimeServices;
-        context.mercuryRuntimePrimaryUrl =
-          runtimeServices.find((service) => readNonEmptyString(service.url))?.url ?? null;
-        await db
-          .update(heartbeatRuns)
-          .set({
-            contextSnapshot: context,
-            updatedAt: new Date(),
-          })
-          .where(eq(heartbeatRuns.id, run.id));
-      }
-      if (issueId && (executionWorkspace.created || runtimeServices.some((service) => !service.reused))) {
-        try {
-          await issuesSvc.addComment(
-            issueId,
-            buildWorkspaceReadyComment({
-              workspace: executionWorkspace,
-              runtimeServices,
-            }),
-            { agentId: agent.id, runId: run.id },
-          );
-        } catch (err) {
-          await onLog(
-            "stderr",
-            `[mercury] Failed to post workspace-ready comment: ${err instanceof Error ? err.message : String(err)}\n`,
-          );
-        }
-      }
       const onAdapterMeta = async (meta: AdapterInvocationMeta) => {
         if (meta.env && secretKeys.size > 0) {
           for (const key of secretKeys) {
@@ -5737,6 +5687,75 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           payload: meta as unknown as Record<string, unknown>,
         });
       };
+      let runtimeServices: Awaited<ReturnType<typeof internals.ensureRuntimeServicesForRun>> = [];
+
+      // Runtime services + adapter setup. Calls internals.ensureRuntimeServicesForRun
+      // to provision agent runtime, merges results into context, persists the context
+      // update, and posts the workspace-ready issue comment. Adapter callbacks
+      // (onLog, onAdapterMeta) are hoisted to outer-executeRun scope so PR-12's
+      // executeAdapter helper can pass them to adapter.execute() via closure.
+      async function ensureRuntimeServicesAndSetup() {
+        if (runScopedMentionedSkillKeys.length > 0) {
+          await onLog(
+            "stdout",
+            `[mercury] Enabled run-scoped skills from issue mentions: ${runScopedMentionedSkillKeys.join(", ")}\n`,
+          );
+        }
+        for (const warning of runtimeWorkspaceWarnings) {
+          const logEntry = formatRuntimeWorkspaceWarningLog(warning);
+          await onLog(logEntry.stream, logEntry.chunk);
+        }
+        const adapterEnv = Object.fromEntries(
+          Object.entries(parseObject(resolvedConfig.env)).filter(
+            (entry): entry is [string, string] => typeof entry[0] === "string" && typeof entry[1] === "string",
+          ),
+        );
+        runtimeServices = await internals.ensureRuntimeServicesForRun({
+          db,
+          runId: run.id,
+          agent: {
+            id: agent.id,
+            name: agent.name,
+            companyId: agent.companyId,
+          },
+          issue: issueRef,
+          workspace: executionWorkspace,
+          executionWorkspaceId: persistedExecutionWorkspace?.id ?? issueRef?.executionWorkspaceId ?? null,
+          config: effectiveResolvedConfig,
+          adapterEnv,
+          onLog,
+        });
+        if (runtimeServices.length > 0) {
+          context.mercuryRuntimeServices = runtimeServices;
+          context.mercuryRuntimePrimaryUrl =
+            runtimeServices.find((service) => readNonEmptyString(service.url))?.url ?? null;
+          await db
+            .update(heartbeatRuns)
+            .set({
+              contextSnapshot: context,
+              updatedAt: new Date(),
+            })
+            .where(eq(heartbeatRuns.id, run.id));
+        }
+        if (issueId && (executionWorkspace.created || runtimeServices.some((service) => !service.reused))) {
+          try {
+            await issuesSvc.addComment(
+              issueId,
+              buildWorkspaceReadyComment({
+                workspace: executionWorkspace,
+                runtimeServices,
+              }),
+              { agentId: agent.id, runId: run.id },
+            );
+          } catch (err) {
+            await onLog(
+              "stderr",
+              `[mercury] Failed to post workspace-ready comment: ${err instanceof Error ? err.message : String(err)}\n`,
+            );
+          }
+        }
+      }
+      await ensureRuntimeServicesAndSetup();
 
       const adapter = getServerAdapter(agent.adapterType);
       const authToken = adapter.supportsLocalAgentJwt
