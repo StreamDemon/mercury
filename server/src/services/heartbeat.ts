@@ -4709,7 +4709,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
 
     // Top-of-run gate: fetches the run row, validates status, and (if queued) atomically
     // claims it. Returns null in any of the three skip paths so the caller's top-level
-    // `if (!run) return;` exits executeRun before activeRunExecutions registers it.
+    // `if (!claimed) return;` exits executeRun before activeRunExecutions registers it.
     async function claimAndValidate() {
       let run = await getRun(runId);
       if (!run) return null;
