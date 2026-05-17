@@ -6,7 +6,7 @@
 // Postgres or the real heartbeat service — that integration is exercised by the
 // F1 happy-path fixture in PR C.
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { publishLiveEvent } from "../../live-events.js";
 import {
@@ -41,9 +41,17 @@ function makeFakeHeartbeat() {
 }
 
 describe("trace-recorder smoke", () => {
+  // Guarantee teardown even when an assertion throws mid-test, so the monkey-patched
+  // internals and live-event subscription cannot leak into a subsequent case.
+  let activeRecorder: ReturnType<typeof createTraceRecorder> | null = null;
+  afterEach(() => {
+    activeRecorder?.dispose();
+    activeRecorder = null;
+  });
+
   it("records internal-spy calls in order with monotonic sequence indices", async () => {
     const { heartbeat, calls } = makeFakeHeartbeat();
-    const recorder = createTraceRecorder({
+    activeRecorder = createTraceRecorder({
       db: {} as never,
       heartbeat: heartbeat as never,
       companyId: "company-smoke-1",
@@ -52,7 +60,7 @@ describe("trace-recorder smoke", () => {
     await heartbeat.__internalsForTests.setRunStatus("run-1", "running");
     await heartbeat.__internalsForTests.appendRunEvent({ id: "run-1" }, 1, { eventType: "lifecycle" });
 
-    const trace = recorder.getOrderedTrace();
+    const trace = activeRecorder.getOrderedTrace();
     expect(trace).toHaveLength(2);
     expect(trace[0]).toMatchObject({ kind: "internal", name: "setRunStatus", at: 0 });
     expect(trace[1]).toMatchObject({ kind: "internal", name: "appendRunEvent", at: 1 });
@@ -62,14 +70,12 @@ describe("trace-recorder smoke", () => {
       'setRunStatus:["run-1","running"]',
       'appendRunEvent:[{"id":"run-1"},1,{"eventType":"lifecycle"}]',
     ]);
-
-    recorder.dispose();
   });
 
   it("records live events from publishLiveEvent into the same ordered stream", async () => {
     const { heartbeat } = makeFakeHeartbeat();
     const companyId = "company-smoke-2";
-    const recorder = createTraceRecorder({
+    activeRecorder = createTraceRecorder({
       db: {} as never,
       heartbeat: heartbeat as never,
       companyId,
@@ -79,7 +85,7 @@ describe("trace-recorder smoke", () => {
     publishLiveEvent({ companyId, type: "heartbeat.run.status", payload: { runId: "run-2", status: "running" } });
     await heartbeat.__internalsForTests.appendRunEvent({ id: "run-2" }, 1, { eventType: "lifecycle" });
 
-    const trace = recorder.getOrderedTrace();
+    const trace = activeRecorder.getOrderedTrace();
     expect(trace).toHaveLength(3);
     expect(trace[0]).toMatchObject({ kind: "internal", name: "setRunStatus" });
     expect(trace[1]).toMatchObject({
@@ -89,13 +95,11 @@ describe("trace-recorder smoke", () => {
     });
     expect(trace[2]).toMatchObject({ kind: "internal", name: "appendRunEvent" });
     expect(trace.map((e) => e.at)).toEqual([0, 1, 2]);
-
-    recorder.dispose();
   });
 
   it("ignores live events for other companies", () => {
     const { heartbeat } = makeFakeHeartbeat();
-    const recorder = createTraceRecorder({
+    activeRecorder = createTraceRecorder({
       db: {} as never,
       heartbeat: heartbeat as never,
       companyId: "company-smoke-3",
@@ -104,11 +108,9 @@ describe("trace-recorder smoke", () => {
     publishLiveEvent({ companyId: "other-company", type: "heartbeat.run.status", payload: {} });
     publishLiveEvent({ companyId: "company-smoke-3", type: "heartbeat.run.event", payload: { seq: 5 } });
 
-    const trace = recorder.getOrderedTrace();
+    const trace = activeRecorder.getOrderedTrace();
     expect(trace).toHaveLength(1);
     expect(trace[0]).toMatchObject({ kind: "liveEvent", type: "heartbeat.run.event" });
-
-    recorder.dispose();
   });
 
   it("dispose() restores originals and stops recording further events", async () => {

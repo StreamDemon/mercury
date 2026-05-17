@@ -141,7 +141,8 @@ export function createTraceRecorder(options: TraceRecorderOptions): TraceRecorde
       const costs = await db
         .select()
         .from(costEvents)
-        .where(eq(costEvents.heartbeatRunId, runId));
+        .where(eq(costEvents.heartbeatRunId, runId))
+        .orderBy(asc(costEvents.occurredAt), asc(costEvents.id));
 
       const comments = await db
         .select()
