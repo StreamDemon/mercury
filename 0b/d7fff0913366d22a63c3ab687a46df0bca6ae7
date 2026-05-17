@@ -1,0 +1,19 @@
+server/src/services/heartbeat.ts
+  s_7c993cdc499d28::t_0fd6858620c6f6 4710-4718,5286-5373
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "0bd7fff0913366d22a63c3ab687a46df0bca6ae7",
+  "prompts": {},
+  "sessions": {
+    "s_7c993cdc499d28": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5dfc9e17-9a8c-444b-8a9e-c8a3223d74a6",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Mercury Rebrand <rebrand@local>"
+    }
+  }
+}
