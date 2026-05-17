@@ -4811,35 +4811,63 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       return;
     }
 
-    const runtime = await ensureRuntimeState(agent);
-    const context = parseObject(run.contextSnapshot);
-    const taskKey = deriveTaskKeyWithHeartbeatFallback(context, null);
-    const sessionCodec = getAdapterSessionCodec(agent.adapterType);
-    const issueId = readNonEmptyString(context.issueId);
-    let issueContext = issueId ? await getIssueExecutionContext(agent.companyId, issueId) : null;
-    const issueDependencyReadiness = issueId
-      ? await issuesSvc.listDependencyReadiness(agent.companyId, [issueId]).then((rows) => rows.get(issueId) ?? null)
-      : null;
-    if (
-      issueId &&
-      issueContext &&
-      shouldAutoCheckoutIssueForWake({
-        contextSnapshot: context,
-        issueStatus: issueContext.status,
-        issueAssigneeAgentId: issueContext.assigneeAgentId,
-        isDependencyReady: issueDependencyReadiness?.isDependencyReady ?? true,
-        agentId: agent.id,
-      })
-    ) {
-      try {
-        await issuesSvc.checkout(issueId, agent.id, ["todo", "backlog", "blocked"], run.id);
-        context[MERCURY_HARNESS_CHECKOUT_KEY] = true;
-      } catch (error) {
-        if (!isCheckoutConflictError(error)) throw error;
-        context[MERCURY_HARNESS_CHECKOUT_KEY] = false;
+    // Hoisted to outer scope so later phases (workspace realization, adapter exec,
+    // finalization) can read them via closure. Initialized by resolveRuntimeContext below;
+    // definite-assignment assertion (`!`) is safe because resolveRuntimeContext is awaited
+    // before any read.
+    type ResolvedIssueContext = Awaited<ReturnType<typeof getIssueExecutionContext>>;
+    type ResolvedDependencyReadiness = Awaited<ReturnType<typeof issuesSvc.getDependencyReadiness>>;
+    let runtime!: Awaited<ReturnType<typeof ensureRuntimeState>>;
+    let context!: Record<string, unknown>;
+    let taskKey!: ReturnType<typeof deriveTaskKeyWithHeartbeatFallback>;
+    let sessionCodec!: ReturnType<typeof getAdapterSessionCodec>;
+    let issueId: string | null = null;
+    let issueContext!: ResolvedIssueContext;
+    let issueDependencyReadiness!: ResolvedDependencyReadiness | null;
+
+    // Resolve runtime + context block: builds `runtime`, `context`, `taskKey`,
+    // `sessionCodec`, `issueId`, `issueContext`, `issueDependencyReadiness` from the
+    // claimed run + agent. Includes the shouldAutoCheckoutIssueForWake reconciliation.
+    // Mutates outer-scope `let` bindings via closure (no DI per plan invariant 4).
+    async function resolveRuntimeContext() {
+      runtime = await ensureRuntimeState(agent);
+      context = parseObject(run.contextSnapshot);
+      taskKey = deriveTaskKeyWithHeartbeatFallback(context, null);
+      sessionCodec = getAdapterSessionCodec(agent.adapterType);
+      const resolvedIssueId = readNonEmptyString(context.issueId);
+      issueId = resolvedIssueId;
+      issueContext = (resolvedIssueId
+        ? await getIssueExecutionContext(agent.companyId, resolvedIssueId)
+        : null) as ResolvedIssueContext;
+      issueDependencyReadiness = (resolvedIssueId
+        ? await issuesSvc
+            .listDependencyReadiness(agent.companyId, [resolvedIssueId])
+            .then((rows) => rows.get(resolvedIssueId) ?? null)
+        : null) as ResolvedDependencyReadiness | null;
+      if (
+        resolvedIssueId &&
+        issueContext &&
+        shouldAutoCheckoutIssueForWake({
+          contextSnapshot: context,
+          issueStatus: issueContext.status,
+          issueAssigneeAgentId: issueContext.assigneeAgentId,
+          isDependencyReady: issueDependencyReadiness?.isDependencyReady ?? true,
+          agentId: agent.id,
+        })
+      ) {
+        try {
+          await issuesSvc.checkout(resolvedIssueId, agent.id, ["todo", "backlog", "blocked"], run.id);
+          context[MERCURY_HARNESS_CHECKOUT_KEY] = true;
+        } catch (error) {
+          if (!isCheckoutConflictError(error)) throw error;
+          context[MERCURY_HARNESS_CHECKOUT_KEY] = false;
+        }
+        issueContext = (await getIssueExecutionContext(agent.companyId, resolvedIssueId)) as ResolvedIssueContext;
       }
-      issueContext = await getIssueExecutionContext(agent.companyId, issueId);
     }
+
+    await resolveRuntimeContext();
+
     const wakeCommentId = deriveCommentId(context, null);
     const wakeCommentContext =
       issueContext && wakeCommentId
