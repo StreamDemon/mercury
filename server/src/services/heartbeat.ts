@@ -4707,9 +4707,10 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
 
     activeRunExecutions.add(run.id);
 
-    // Hoisted to outer executeRun scope so the finally-clause `releaseAndDequeue` helper
-    // can read it on every exit path. Initialized inside `acquireEnvironmentLease` once
-    // the env-orchestrator returns the lease.
+    // Hoisted to outer executeRun scope for lifecycle visibility. Initialized inside
+    // `acquireEnvironmentLease`. Release happens in `releaseAndDequeue` via run-id
+    // lookup (envOrchestrator.releaseForRun), so this binding is currently informational
+    // — kept hoisted as forward capacity for future cleanup-by-reference paths.
     type AcquiredEnvironmentLease = Pick<
       Awaited<ReturnType<typeof envOrchestrator.acquireForRun>>,
       "environment" | "lease" | "leaseContext"
@@ -5284,8 +5285,9 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     const executionWorkspace = realizedWorkspaceContext.executionWorkspace;
     let persistedExecutionWorkspace = realizedWorkspaceContext.persistedExecutionWorkspace;
     // Acquire environment lease for the run, then materialize the lease into the run
-    // context. The `activeEnvironmentLease` outer-scope binding is read by the
-    // finally-clause `releaseAndDequeue` helper to release the lease on every exit path.
+    // context. Updates the outer-scope `activeEnvironmentLease` binding for lifecycle
+    // tracking; actual release is via run-id lookup in `releaseAndDequeue`, not by
+    // direct reference to this binding.
     type AcquireEnvironmentLeaseResult = Pick<
       Awaited<ReturnType<typeof envOrchestrator.realizeForRun>>,
       "persistedExecutionWorkspace" | "workspaceRealization" | "executionTarget" | "remoteExecution"
