@@ -4716,6 +4716,32 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
 
     activeRunExecutions.add(run.id);
 
+    // Finally body — runs after every executeRun outcome (success path, inner catch F2,
+    // outer catch F3, F4 early-exit, F5/F6/F7 cancels). Routes the two cleanup calls
+    // through internals so fixture trace recorders see them.
+    async function releaseAndDequeue() {
+          const latestRun = await getRun(run.id).catch(() => null);
+          const releaseResult = await envOrchestrator.releaseForRun({
+            heartbeatRunId: run.id,
+            companyId: run.companyId,
+            agentId: run.agentId,
+            status: leaseReleaseStatusForRunStatus(latestRun?.status),
+            failureReason: latestRun?.error ?? undefined,
+          }).catch((err) => {
+            logger.warn({ err, runId: run.id }, "failed to release environment leases for heartbeat run");
+            return null;
+          });
+          for (const releaseError of releaseResult?.errors ?? []) {
+            logger.warn(
+              { err: releaseError.error, leaseId: releaseError.leaseId, runId: run.id },
+              "failed to release environment lease for heartbeat run",
+            );
+          }
+          await internals.releaseRuntimeServicesForRun(run.id).catch(() => undefined);
+          activeRunExecutions.delete(run.id);
+          await internals.startNextQueuedRunForAgent(run.agentId);
+    }
+
     try {
     // F4 contract: the `return` after this helper must fall through the outer-finally block.
     // The helper is invoked inside outer-try; the caller's own `return` exits the try, finally runs.
@@ -5936,26 +5962,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           // DB calls threw (e.g. a transient DB error in finalizeAgentStatus).
           await internals.finalizeAgentStatus(run.agentId, "failed").catch(() => undefined);
         } finally {
-          const latestRun = await getRun(run.id).catch(() => null);
-          const releaseResult = await envOrchestrator.releaseForRun({
-            heartbeatRunId: run.id,
-            companyId: run.companyId,
-            agentId: run.agentId,
-            status: leaseReleaseStatusForRunStatus(latestRun?.status),
-            failureReason: latestRun?.error ?? undefined,
-          }).catch((err) => {
-            logger.warn({ err, runId: run.id }, "failed to release environment leases for heartbeat run");
-            return null;
-          });
-          for (const releaseError of releaseResult?.errors ?? []) {
-            logger.warn(
-              { err: releaseError.error, leaseId: releaseError.leaseId, runId: run.id },
-              "failed to release environment lease for heartbeat run",
-            );
-          }
-          await internals.releaseRuntimeServicesForRun(run.id).catch(() => undefined);
-          activeRunExecutions.delete(run.id);
-          await internals.startNextQueuedRunForAgent(run.agentId);
+          await releaseAndDequeue();
         }
   }
 
