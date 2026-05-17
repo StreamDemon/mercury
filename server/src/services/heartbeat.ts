@@ -4676,6 +4676,30 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     });
   }
 
+  // Side-effect indirection container for executeRun (wince #3 Track B Phase 1 — golden-trace
+  // characterization fixture spy hook). Every side effect inside executeRun routes through
+  // internals.X so test fixtures can swap entries before invoking heartbeat.wakeup() and record
+  // the exact ordered call trace. Production paths must not access internals directly.
+  const internals = {
+    setRunStatus,
+    appendRunEvent,
+    setWakeupStatus,
+    releaseIssueExecutionAndPromote,
+    finalizeAgentStatus,
+    classifyAndPersistRunLiveness,
+    refreshContinuationSummaryForRun,
+    finalizeIssueCommentPolicy,
+    handleRunLivenessContinuation,
+    updateRuntimeState,
+    clearTaskSessions,
+    upsertTaskSession,
+    scheduleBoundedRetryForRun,
+    startNextQueuedRunForAgent,
+    ensureRuntimeServicesForRun,
+    realizeExecutionWorkspace,
+    releaseRuntimeServicesForRun,
+  };
+
   async function executeRun(runId: string) {
     let run = await getRun(runId);
     if (!run) return;
@@ -4695,17 +4719,17 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     try {
     const agent = await getAgent(run.agentId);
     if (!agent) {
-      await setRunStatus(runId, "failed", {
+      await internals.setRunStatus(runId, "failed", {
         error: "Agent not found",
         errorCode: "agent_not_found",
         finishedAt: new Date(),
       });
-      await setWakeupStatus(run.wakeupRequestId, "failed", {
+      await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
         finishedAt: new Date(),
         error: "Agent not found",
       });
       const failedRun = await getRun(runId);
-      if (failedRun) await releaseIssueExecutionAndPromote(failedRun);
+      if (failedRun) await internals.releaseIssueExecutionAndPromote(failedRun);
       return;
     }
 
@@ -4969,7 +4993,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           workspace: existingExecutionWorkspace,
         })
       : null;
-    const executionWorkspace = reusedExecutionWorkspace ?? await realizeExecutionWorkspace({
+    const executionWorkspace = reusedExecutionWorkspace ?? await internals.realizeExecutionWorkspace({
           base: executionWorkspaceBase,
           config: runtimeConfig,
           issue: issueRef,
@@ -5356,7 +5380,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       }
 
       const currentRun = run;
-      await appendRunEvent(currentRun, seq++, {
+      await internals.appendRunEvent(currentRun, seq++, {
         eventType: "lifecycle",
         stream: "system",
         level: "info",
@@ -5438,7 +5462,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           (entry): entry is [string, string] => typeof entry[0] === "string" && typeof entry[1] === "string",
         ),
       );
-      const runtimeServices = await ensureRuntimeServicesForRun({
+      const runtimeServices = await internals.ensureRuntimeServicesForRun({
         db,
         runId: run.id,
         agent: {
@@ -5488,7 +5512,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
             if (key in meta.env) meta.env[key] = "***REDACTED***";
           }
         }
-        await appendRunEvent(currentRun, seq++, {
+        await internals.appendRunEvent(currentRun, seq++, {
           eventType: "adapter.invoke",
           stream: "system",
           level: "info",
@@ -5687,7 +5711,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         adapterResult.summary ?? null,
       );
 
-      let persistedRun = await setRunStatus(run.id, status, {
+      let persistedRun = await internals.setRunStatus(run.id, status, {
         finishedAt: new Date(),
         error: runErrorMessage,
         errorCode: runErrorCode,
@@ -5703,17 +5727,17 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         logCompressed: logSummary?.compressed ?? false,
       });
       if (persistedRun) {
-        persistedRun = await classifyAndPersistRunLiveness(persistedRun, persistedResultJson) ?? persistedRun;
+        persistedRun = await internals.classifyAndPersistRunLiveness(persistedRun, persistedResultJson) ?? persistedRun;
       }
 
-      await setWakeupStatus(run.wakeupRequestId, outcome === "succeeded" ? "completed" : status, {
+      await internals.setWakeupStatus(run.wakeupRequestId, outcome === "succeeded" ? "completed" : status, {
         finishedAt: new Date(),
         error: runErrorMessage,
       });
 
       const finalizedRun = persistedRun ?? (await getRun(run.id));
       if (finalizedRun) {
-        await appendRunEvent(finalizedRun, seq++, {
+        await internals.appendRunEvent(finalizedRun, seq++, {
           eventType: "lifecycle",
           stream: "system",
           level: outcome === "succeeded" ? "info" : "error",
@@ -5724,7 +5748,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           },
         });
         const livenessRun = finalizedRun;
-        await refreshContinuationSummaryForRun(livenessRun, agent);
+        await internals.refreshContinuationSummaryForRun(livenessRun, agent);
         if (issueId && outcome === "succeeded") {
           try {
             const existingRunComment = await findRunIssueComment(livenessRun.id, livenessRun.companyId, issueId);
@@ -5742,25 +5766,25 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           }
         }
         if (outcome === "failed" && readTransientRecoveryContractFromRun(livenessRun)) {
-          await scheduleBoundedRetryForRun(livenessRun, agent);
+          await internals.scheduleBoundedRetryForRun(livenessRun, agent);
         }
-        await finalizeIssueCommentPolicy(livenessRun, agent);
-        await releaseIssueExecutionAndPromote(livenessRun);
-        await handleRunLivenessContinuation(livenessRun);
+        await internals.finalizeIssueCommentPolicy(livenessRun, agent);
+        await internals.releaseIssueExecutionAndPromote(livenessRun);
+        await internals.handleRunLivenessContinuation(livenessRun);
       }
 
       if (finalizedRun) {
-        await updateRuntimeState(agent, finalizedRun, adapterResult, {
+        await internals.updateRuntimeState(agent, finalizedRun, adapterResult, {
           legacySessionId: nextSessionState.legacySessionId,
         }, normalizedUsage);
         if (taskKey) {
           if (adapterResult.clearSession || (!nextSessionState.params && !nextSessionState.displayId)) {
-            await clearTaskSessions(agent.companyId, agent.id, {
+            await internals.clearTaskSessions(agent.companyId, agent.id, {
               taskKey,
               adapterType: agent.adapterType,
             });
           } else {
-            await upsertTaskSession({
+            await internals.upsertTaskSession({
               companyId: agent.companyId,
               agentId: agent.id,
               adapterType: agent.adapterType,
@@ -5773,7 +5797,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           }
         }
       }
-      await finalizeAgentStatus(agent.id, outcome);
+      await internals.finalizeAgentStatus(agent.id, outcome);
     } catch (err) {
       const message = redactCurrentUserText(
         err instanceof Error ? err.message : "Unknown adapter failure",
@@ -5797,7 +5821,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         logger.warn({ err: flushErr, runId }, "failed to flush run output progress after error");
       });
 
-      const failedRun = await setRunStatus(run.id, "failed", {
+      const failedRun = await internals.setRunStatus(run.id, "failed", {
         error: message,
         errorCode: "adapter_failed",
         finishedAt: new Date(),
@@ -5811,24 +5835,24 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         logSha256: logSummary?.sha256,
         logCompressed: logSummary?.compressed ?? false,
       });
-      await setWakeupStatus(run.wakeupRequestId, "failed", {
+      await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
         finishedAt: new Date(),
         error: message,
       });
 
       if (failedRun) {
-        await appendRunEvent(failedRun, seq++, {
+        await internals.appendRunEvent(failedRun, seq++, {
           eventType: "error",
           stream: "system",
           level: "error",
           message,
         });
-        const livenessRun = await classifyAndPersistRunLiveness(failedRun) ?? failedRun;
-        await refreshContinuationSummaryForRun(livenessRun, agent);
-        await finalizeIssueCommentPolicy(livenessRun, agent);
-        await releaseIssueExecutionAndPromote(livenessRun);
+        const livenessRun = await internals.classifyAndPersistRunLiveness(failedRun) ?? failedRun;
+        await internals.refreshContinuationSummaryForRun(livenessRun, agent);
+        await internals.finalizeIssueCommentPolicy(livenessRun, agent);
+        await internals.releaseIssueExecutionAndPromote(livenessRun);
 
-        await updateRuntimeState(agent, livenessRun, {
+        await internals.updateRuntimeState(agent, livenessRun, {
           exitCode: null,
           signal: null,
           timedOut: false,
@@ -5838,7 +5862,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         });
 
         if (taskKey && (previousSessionParams || previousSessionDisplayId || taskSession)) {
-          await upsertTaskSession({
+          await internals.upsertTaskSession({
             companyId: agent.companyId,
             agentId: agent.id,
             adapterType: agent.adapterType,
@@ -5851,7 +5875,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         }
       }
 
-      await finalizeAgentStatus(agent.id, "failed");
+      await internals.finalizeAgentStatus(agent.id, "failed");
     }
     } catch (outerErr) {
           // Setup code before adapter.execute threw (e.g. ensureRuntimeState, resolveWorkspaceForRun).
@@ -5859,7 +5883,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           const message = outerErr instanceof Error ? outerErr.message : "Unknown setup failure";
           logger.error({ err: outerErr, runId }, "heartbeat execution setup failed");
           const setupFailureAgent = await getAgent(run.agentId).catch(() => null);
-          await setRunStatus(runId, "failed", {
+          await internals.setRunStatus(runId, "failed", {
             error: message,
             errorCode: "adapter_failed",
             finishedAt: new Date(),
@@ -5870,7 +5894,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
               }),
             } : {}),
           }).catch(() => undefined);
-          await setWakeupStatus(run.wakeupRequestId, "failed", {
+          await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
             finishedAt: new Date(),
             error: message,
           }).catch(() => undefined);
@@ -5878,23 +5902,23 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           if (failedRun) {
             // Emit a run-log event so the failure is visible in the run timeline,
             // consistent with what the inner catch block does for adapter failures.
-            await appendRunEvent(failedRun, 1, {
+            await internals.appendRunEvent(failedRun, 1, {
               eventType: "error",
               stream: "system",
               level: "error",
               message,
             }).catch(() => undefined);
-            const livenessRun = await classifyAndPersistRunLiveness(failedRun).catch(() => failedRun);
+            const livenessRun = await internals.classifyAndPersistRunLiveness(failedRun).catch(() => failedRun);
             const failedAgent = setupFailureAgent ?? await getAgent(run.agentId).catch(() => null);
             if (failedAgent) {
-              await refreshContinuationSummaryForRun(livenessRun, failedAgent).catch(() => undefined);
-              await finalizeIssueCommentPolicy(livenessRun, failedAgent).catch(() => undefined);
+              await internals.refreshContinuationSummaryForRun(livenessRun, failedAgent).catch(() => undefined);
+              await internals.finalizeIssueCommentPolicy(livenessRun, failedAgent).catch(() => undefined);
             }
-            await releaseIssueExecutionAndPromote(livenessRun).catch(() => undefined);
+            await internals.releaseIssueExecutionAndPromote(livenessRun).catch(() => undefined);
           }
           // Ensure the agent is not left stuck in "running" if the inner catch handler's
           // DB calls threw (e.g. a transient DB error in finalizeAgentStatus).
-          await finalizeAgentStatus(run.agentId, "failed").catch(() => undefined);
+          await internals.finalizeAgentStatus(run.agentId, "failed").catch(() => undefined);
         } finally {
           const latestRun = await getRun(run.id).catch(() => null);
           const releaseResult = await envOrchestrator.releaseForRun({
@@ -5913,9 +5937,9 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
               "failed to release environment lease for heartbeat run",
             );
           }
-          await releaseRuntimeServicesForRun(run.id).catch(() => undefined);
+          await internals.releaseRuntimeServicesForRun(run.id).catch(() => undefined);
           activeRunExecutions.delete(run.id);
-          await startNextQueuedRunForAgent(run.agentId);
+          await internals.startNextQueuedRunForAgent(run.agentId);
         }
   }
 
@@ -6346,7 +6370,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       },
     });
 
-    await startNextQueuedRunForAgent(promotedRun.agentId);
+    await internals.startNextQueuedRunForAgent(promotedRun.agentId);
   }
 
   async function enqueueWakeup(agentId: string, opts: WakeupOptions = {}) {
@@ -7159,7 +7183,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       });
     }
 
-    const cancelled = await setRunStatus(run.id, "cancelled", {
+    const cancelled = await internals.setRunStatus(run.id, "cancelled", {
       finishedAt: new Date(),
       error: reason,
       errorCode: "cancelled",
@@ -7172,24 +7196,24 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       } : {}),
     });
 
-    await setWakeupStatus(run.wakeupRequestId, "cancelled", {
+    await internals.setWakeupStatus(run.wakeupRequestId, "cancelled", {
       finishedAt: new Date(),
       error: reason,
     });
 
     if (cancelled) {
-      await appendRunEvent(cancelled, 1, {
+      await internals.appendRunEvent(cancelled, 1, {
         eventType: "lifecycle",
         stream: "system",
         level: "warn",
         message: "run cancelled",
       });
-      await releaseIssueExecutionAndPromote(cancelled);
+      await internals.releaseIssueExecutionAndPromote(cancelled);
     }
 
     runningProcesses.delete(run.id);
-    await finalizeAgentStatus(run.agentId, "cancelled");
-    await startNextQueuedRunForAgent(run.agentId);
+    await internals.finalizeAgentStatus(run.agentId, "cancelled");
+    await internals.startNextQueuedRunForAgent(run.agentId);
     return cancelled;
   }
 
@@ -7609,5 +7633,12 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         .limit(1);
       return run ?? null;
     },
+
+    /**
+     * @internal Test-only spy hook for executeRun characterization fixtures
+     * (wince #3 Track B Phase 1). Replace entries to record or stub side
+     * effects. Production paths must NOT access this surface.
+     */
+    __internalsForTests: internals,
   };
 }
