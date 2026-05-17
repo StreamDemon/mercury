@@ -5931,116 +5931,138 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       });
       const normalizedUsage = sessionUsageResolution.normalizedUsage;
 
-      let outcome: "succeeded" | "failed" | "cancelled" | "timed_out";
-      const latestRun = await getRun(run.id);
-      if (isHeartbeatRunTerminalStatus(latestRun?.status)) {
-        outcome = latestRun.status;
-      } else if (adapterResult.timedOut) {
-        outcome = "timed_out";
-      } else if ((adapterResult.exitCode ?? 0) === 0 && !adapterResult.errorMessage) {
-        outcome = "succeeded";
-      } else {
-        outcome = "failed";
-      }
-      const runErrorMessage =
-        outcome === "cancelled"
-          ? (latestRun?.error ?? adapterResult.errorMessage ?? "Cancelled")
-          : outcome === "succeeded"
-            ? null
-            : redactCurrentUserText(
-                adapterResult.errorMessage ?? (outcome === "timed_out" ? "Timed out" : "Adapter failed"),
-                currentUserRedactionOptions,
-              );
-      const runErrorCode =
-        outcome === "timed_out"
-          ? "timeout"
-          : outcome === "cancelled"
-            ? (latestRun?.errorCode ?? "cancelled")
-            : outcome === "failed"
-              ? (adapterResult.errorCode ?? "adapter_failed")
-              : null;
-
+      // Hoisted from the classifyAndPersistOutcome helper so downstream PR-14 territory
+      // (appendRunEvent payload, retry gate, taskSession upsert, finalizeAgentStatus)
+      // can read them via closure. Definite-assignment assertions (`!`) are used where
+      // the helper always assigns before any read — TS's control-flow analysis is opaque
+      // through async closure mutation, so without `!` the binding narrows incorrectly
+      // (see reference_ts_function_decl_block_scope.md gotcha #2).
+      let outcome!: "succeeded" | "failed" | "cancelled" | "timed_out";
+      let status!: "succeeded" | "failed" | "cancelled" | "timed_out";
+      let runErrorMessage: string | null = null;
+      let runErrorCode: string | null = null;
       let logSummary: { bytes: number; sha256?: string; compressed: boolean } | null = null;
-      if (handle) {
-        logSummary = await runLogStore.finalize(handle);
-      }
-      const finalLogBytes = logSummary?.bytes;
-      if (outputProgressState.pending && typeof finalLogBytes === "number") {
-        outputProgressState.pending.bytes = finalLogBytes;
-      }
-      await flushOutputProgress({ force: true });
+      let usageJson: Record<string, unknown> | null = null;
+      let persistedResultJson: Record<string, unknown> | null = null;
+      let persistedRun: typeof heartbeatRuns.$inferSelect | null = null;
 
-      const status =
-        outcome === "succeeded"
-          ? "succeeded"
-          : outcome === "cancelled"
-            ? "cancelled"
-            : outcome === "timed_out"
-              ? "timed_out"
-              : "failed";
+      // Classify the run's terminal outcome and persist it. Examines latestRun status
+      // (could be cancelled/timed_out from concurrent cancel-mid-run paths) and adapterResult
+      // hints, builds the result-json metadata, finalizes the log handle, and calls
+      // internals.setRunStatus + internals.classifyAndPersistRunLiveness to lock the
+      // terminal state. Output is consumed by finalizeAndPromote.
+      async function classifyAndPersistOutcome() {
+        const latestRun = await getRun(run.id);
+        if (isHeartbeatRunTerminalStatus(latestRun?.status)) {
+          outcome = latestRun.status;
+        } else if (adapterResult.timedOut) {
+          outcome = "timed_out";
+        } else if ((adapterResult.exitCode ?? 0) === 0 && !adapterResult.errorMessage) {
+          outcome = "succeeded";
+        } else {
+          outcome = "failed";
+        }
+        runErrorMessage =
+          outcome === "cancelled"
+            ? (latestRun?.error ?? adapterResult.errorMessage ?? "Cancelled")
+            : outcome === "succeeded"
+              ? null
+              : redactCurrentUserText(
+                  adapterResult.errorMessage ?? (outcome === "timed_out" ? "Timed out" : "Adapter failed"),
+                  currentUserRedactionOptions,
+                );
+        runErrorCode =
+          outcome === "timed_out"
+            ? "timeout"
+            : outcome === "cancelled"
+              ? (latestRun?.errorCode ?? "cancelled")
+              : outcome === "failed"
+                ? (adapterResult.errorCode ?? "adapter_failed")
+                : null;
 
-      const usageJson =
-        normalizedUsage || adapterResult.costUsd != null
-          ? ({
-              ...(normalizedUsage ?? {}),
-              ...(rawUsage ? {
-                rawInputTokens: rawUsage.inputTokens,
-                rawCachedInputTokens: rawUsage.cachedInputTokens,
-                rawOutputTokens: rawUsage.outputTokens,
-              } : {}),
-              ...(sessionUsageResolution.derivedFromSessionTotals ? { usageSource: "session_delta" } : {}),
-              ...((nextSessionState.displayId ?? nextSessionState.legacySessionId)
-                ? { persistedSessionId: nextSessionState.displayId ?? nextSessionState.legacySessionId }
-                : {}),
-              sessionReused: runtimeForAdapter.sessionId != null || runtimeForAdapter.sessionDisplayId != null,
-              taskSessionReused: taskSessionForRun != null,
-              freshSession: runtimeForAdapter.sessionId == null && runtimeForAdapter.sessionDisplayId == null,
-              sessionRotated: sessionCompaction.rotate,
-              sessionRotationReason: sessionCompaction.reason,
-              provider: readNonEmptyString(adapterResult.provider) ?? "unknown",
-              biller: resolveLedgerBiller(adapterResult),
-              model: readNonEmptyString(adapterResult.model) ?? "unknown",
-              ...(adapterResult.costUsd != null ? { costUsd: adapterResult.costUsd } : {}),
-              billingType: normalizeLedgerBillingType(adapterResult.billingType),
-            } as Record<string, unknown>)
-          : null;
+        if (handle) {
+          logSummary = await runLogStore.finalize(handle);
+        }
+        const finalLogBytes = logSummary?.bytes;
+        if (outputProgressState.pending && typeof finalLogBytes === "number") {
+          outputProgressState.pending.bytes = finalLogBytes;
+        }
+        await flushOutputProgress({ force: true });
 
-      const persistedResultJson = mergeHeartbeatRunResultJson(
-        mergeRunStopMetadataForAgent(agent, outcome, {
-          resultJson: mergeAdapterRecoveryMetadata({
-            resultJson: adapterResult.resultJson ?? null,
-            errorFamily: adapterResult.errorFamily ?? null,
-            retryNotBefore: adapterResult.retryNotBefore ?? null,
+        status =
+          outcome === "succeeded"
+            ? "succeeded"
+            : outcome === "cancelled"
+              ? "cancelled"
+              : outcome === "timed_out"
+                ? "timed_out"
+                : "failed";
+
+        usageJson =
+          normalizedUsage || adapterResult.costUsd != null
+            ? ({
+                ...(normalizedUsage ?? {}),
+                ...(rawUsage ? {
+                  rawInputTokens: rawUsage.inputTokens,
+                  rawCachedInputTokens: rawUsage.cachedInputTokens,
+                  rawOutputTokens: rawUsage.outputTokens,
+                } : {}),
+                ...(sessionUsageResolution.derivedFromSessionTotals ? { usageSource: "session_delta" } : {}),
+                ...((nextSessionState.displayId ?? nextSessionState.legacySessionId)
+                  ? { persistedSessionId: nextSessionState.displayId ?? nextSessionState.legacySessionId }
+                  : {}),
+                sessionReused: runtimeForAdapter.sessionId != null || runtimeForAdapter.sessionDisplayId != null,
+                taskSessionReused: taskSessionForRun != null,
+                freshSession: runtimeForAdapter.sessionId == null && runtimeForAdapter.sessionDisplayId == null,
+                sessionRotated: sessionCompaction.rotate,
+                sessionRotationReason: sessionCompaction.reason,
+                provider: readNonEmptyString(adapterResult.provider) ?? "unknown",
+                biller: resolveLedgerBiller(adapterResult),
+                model: readNonEmptyString(adapterResult.model) ?? "unknown",
+                ...(adapterResult.costUsd != null ? { costUsd: adapterResult.costUsd } : {}),
+                billingType: normalizeLedgerBillingType(adapterResult.billingType),
+              } as Record<string, unknown>)
+            : null;
+
+        persistedResultJson = mergeHeartbeatRunResultJson(
+          mergeRunStopMetadataForAgent(agent, outcome, {
+            resultJson: mergeAdapterRecoveryMetadata({
+              resultJson: adapterResult.resultJson ?? null,
+              errorFamily: adapterResult.errorFamily ?? null,
+              retryNotBefore: adapterResult.retryNotBefore ?? null,
+            }),
+            errorCode: runErrorCode,
+            errorMessage: runErrorMessage,
           }),
-          errorCode: runErrorCode,
-          errorMessage: runErrorMessage,
-        }),
-        adapterResult.summary ?? null,
-      );
+          adapterResult.summary ?? null,
+        );
 
-      let persistedRun = await internals.setRunStatus(run.id, status, {
-        finishedAt: new Date(),
-        error: runErrorMessage,
-        errorCode: runErrorCode,
-        exitCode: adapterResult.exitCode,
-        signal: adapterResult.signal,
-        usageJson,
-        resultJson: persistedResultJson,
-        sessionIdAfter: nextSessionState.displayId ?? nextSessionState.legacySessionId,
-        stdoutExcerpt,
-        stderrExcerpt,
-        logBytes: logSummary?.bytes,
-        logSha256: logSummary?.sha256,
-        logCompressed: logSummary?.compressed ?? false,
-      });
-      if (persistedRun) {
-        persistedRun = await internals.classifyAndPersistRunLiveness(persistedRun, persistedResultJson) ?? persistedRun;
+        persistedRun = await internals.setRunStatus(run.id, status, {
+          finishedAt: new Date(),
+          error: runErrorMessage,
+          errorCode: runErrorCode,
+          exitCode: adapterResult.exitCode,
+          signal: adapterResult.signal,
+          usageJson,
+          resultJson: persistedResultJson,
+          sessionIdAfter: nextSessionState.displayId ?? nextSessionState.legacySessionId,
+          stdoutExcerpt,
+          stderrExcerpt,
+          logBytes: logSummary?.bytes,
+          logSha256: logSummary?.sha256,
+          logCompressed: logSummary?.compressed ?? false,
+        });
+        if (persistedRun) {
+          persistedRun = await internals.classifyAndPersistRunLiveness(persistedRun, persistedResultJson) ?? persistedRun;
+        }
+
+        await internals.setWakeupStatus(run.wakeupRequestId, outcome === "succeeded" ? "completed" : status, {
+          finishedAt: new Date(),
+          error: runErrorMessage,
+        });
       }
 
-      await internals.setWakeupStatus(run.wakeupRequestId, outcome === "succeeded" ? "completed" : status, {
-        finishedAt: new Date(),
-        error: runErrorMessage,
-      });
+      await classifyAndPersistOutcome();
 
       const finalizedRun = persistedRun ?? (await getRun(run.id));
       if (finalizedRun) {
