@@ -4799,6 +4799,47 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       await internals.finalizeAgentStatus(run.agentId, "failed").catch(() => undefined);
     }
 
+    // Run output tracking state is hoisted to outer executeRun scope so the inner try
+    // body, handleAdapterFailure (inner catch helper), and future runtime-services helpers
+    // can read/write via closure. openLogAndInitTracking refreshes the dynamic watermarks
+    // (outputSeq / lastOutputFlushAt / persistedLogBytes) from `run` before the inner try.
+    let seq = 1;
+    let handle: RunLogHandle | null = null;
+    let stdoutExcerpt = "";
+    let stderrExcerpt = "";
+    let outputSeq = 0;
+    let lastOutputFlushAt: Date | null = null;
+    const outputProgressState: {
+      pending: {
+      at: Date;
+      seq: number;
+      stream: "stdout" | "stderr";
+      bytes: number;
+      } | null;
+    } = { pending: null };
+    let persistedLogBytes = 0;
+    const flushOutputProgress = async (opts?: { force?: boolean }) => {
+      const pendingOutputProgress = outputProgressState.pending;
+      if (!pendingOutputProgress) return;
+      const shouldFlush =
+        opts?.force === true ||
+        !lastOutputFlushAt ||
+        pendingOutputProgress.at.getTime() - lastOutputFlushAt.getTime() >= ACTIVE_RUN_OUTPUT_PROGRESS_FLUSH_INTERVAL_MS;
+      if (!shouldFlush) return;
+      await db
+        .update(heartbeatRuns)
+        .set({
+          lastOutputAt: pendingOutputProgress.at,
+          lastOutputSeq: pendingOutputProgress.seq,
+          lastOutputStream: pendingOutputProgress.stream,
+          lastOutputBytes: pendingOutputProgress.bytes,
+          updatedAt: new Date(),
+        })
+        .where(eq(heartbeatRuns.id, run.id));
+      lastOutputFlushAt = pendingOutputProgress.at;
+      outputProgressState.pending = null;
+    };
+
     try {
     // F4 contract: the `return` after this helper must fall through the outer-finally block.
     // The helper is invoked inside outer-try; the caller's own `return` exits the try, finally runs.
@@ -5462,42 +5503,16 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
 
     await resolveAdapterSession();
 
-    let seq = 1;
-    let handle: RunLogHandle | null = null;
-    let stdoutExcerpt = "";
-    let stderrExcerpt = "";
-    let outputSeq = Number(run.lastOutputSeq ?? 0);
-    let lastOutputFlushAt: Date | null = run.lastOutputAt ?? null;
-    const outputProgressState: {
-      pending: {
-      at: Date;
-      seq: number;
-      stream: "stdout" | "stderr";
-      bytes: number;
-      } | null;
-    } = { pending: null };
-    let persistedLogBytes = Number(run.logBytes ?? 0);
-    const flushOutputProgress = async (opts?: { force?: boolean }) => {
-      const pendingOutputProgress = outputProgressState.pending;
-      if (!pendingOutputProgress) return;
-      const shouldFlush =
-        opts?.force === true ||
-        !lastOutputFlushAt ||
-        pendingOutputProgress.at.getTime() - lastOutputFlushAt.getTime() >= ACTIVE_RUN_OUTPUT_PROGRESS_FLUSH_INTERVAL_MS;
-      if (!shouldFlush) return;
-      await db
-        .update(heartbeatRuns)
-        .set({
-          lastOutputAt: pendingOutputProgress.at,
-          lastOutputSeq: pendingOutputProgress.seq,
-          lastOutputStream: pendingOutputProgress.stream,
-          lastOutputBytes: pendingOutputProgress.bytes,
-          updatedAt: new Date(),
-        })
-        .where(eq(heartbeatRuns.id, run.id));
-      lastOutputFlushAt = pendingOutputProgress.at;
-      outputProgressState.pending = null;
-    };
+    // Open log handle and initialize run output tracking state (seq, stdout/stderr
+    // excerpts, outputProgressState, flushOutputProgress closure). Runs immediately
+    // before the inner try block opens. State is hoisted to outer-executeRun scope
+    // so the inner try body, handleAdapterFailure, and ensureRuntimeServicesAndSetup
+    // helpers can read/write via closure.
+    async function openLogAndInitTracking() {
+      outputSeq = Number(run.lastOutputSeq ?? 0);
+      lastOutputFlushAt = run.lastOutputAt ?? null;
+      persistedLogBytes = Number(run.logBytes ?? 0);
+    }
 
     // Inner catch — fires when adapter.execute() or its drain stream throws (F2 path).
     // Logs are finalized, outputProgressState is flushed, then the run-status is set to
@@ -5583,6 +5598,8 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
 
       await internals.finalizeAgentStatus(agent.id, "failed");
     }
+
+    await openLogAndInitTracking();
 
     try {
       const startedAt = run.startedAt ?? new Date();
