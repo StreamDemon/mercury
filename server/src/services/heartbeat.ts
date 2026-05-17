@@ -6042,69 +6042,78 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
         error: runErrorMessage,
       });
 
-      const finalizedRun = persistedRun ?? (await getRun(run.id));
-      if (finalizedRun) {
-        await internals.appendRunEvent(finalizedRun, seq++, {
-          eventType: "lifecycle",
-          stream: "system",
-          level: outcome === "succeeded" ? "info" : "error",
-          message: `run ${outcome}`,
-          payload: {
-            status,
-            exitCode: adapterResult.exitCode,
-          },
-        });
-        const livenessRun = finalizedRun;
-        await internals.refreshContinuationSummaryForRun(livenessRun, agent);
-        if (issueId && outcome === "succeeded") {
-          try {
-            const existingRunComment = await findRunIssueComment(livenessRun.id, livenessRun.companyId, issueId);
-            if (!existingRunComment) {
-              const issueComment = buildHeartbeatRunIssueComment(persistedResultJson);
-              if (issueComment) {
-                await issuesSvc.addComment(issueId, issueComment, { agentId: agent.id, runId: livenessRun.id });
+      // Finalize the run and promote the next queued work. Emits the closing lifecycle
+      // event, refreshes continuation summary, optionally schedules retry, finalizes
+      // issue-comment policy, releases issue execution and promotes the next agent,
+      // updates runtime state, conditionally clears or upserts task session, and
+      // marks the agent status. Last phase before the inner catch boundary.
+      async function finalizeAndPromote() {
+        const finalizedRun = persistedRun ?? (await getRun(run.id));
+        if (finalizedRun) {
+          await internals.appendRunEvent(finalizedRun, seq++, {
+            eventType: "lifecycle",
+            stream: "system",
+            level: outcome === "succeeded" ? "info" : "error",
+            message: `run ${outcome}`,
+            payload: {
+              status,
+              exitCode: adapterResult.exitCode,
+            },
+          });
+          const livenessRun = finalizedRun;
+          await internals.refreshContinuationSummaryForRun(livenessRun, agent);
+          if (issueId && outcome === "succeeded") {
+            try {
+              const existingRunComment = await findRunIssueComment(livenessRun.id, livenessRun.companyId, issueId);
+              if (!existingRunComment) {
+                const issueComment = buildHeartbeatRunIssueComment(persistedResultJson);
+                if (issueComment) {
+                  await issuesSvc.addComment(issueId, issueComment, { agentId: agent.id, runId: livenessRun.id });
+                }
               }
+            } catch (err) {
+              await onLog(
+                "stderr",
+                `[mercury] Failed to post run summary comment: ${err instanceof Error ? err.message : String(err)}\n`,
+              );
             }
-          } catch (err) {
-            await onLog(
-              "stderr",
-              `[mercury] Failed to post run summary comment: ${err instanceof Error ? err.message : String(err)}\n`,
-            );
+          }
+          if (outcome === "failed" && readTransientRecoveryContractFromRun(livenessRun)) {
+            await internals.scheduleBoundedRetryForRun(livenessRun, agent);
+          }
+          await internals.finalizeIssueCommentPolicy(livenessRun, agent);
+          await internals.releaseIssueExecutionAndPromote(livenessRun);
+          await internals.handleRunLivenessContinuation(livenessRun);
+        }
+
+        if (finalizedRun) {
+          await internals.updateRuntimeState(agent, finalizedRun, adapterResult, {
+            legacySessionId: nextSessionState.legacySessionId,
+          }, normalizedUsage);
+          if (taskKey) {
+            if (adapterResult.clearSession || (!nextSessionState.params && !nextSessionState.displayId)) {
+              await internals.clearTaskSessions(agent.companyId, agent.id, {
+                taskKey,
+                adapterType: agent.adapterType,
+              });
+            } else {
+              await internals.upsertTaskSession({
+                companyId: agent.companyId,
+                agentId: agent.id,
+                adapterType: agent.adapterType,
+                taskKey,
+                sessionParamsJson: nextSessionState.params,
+                sessionDisplayId: nextSessionState.displayId,
+                lastRunId: finalizedRun.id,
+                lastError: outcome === "succeeded" ? null : (adapterResult.errorMessage ?? "run_failed"),
+              });
+            }
           }
         }
-        if (outcome === "failed" && readTransientRecoveryContractFromRun(livenessRun)) {
-          await internals.scheduleBoundedRetryForRun(livenessRun, agent);
-        }
-        await internals.finalizeIssueCommentPolicy(livenessRun, agent);
-        await internals.releaseIssueExecutionAndPromote(livenessRun);
-        await internals.handleRunLivenessContinuation(livenessRun);
+        await internals.finalizeAgentStatus(agent.id, outcome);
       }
 
-      if (finalizedRun) {
-        await internals.updateRuntimeState(agent, finalizedRun, adapterResult, {
-          legacySessionId: nextSessionState.legacySessionId,
-        }, normalizedUsage);
-        if (taskKey) {
-          if (adapterResult.clearSession || (!nextSessionState.params && !nextSessionState.displayId)) {
-            await internals.clearTaskSessions(agent.companyId, agent.id, {
-              taskKey,
-              adapterType: agent.adapterType,
-            });
-          } else {
-            await internals.upsertTaskSession({
-              companyId: agent.companyId,
-              agentId: agent.id,
-              adapterType: agent.adapterType,
-              taskKey,
-              sessionParamsJson: nextSessionState.params,
-              sessionDisplayId: nextSessionState.displayId,
-              lastRunId: finalizedRun.id,
-              lastError: outcome === "succeeded" ? null : (adapterResult.errorMessage ?? "run_failed"),
-            });
-          }
-        }
-      }
-      await internals.finalizeAgentStatus(agent.id, outcome);
+      await finalizeAndPromote();
     } catch (err) {
       await handleAdapterFailure(err);
     }
