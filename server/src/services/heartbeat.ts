@@ -5843,93 +5843,108 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
           "local agent jwt secret missing or invalid; running without injected MERCURY_API_KEY",
         );
       }
-      const adapterResult = await adapter.execute({
-        runId: run.id,
-        agent,
-        runtime: runtimeForAdapter,
-        config: runtimeConfig,
-        context,
-        executionTarget,
-        executionTransport: remoteExecution
-          ? { remoteExecution: remoteExecution as unknown as Record<string, unknown> }
-          : undefined,
-        onLog,
-        onMeta: onAdapterMeta,
-        onSpawn: async (meta) => {
-          await persistRunProcessMetadata(run.id, {
-            pid: meta.pid,
-            processGroupId:
-              "processGroupId" in meta && typeof meta.processGroupId === "number"
-                ? meta.processGroupId
-                : null,
-            startedAt: meta.startedAt,
-          });
-        },
-        authToken: authToken ?? undefined,
-      });
-      const adapterManagedRuntimeServices = adapterResult.runtimeServices
-        ? await persistAdapterManagedRuntimeServices({
-            db,
-            adapterType: agent.adapterType,
-            runId: run.id,
-            agent: {
-              id: agent.id,
-              name: agent.name,
-              companyId: agent.companyId,
-            },
-            issue: issueRef,
-            workspace: executionWorkspace,
-            reports: adapterResult.runtimeServices,
-          })
-        : [];
-      if (adapterManagedRuntimeServices.length > 0) {
-        const combinedRuntimeServices = [
-          ...runtimeServices,
-          ...adapterManagedRuntimeServices,
-        ];
-        context.mercuryRuntimeServices = combinedRuntimeServices;
-        context.mercuryRuntimePrimaryUrl =
-          combinedRuntimeServices.find((service) => readNonEmptyString(service.url))?.url ?? null;
-        await db
-          .update(heartbeatRuns)
-          .set({
-            contextSnapshot: context,
-            updatedAt: new Date(),
-          })
-          .where(eq(heartbeatRuns.id, run.id));
-        if (issueId) {
-          try {
-            await issuesSvc.addComment(
-              issueId,
-              buildWorkspaceReadyComment({
-                workspace: executionWorkspace,
-                runtimeServices: adapterManagedRuntimeServices,
-              }),
-              { agentId: agent.id, runId: run.id },
-            );
-          } catch (err) {
-            await onLog(
-              "stderr",
-              `[mercury] Failed to post adapter-managed runtime comment: ${err instanceof Error ? err.message : String(err)}\n`,
-            );
+      let adapterResult!: AdapterExecutionResult;
+      let adapterManagedRuntimeServices: Awaited<ReturnType<typeof persistAdapterManagedRuntimeServices>> = [];
+      let nextSessionState!: ReturnType<typeof resolveNextSessionState>;
+      let rawUsage!: ReturnType<typeof normalizeUsageTotals>;
+      let sessionUsageResolution!: Awaited<ReturnType<typeof resolveNormalizedUsageForSession>>;
+      let normalizedUsage!: typeof sessionUsageResolution.normalizedUsage;
+
+      // Execute the agent adapter and capture its result. Passes the hoisted onLog and
+      // onAdapterMeta callbacks (defined at inner-try body scope by ensureRuntimeServicesAndSetup
+      // setup) — they fire run-event side effects via closure when the adapter invokes them.
+      // Adapter-managed runtime services and session state are extracted into hoisted bindings
+      // for classifyAndPersistOutcome + finalizeAndPromote.
+      async function executeAdapter() {
+        adapterResult = await adapter.execute({
+          runId: run.id,
+          agent,
+          runtime: runtimeForAdapter,
+          config: runtimeConfig,
+          context,
+          executionTarget,
+          executionTransport: remoteExecution
+            ? { remoteExecution: remoteExecution as unknown as Record<string, unknown> }
+            : undefined,
+          onLog,
+          onMeta: onAdapterMeta,
+          onSpawn: async (meta) => {
+            await persistRunProcessMetadata(run.id, {
+              pid: meta.pid,
+              processGroupId:
+                "processGroupId" in meta && typeof meta.processGroupId === "number"
+                  ? meta.processGroupId
+                  : null,
+              startedAt: meta.startedAt,
+            });
+          },
+          authToken: authToken ?? undefined,
+        });
+        adapterManagedRuntimeServices = adapterResult.runtimeServices
+          ? await persistAdapterManagedRuntimeServices({
+              db,
+              adapterType: agent.adapterType,
+              runId: run.id,
+              agent: {
+                id: agent.id,
+                name: agent.name,
+                companyId: agent.companyId,
+              },
+              issue: issueRef,
+              workspace: executionWorkspace,
+              reports: adapterResult.runtimeServices,
+            })
+          : [];
+        if (adapterManagedRuntimeServices.length > 0) {
+          const combinedRuntimeServices = [
+            ...runtimeServices,
+            ...adapterManagedRuntimeServices,
+          ];
+          context.mercuryRuntimeServices = combinedRuntimeServices;
+          context.mercuryRuntimePrimaryUrl =
+            combinedRuntimeServices.find((service) => readNonEmptyString(service.url))?.url ?? null;
+          await db
+            .update(heartbeatRuns)
+            .set({
+              contextSnapshot: context,
+              updatedAt: new Date(),
+            })
+            .where(eq(heartbeatRuns.id, run.id));
+          if (issueId) {
+            try {
+              await issuesSvc.addComment(
+                issueId,
+                buildWorkspaceReadyComment({
+                  workspace: executionWorkspace,
+                  runtimeServices: adapterManagedRuntimeServices,
+                }),
+                { agentId: agent.id, runId: run.id },
+              );
+            } catch (err) {
+              await onLog(
+                "stderr",
+                `[mercury] Failed to post adapter-managed runtime comment: ${err instanceof Error ? err.message : String(err)}\n`,
+              );
+            }
           }
         }
+        nextSessionState = resolveNextSessionState({
+          codec: sessionCodec,
+          adapterResult,
+          previousParams: previousSessionParams,
+          previousDisplayId: runtimeForAdapter.sessionDisplayId,
+          previousLegacySessionId: runtimeForAdapter.sessionId,
+        });
+        rawUsage = normalizeUsageTotals(adapterResult.usage);
+        sessionUsageResolution = await resolveNormalizedUsageForSession({
+          agentId: agent.id,
+          runId: run.id,
+          sessionId: nextSessionState.displayId ?? nextSessionState.legacySessionId,
+          rawUsage,
+        });
+        normalizedUsage = sessionUsageResolution.normalizedUsage;
       }
-      const nextSessionState = resolveNextSessionState({
-        codec: sessionCodec,
-        adapterResult,
-        previousParams: previousSessionParams,
-        previousDisplayId: runtimeForAdapter.sessionDisplayId,
-        previousLegacySessionId: runtimeForAdapter.sessionId,
-      });
-      const rawUsage = normalizeUsageTotals(adapterResult.usage);
-      const sessionUsageResolution = await resolveNormalizedUsageForSession({
-        agentId: agent.id,
-        runId: run.id,
-        sessionId: nextSessionState.displayId ?? nextSessionState.legacySessionId,
-        rawUsage,
-      });
-      const normalizedUsage = sessionUsageResolution.normalizedUsage;
+      await executeAdapter();
 
       let outcome: "succeeded" | "failed" | "cancelled" | "timed_out";
       const latestRun = await getRun(run.id);
