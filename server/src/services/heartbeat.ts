@@ -4707,6 +4707,16 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
 
     activeRunExecutions.add(run.id);
 
+    // Hoisted to outer executeRun scope for lifecycle visibility. Initialized inside
+    // `acquireEnvironmentLease`. Release happens in `releaseAndDequeue` via run-id
+    // lookup (envOrchestrator.releaseForRun), so this binding is currently informational
+    // — kept hoisted as forward capacity for future cleanup-by-reference paths.
+    type AcquiredEnvironmentLease = Pick<
+      Awaited<ReturnType<typeof envOrchestrator.acquireForRun>>,
+      "environment" | "lease" | "leaseContext"
+    >;
+    let activeEnvironmentLease: AcquiredEnvironmentLease | null = null;
+
     // Top-of-run gate: fetches the run row, validates status, and (if queued) atomically
     // claims it. Returns null in any of the three skip paths so the caller's top-level
     // `if (!claimed) return;` exits executeRun before activeRunExecutions registers it.
@@ -5315,73 +5325,95 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     const realizedWorkspaceContext = await realizeWorkspaceAndIssueContext();
     const executionWorkspace = realizedWorkspaceContext.executionWorkspace;
     let persistedExecutionWorkspace = realizedWorkspaceContext.persistedExecutionWorkspace;
-    const persistedEnvironmentId = persistedExecutionWorkspace?.config?.environmentId ?? selectedEnvironmentId;
-    const acquiredEnvironment = await envOrchestrator.acquireForRun({
-      companyId: agent.companyId,
-      selectedEnvironmentId: persistedEnvironmentId,
-      defaultEnvironmentId: defaultEnvironment.id,
-      adapterType: agent.adapterType,
-      issueId: issueId ?? null,
-      heartbeatRunId: run.id,
-      agentId: agent.id,
-      persistedExecutionWorkspace,
-    });
-    const selectedEnvironment = acquiredEnvironment.environment;
-    let activeEnvironmentLease = {
-      environment: acquiredEnvironment.environment,
-      lease: acquiredEnvironment.lease,
-      leaseContext: acquiredEnvironment.leaseContext,
-    };
-    const realizationResult = await envOrchestrator.realizeForRun({
-      environment: selectedEnvironment,
-      lease: activeEnvironmentLease.lease,
-      adapterType: agent.adapterType,
-      companyId: agent.companyId,
-      issueId: issueId ?? null,
-      heartbeatRunId: run.id,
-      executionWorkspace,
-      effectiveExecutionWorkspaceMode,
-      persistedExecutionWorkspace,
-    });
-    activeEnvironmentLease = {
-      ...activeEnvironmentLease,
-      lease: realizationResult.lease,
-    };
-    persistedExecutionWorkspace = realizationResult.persistedExecutionWorkspace;
-    const workspaceRealization = realizationResult.workspaceRealization;
-    const executionTarget = realizationResult.executionTarget;
-    const remoteExecution = realizationResult.remoteExecution;
-    context.mercuryEnvironment = {
-      id: selectedEnvironment.id,
-      name: selectedEnvironment.name,
-      driver: selectedEnvironment.driver,
-      leaseId: activeEnvironmentLease.lease.id,
-      workspaceRealization,
-      ...(typeof activeEnvironmentLease.lease.metadata?.remoteCwd === "string"
-        ? {
-            remoteCwd: activeEnvironmentLease.lease.metadata.remoteCwd,
-            host:
-              typeof activeEnvironmentLease.lease.metadata?.host === "string"
-                ? activeEnvironmentLease.lease.metadata.host
-                : undefined,
-            port:
-              typeof activeEnvironmentLease.lease.metadata?.port === "number"
-                ? activeEnvironmentLease.lease.metadata.port
-                : undefined,
-            username:
-              typeof activeEnvironmentLease.lease.metadata?.username === "string"
-                ? activeEnvironmentLease.lease.metadata.username
-                : undefined,
-          }
-        : {}),
-    };
-    await db
-      .update(heartbeatRuns)
-      .set({
-        contextSnapshot: context,
-        updatedAt: new Date(),
-      })
-      .where(eq(heartbeatRuns.id, run.id));
+    // Acquire environment lease for the run, then materialize the lease into the run
+    // context. Updates the outer-scope `activeEnvironmentLease` binding for lifecycle
+    // tracking; actual release is via run-id lookup in `releaseAndDequeue`, not by
+    // direct reference to this binding.
+    type AcquireEnvironmentLeaseResult = Pick<
+      Awaited<ReturnType<typeof envOrchestrator.realizeForRun>>,
+      "persistedExecutionWorkspace" | "workspaceRealization" | "executionTarget" | "remoteExecution"
+    >;
+    async function acquireEnvironmentLease(): Promise<AcquireEnvironmentLeaseResult> {
+      const persistedEnvironmentId = persistedExecutionWorkspace?.config?.environmentId ?? selectedEnvironmentId;
+      const acquiredEnvironment = await envOrchestrator.acquireForRun({
+        companyId: agent.companyId,
+        selectedEnvironmentId: persistedEnvironmentId,
+        defaultEnvironmentId: defaultEnvironment.id,
+        adapterType: agent.adapterType,
+        issueId: issueId ?? null,
+        heartbeatRunId: run.id,
+        agentId: agent.id,
+        persistedExecutionWorkspace,
+      });
+      const selectedEnvironment = acquiredEnvironment.environment;
+      activeEnvironmentLease = {
+        environment: acquiredEnvironment.environment,
+        lease: acquiredEnvironment.lease,
+        leaseContext: acquiredEnvironment.leaseContext,
+      };
+      const realizationResult = await envOrchestrator.realizeForRun({
+        environment: selectedEnvironment,
+        lease: activeEnvironmentLease.lease,
+        adapterType: agent.adapterType,
+        companyId: agent.companyId,
+        issueId: issueId ?? null,
+        heartbeatRunId: run.id,
+        executionWorkspace,
+        effectiveExecutionWorkspaceMode,
+        persistedExecutionWorkspace,
+      });
+      activeEnvironmentLease = {
+        ...activeEnvironmentLease,
+        lease: realizationResult.lease,
+      };
+      persistedExecutionWorkspace = realizationResult.persistedExecutionWorkspace;
+      const workspaceRealization = realizationResult.workspaceRealization;
+      const executionTarget = realizationResult.executionTarget;
+      const remoteExecution = realizationResult.remoteExecution;
+      context.mercuryEnvironment = {
+        id: selectedEnvironment.id,
+        name: selectedEnvironment.name,
+        driver: selectedEnvironment.driver,
+        leaseId: activeEnvironmentLease.lease.id,
+        workspaceRealization,
+        ...(typeof activeEnvironmentLease.lease.metadata?.remoteCwd === "string"
+          ? {
+              remoteCwd: activeEnvironmentLease.lease.metadata.remoteCwd,
+              host:
+                typeof activeEnvironmentLease.lease.metadata?.host === "string"
+                  ? activeEnvironmentLease.lease.metadata.host
+                  : undefined,
+              port:
+                typeof activeEnvironmentLease.lease.metadata?.port === "number"
+                  ? activeEnvironmentLease.lease.metadata.port
+                  : undefined,
+              username:
+                typeof activeEnvironmentLease.lease.metadata?.username === "string"
+                  ? activeEnvironmentLease.lease.metadata.username
+                  : undefined,
+            }
+          : {}),
+      };
+      await db
+        .update(heartbeatRuns)
+        .set({
+          contextSnapshot: context,
+          updatedAt: new Date(),
+        })
+        .where(eq(heartbeatRuns.id, run.id));
+      return {
+        persistedExecutionWorkspace,
+        workspaceRealization,
+        executionTarget,
+        remoteExecution,
+      };
+    }
+
+    const acquiredEnvironmentLeaseResult = await acquireEnvironmentLease();
+    persistedExecutionWorkspace = acquiredEnvironmentLeaseResult.persistedExecutionWorkspace;
+    const workspaceRealization = acquiredEnvironmentLeaseResult.workspaceRealization;
+    const executionTarget = acquiredEnvironmentLeaseResult.executionTarget;
+    const remoteExecution = acquiredEnvironmentLeaseResult.remoteExecution;
     const runtimeSessionResolution = resolveRuntimeSessionParamsForWorkspace({
       agentId: agent.id,
       previousSessionParams,
