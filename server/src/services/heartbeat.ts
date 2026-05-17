@@ -5397,48 +5397,70 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
     if (executionWorkspace.projectId && !readNonEmptyString(context.projectId)) {
       context.projectId = executionWorkspace.projectId;
     }
-    const runtimeSessionFallback = taskKey || resetTaskSession ? null : runtime.sessionId;
-    let previousSessionDisplayId = truncateDisplayId(
-      explicitResumeSessionDisplayId ??
-        taskSessionForRun?.sessionDisplayId ??
-        (sessionCodec.getDisplayId ? sessionCodec.getDisplayId(runtimeSessionParams) : null) ??
-        readNonEmptyString(runtimeSessionParams?.sessionId) ??
-        runtimeSessionFallback,
-    );
-    let runtimeSessionIdForAdapter =
-      readNonEmptyString(runtimeSessionParams?.sessionId) ?? runtimeSessionFallback;
-    let runtimeSessionParamsForAdapter = runtimeSessionParams;
+    // Hoisted to outer scope so later phases (log init, adapter exec, finalization)
+    // can read them via closure. Initialized by resolveAdapterSession below;
+    // definite-assignment assertion (`!`) is safe because resolveAdapterSession is
+    // awaited before any read.
+    let previousSessionDisplayId: string | null = null;
+    let runtimeSessionIdForAdapter: string | null = null;
+    let runtimeSessionParamsForAdapter: typeof runtimeSessionParams = runtimeSessionParams;
+    let runtimeForAdapter!: {
+      sessionId: string | null;
+      sessionParams: typeof runtimeSessionParams;
+      sessionDisplayId: string | null;
+      taskKey: typeof taskKey;
+    };
+    let sessionCompaction!: SessionCompactionDecision;
 
-    const sessionCompaction = await evaluateSessionCompaction({
-      agent,
-      sessionId: previousSessionDisplayId ?? runtimeSessionIdForAdapter,
-      issueId,
-      continuationSummaryBody: continuationSummary?.body ?? null,
-    });
-    if (sessionCompaction.rotate) {
-      context.mercurySessionHandoffMarkdown = sessionCompaction.handoffMarkdown;
-      context.mercurySessionRotationReason = sessionCompaction.reason;
-      context.mercuryPreviousSessionId = previousSessionDisplayId ?? runtimeSessionIdForAdapter;
-      runtimeSessionIdForAdapter = null;
-      runtimeSessionParamsForAdapter = null;
-      previousSessionDisplayId = null;
-      if (sessionCompaction.reason) {
-        runtimeWorkspaceWarnings.push(
-          `Starting a fresh session because ${sessionCompaction.reason}.`,
-        );
+    // Resolve adapter session: evaluates rotation conditionals, mutates context's
+    // session-handoff fields, and produces `runtimeForAdapter` for the adapter call.
+    // The non-rotate branch must still delete the session-handoff context keys.
+    async function resolveAdapterSession() {
+      const runtimeSessionFallback = taskKey || resetTaskSession ? null : runtime.sessionId;
+      previousSessionDisplayId = truncateDisplayId(
+        explicitResumeSessionDisplayId ??
+          taskSessionForRun?.sessionDisplayId ??
+          (sessionCodec.getDisplayId ? sessionCodec.getDisplayId(runtimeSessionParams) : null) ??
+          readNonEmptyString(runtimeSessionParams?.sessionId) ??
+          runtimeSessionFallback,
+      );
+      runtimeSessionIdForAdapter =
+        readNonEmptyString(runtimeSessionParams?.sessionId) ?? runtimeSessionFallback;
+      runtimeSessionParamsForAdapter = runtimeSessionParams;
+
+      sessionCompaction = await evaluateSessionCompaction({
+        agent,
+        sessionId: previousSessionDisplayId ?? runtimeSessionIdForAdapter,
+        issueId,
+        continuationSummaryBody: continuationSummary?.body ?? null,
+      });
+      if (sessionCompaction.rotate) {
+        context.mercurySessionHandoffMarkdown = sessionCompaction.handoffMarkdown;
+        context.mercurySessionRotationReason = sessionCompaction.reason;
+        context.mercuryPreviousSessionId = previousSessionDisplayId ?? runtimeSessionIdForAdapter;
+        runtimeSessionIdForAdapter = null;
+        runtimeSessionParamsForAdapter = null;
+        previousSessionDisplayId = null;
+        if (sessionCompaction.reason) {
+          runtimeWorkspaceWarnings.push(
+            `Starting a fresh session because ${sessionCompaction.reason}.`,
+          );
+        }
+      } else {
+        delete context.mercurySessionHandoffMarkdown;
+        delete context.mercurySessionRotationReason;
+        delete context.mercuryPreviousSessionId;
       }
-    } else {
-      delete context.mercurySessionHandoffMarkdown;
-      delete context.mercurySessionRotationReason;
-      delete context.mercuryPreviousSessionId;
+
+      runtimeForAdapter = {
+        sessionId: runtimeSessionIdForAdapter,
+        sessionParams: runtimeSessionParamsForAdapter,
+        sessionDisplayId: previousSessionDisplayId,
+        taskKey,
+      };
     }
 
-    const runtimeForAdapter = {
-      sessionId: runtimeSessionIdForAdapter,
-      sessionParams: runtimeSessionParamsForAdapter,
-      sessionDisplayId: previousSessionDisplayId,
-      taskKey,
-    };
+    await resolveAdapterSession();
 
     let seq = 1;
     let handle: RunLogHandle | null = null;
