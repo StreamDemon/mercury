@@ -5345,6 +5345,92 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       lastOutputFlushAt = pendingOutputProgress.at;
       outputProgressState.pending = null;
     };
+
+    // Inner catch — fires when adapter.execute() or its drain stream throws (F2 path).
+    // Logs are finalized, outputProgressState is flushed, then the run-status is set to
+    // failed with adapter_failed errorCode, followed by the full recovery cluster
+    // (appendRunEvent, classifyAndPersistRunLiveness, refresh/finalize hooks, release,
+    // updateRuntimeState, optional upsertTaskSession, finalizeAgentStatus).
+    async function handleAdapterFailure(err: unknown) {
+      const message = redactCurrentUserText(
+        err instanceof Error ? err.message : "Unknown adapter failure",
+        await getCurrentUserRedactionOptions(),
+      );
+      logger.error({ err, runId }, "heartbeat execution failed");
+
+      let logSummary: { bytes: number; sha256?: string; compressed: boolean } | null = null;
+      if (handle) {
+        try {
+          logSummary = await runLogStore.finalize(handle);
+        } catch (finalizeErr) {
+          logger.warn({ err: finalizeErr, runId }, "failed to finalize run log after error");
+        }
+      }
+      const finalLogBytes = logSummary?.bytes;
+      if (outputProgressState.pending && typeof finalLogBytes === "number") {
+        outputProgressState.pending.bytes = finalLogBytes;
+      }
+      await flushOutputProgress({ force: true }).catch((flushErr) => {
+        logger.warn({ err: flushErr, runId }, "failed to flush run output progress after error");
+      });
+
+      const failedRun = await internals.setRunStatus(run.id, "failed", {
+        error: message,
+        errorCode: "adapter_failed",
+        finishedAt: new Date(),
+        resultJson: mergeRunStopMetadataForAgent(agent, "failed", {
+          errorCode: "adapter_failed",
+          errorMessage: message,
+        }),
+        stdoutExcerpt,
+        stderrExcerpt,
+        logBytes: logSummary?.bytes,
+        logSha256: logSummary?.sha256,
+        logCompressed: logSummary?.compressed ?? false,
+      });
+      await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
+        finishedAt: new Date(),
+        error: message,
+      });
+
+      if (failedRun) {
+        await internals.appendRunEvent(failedRun, seq++, {
+          eventType: "error",
+          stream: "system",
+          level: "error",
+          message,
+        });
+        const livenessRun = await internals.classifyAndPersistRunLiveness(failedRun) ?? failedRun;
+        await internals.refreshContinuationSummaryForRun(livenessRun, agent);
+        await internals.finalizeIssueCommentPolicy(livenessRun, agent);
+        await internals.releaseIssueExecutionAndPromote(livenessRun);
+
+        await internals.updateRuntimeState(agent, livenessRun, {
+          exitCode: null,
+          signal: null,
+          timedOut: false,
+          errorMessage: message,
+        }, {
+          legacySessionId: runtimeForAdapter.sessionId,
+        });
+
+        if (taskKey && (previousSessionParams || previousSessionDisplayId || taskSession)) {
+          await internals.upsertTaskSession({
+            companyId: agent.companyId,
+            agentId: agent.id,
+            adapterType: agent.adapterType,
+            taskKey,
+            sessionParamsJson: previousSessionParams,
+            sessionDisplayId: previousSessionDisplayId,
+            lastRunId: failedRun.id,
+            lastError: message,
+          });
+        }
+      }
+
+      await internals.finalizeAgentStatus(agent.id, "failed");
+    }
+
     try {
       const startedAt = run.startedAt ?? new Date();
       const runningWithSession = await db
@@ -5799,83 +5885,7 @@ export function heartbeatService(db: Db, options: HeartbeatServiceOptions = {}) 
       }
       await internals.finalizeAgentStatus(agent.id, outcome);
     } catch (err) {
-      const message = redactCurrentUserText(
-        err instanceof Error ? err.message : "Unknown adapter failure",
-        await getCurrentUserRedactionOptions(),
-      );
-      logger.error({ err, runId }, "heartbeat execution failed");
-
-      let logSummary: { bytes: number; sha256?: string; compressed: boolean } | null = null;
-      if (handle) {
-        try {
-          logSummary = await runLogStore.finalize(handle);
-        } catch (finalizeErr) {
-          logger.warn({ err: finalizeErr, runId }, "failed to finalize run log after error");
-        }
-      }
-      const finalLogBytes = logSummary?.bytes;
-      if (outputProgressState.pending && typeof finalLogBytes === "number") {
-        outputProgressState.pending.bytes = finalLogBytes;
-      }
-      await flushOutputProgress({ force: true }).catch((flushErr) => {
-        logger.warn({ err: flushErr, runId }, "failed to flush run output progress after error");
-      });
-
-      const failedRun = await internals.setRunStatus(run.id, "failed", {
-        error: message,
-        errorCode: "adapter_failed",
-        finishedAt: new Date(),
-        resultJson: mergeRunStopMetadataForAgent(agent, "failed", {
-          errorCode: "adapter_failed",
-          errorMessage: message,
-        }),
-        stdoutExcerpt,
-        stderrExcerpt,
-        logBytes: logSummary?.bytes,
-        logSha256: logSummary?.sha256,
-        logCompressed: logSummary?.compressed ?? false,
-      });
-      await internals.setWakeupStatus(run.wakeupRequestId, "failed", {
-        finishedAt: new Date(),
-        error: message,
-      });
-
-      if (failedRun) {
-        await internals.appendRunEvent(failedRun, seq++, {
-          eventType: "error",
-          stream: "system",
-          level: "error",
-          message,
-        });
-        const livenessRun = await internals.classifyAndPersistRunLiveness(failedRun) ?? failedRun;
-        await internals.refreshContinuationSummaryForRun(livenessRun, agent);
-        await internals.finalizeIssueCommentPolicy(livenessRun, agent);
-        await internals.releaseIssueExecutionAndPromote(livenessRun);
-
-        await internals.updateRuntimeState(agent, livenessRun, {
-          exitCode: null,
-          signal: null,
-          timedOut: false,
-          errorMessage: message,
-        }, {
-          legacySessionId: runtimeForAdapter.sessionId,
-        });
-
-        if (taskKey && (previousSessionParams || previousSessionDisplayId || taskSession)) {
-          await internals.upsertTaskSession({
-            companyId: agent.companyId,
-            agentId: agent.id,
-            adapterType: agent.adapterType,
-            taskKey,
-            sessionParamsJson: previousSessionParams,
-            sessionDisplayId: previousSessionDisplayId,
-            lastRunId: failedRun.id,
-            lastError: message,
-          });
-        }
-      }
-
-      await internals.finalizeAgentStatus(agent.id, "failed");
+      await handleAdapterFailure(err);
     }
     } catch (outerErr) {
           // Setup code before adapter.execute threw (e.g. ensureRuntimeState, resolveWorkspaceForRun).
